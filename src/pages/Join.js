@@ -683,7 +683,7 @@ const Join = () => {
                           </p>
                           <p>• Bank: Bkash</p>
                           <p>• Account Name: UIU Photography Club</p>
-                          <p>• Account Number: 01885661159</p>
+                          <p>• Account Number: 01622125125</p>
                           <p>• Amount: 500 BDT</p>
                         </div>
                         <div className="form-group">
