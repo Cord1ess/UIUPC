@@ -105,7 +105,7 @@ const PostCard = ({ post }) => {
         text: post.description.substring(0, 100) + '...',
         url: postUrl,
       })
-      .catch((error) => console.log('Error sharing:', error));
+      .catch((error) => {});
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(postUrl)
@@ -113,7 +113,6 @@ const PostCard = ({ post }) => {
           alert('Post link copied to clipboard!');
         })
         .catch((error) => {
-          console.log('Error copying to clipboard:', error);
           alert('Share this post: ' + postUrl);
         });
     }
@@ -154,7 +153,7 @@ const Blog = () => {
   const [error, setError] = useState(null);
 
   // Your Google Apps Script URL for blog
-  const BLOG_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydYlnt1AiH6QsicIlyh2cRH2XmfAmwO-ksB4cGQU17Ho7GQBXcx-Fn6u32wkvYp-fDFA/exec";
+  const BLOG_SCRIPT_URL = process.env.REACT_APP_GAS_BLOG;
 
   const fetchBlogPosts = async () => {
     try {
@@ -168,7 +167,7 @@ const Blog = () => {
       }
 
       const result = await response.json();
-      console.log('Blog posts API response:', result);
+
 
       if (result.status === 'success') {
         // Sort posts by date (newest first)

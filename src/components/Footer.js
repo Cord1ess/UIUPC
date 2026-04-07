@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa";
 import "./Footer.css";
 
-import myLogo from "../assests/logo.jpg";
+import myLogo from "../assets/logo.jpg";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();

@@ -5,7 +5,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { FaTimes, FaBars } from 'react-icons/fa';
-import myLogo from '../assests/logo.jpg';
+import myLogo from '../assets/logo.jpg';
 import './Navbar.css';
 
 const Navbar = () => {

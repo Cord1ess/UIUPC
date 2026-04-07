@@ -18,8 +18,7 @@ const Gallery = () => {
   const [photosPerPage] = useState(12);
 
   // Google Apps Script URL for gallery - USE THE SAME AS ADMIN
-  const GALLERY_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbxgsTUWlUqT0gxhD4Um6RbU9Xre1RJyE0cOyWaJEStKVkFLdIhlMITI1l1bHN4I7XlbaA/exec";
+  const GALLERY_SCRIPT_URL = process.env.REACT_APP_GAS_GALLERY_PUBLIC;
 
   // Mock events (these remain the same)
   const mockEvents = [
@@ -39,22 +38,18 @@ const Gallery = () => {
   const fetchGalleryData = async () => {
     try {
       setLoading(true);
-      console.log("Fetching gallery data from:", GALLERY_SCRIPT_URL);
 
       // Try to fetch from the API first
       const response = await fetch(`${GALLERY_SCRIPT_URL}?action=getGallery`);
-      console.log("API Response status:", response.status);
 
       if (response.ok) {
         const result = await response.json();
-        console.log("Gallery API response:", result);
 
         if (
           result.status === "success" &&
           result.data &&
           result.data.length > 0
         ) {
-          console.log("Found", result.data.length, "photos from API");
           // Transform API data to match our photo structure
           const apiPhotos = result.data.map((photo) => ({
             id: photo.id ? photo.id.toString() : Math.random().toString(),
@@ -72,54 +67,21 @@ const Gallery = () => {
           setEvents(mockEvents);
           setLoading(false);
           return;
-        } else {
-          console.log("No data from API or empty response:", result);
         }
-      } else {
-        console.log("API response not OK:", response.status);
       }
 
-      // Fallback to mock data if API fails or returns no data
-      console.log("Using fallback mock data");
-      fetchMockData();
+      // If API fails or returns no data, set empty state
+      setPhotos([]);
+      setEvents(mockEvents);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching gallery data:", error);
-      // Fallback to mock data
-      fetchMockData();
+      setPhotos([]);
+      setEvents(mockEvents);
+      setLoading(false);
     }
   };
 
-  const fetchMockData = () => {
-    // Your existing mock photos data
-    const mockPhotos = [
-      {
-        id: "14",
-        url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1763290554/g14_ffmlvu.jpg",
-        title:
-          "Shutter Stories Chapter IV Call for Photo Inauguration Ceremony",
-        description:
-          "The Call for Photo Inauguration Ceremony of United Healthcare presents Shutter Stories Chapter IV was held on 15th November, officially marking the beginning of this year's national photography exhibition...",
-        eventId: "6",
-        uploadedAt: new Date(),
-        facebookPost: "https://www.facebook.com/share/p/1CjEqcYrc5/",
-      },
-      {
-        id: "13",
-        url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1762984257/g13_pumj44.jpg",
-        title: "Sadarghat Photowalk Behind the Scenes",
-        description:
-          "Our recent Photowalk was more than just a walk with cameras, it was a journey through the heart of Dhaka...",
-        eventId: "3",
-        uploadedAt: new Date(),
-        facebookPost: "https://www.facebook.com/share/p/1A3bKMZMei/",
-      },
-      // Add all your other mock photos here...
-    ];
-
-    setEvents(mockEvents);
-    setPhotos(mockPhotos);
-    setLoading(false);
-  };
 
   const filterPhotos = useCallback(() => {
     let filtered = photos;
@@ -170,13 +132,6 @@ const Gallery = () => {
     setSelectedPhoto(null);
   };
 
-  // Debug: Log current state
-  useEffect(() => {
-    console.log("Active Filter:", activeFilter);
-    console.log("Total Photos:", photos.length);
-    console.log("Filtered Photos:", filteredPhotos.length);
-    console.log("Events:", events);
-  }, [activeFilter, photos, filteredPhotos, events]);
 
   if (loading) {
     return <div className="loading">Loading gallery...</div>;

@@ -7,6 +7,10 @@ import PhotoSubmissions from "../components/PhotoSubmissions";
 import "../components/GalleryUpload.css";
 import BlogManagement from "../components/BlogManagement";
 import ResultsManagement from "../components/ResultsManagement";
+import { safeToString, getProperty, exportToCSV } from "../utils/adminHelpers";
+import AdminDetailsModal from "../components/admin/AdminDetailsModal";
+import AdminEmailModal from "../components/admin/AdminEmailModal";
+import { useAdminData } from "../hooks/useAdminData";
 
 import {
   FaSync,
@@ -22,9 +26,7 @@ import Loading from "../components/Loading";
 import "./Admin.css";
 
 const UniversalAdmin = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Data State managed by SWR
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedItem, setSelectedItem] = useState(null);
@@ -42,17 +44,12 @@ const UniversalAdmin = () => {
 
   // URLs for different data types - MAKE SURE THESE ARE CORRECT
   const SCRIPTS = {
-    membership:
-      "https://script.google.com/macros/s/AKfycbyhePEFndFhGdTlDdClsRpWAAEVvEB9OJAe0lzx67tFiK4Ej9SUkMo0GoWAJ3MsUUB5/exec",
-    photos:
-      "https://script.google.com/macros/s/AKfycbyUQVpwn4yvn4PJ6FXoai7hh-KC8jSGYooJD5-UcHvrsFraEpBmpUanUmskHn6i4I7i/exec",
-    email:
-      "https://script.google.com/macros/s/AKfycbzut9q4kH0cnVhkfM5EKJrlmGp5oO7qNTuKpF8vn_vl4eJcREjfrSZ5P2SFDlllM7AKLw/exec",
-    gallery:
-      "https://script.google.com/macros/s/AKfycbyzV-c3PZJtzFbD2A_PmKMIR9V5oiQ1vjKarmruIVsCA3vcDQy8nHQ6fPZnWYa-lvDPoA/exec",
-    blog: "https://script.google.com/macros/s/AKfycbydYlnt1AiH6QsicIlyh2cRH2XmfAmwO-ksB4cGQU17Ho7GQBXcx-Fn6u32wkvYp-fDFA/exec",
-    results:
-      "https://script.google.com/macros/s/AKfycbyfEfzXEAzF27NHgN_R5MwaHa98A679KjSq8vd9ru2Om9BYpJtiPobOa6WdRfEGFBUZPw/exec",
+    membership: process.env.REACT_APP_GAS_MEMBERSHIP,
+    photos: process.env.REACT_APP_GAS_PHOTOS,
+    email: process.env.REACT_APP_GAS_EMAIL,
+    gallery: process.env.REACT_APP_GAS_GALLERY,
+    blog: process.env.REACT_APP_GAS_BLOG,
+    results: process.env.REACT_APP_GAS_RESULTS,
   };
 
   const toggleJoinPageStatus = async () => {
@@ -236,7 +233,6 @@ photographyclub@dccsa.uiu.ac.bd`,
   // Test email script connection
   const testEmailConnection = async () => {
     try {
-      console.log("Testing email script connection...");
       setConnectionTest({
         status: "testing",
         message: "Testing connection...",
@@ -249,14 +245,11 @@ photographyclub@dccsa.uiu.ac.bd`,
         },
       });
 
-      console.log("Connection test response status:", response.status);
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log("Connection test result:", result);
 
       if (result.status === "success") {
         setConnectionTest({
@@ -275,65 +268,19 @@ photographyclub@dccsa.uiu.ac.bd`,
     }
   };
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      console.log(`Fetching ${dataType} data...`);
+  const { data, error, isLoading: loading, refetch: fetchData } = useAdminData(dataType, SCRIPTS[dataType]);
 
-      // Don't fetch data for blog type as BlogManagement handles its own data
-      if (dataType === "blog" || dataType === "gallery") {
-        setData([]);
-        setLoading(false);
-        return;
-      }
-
-      const action =
-        dataType === "membership" ? "getApplications" : "getSubmissions";
-      const response = await fetch(`${SCRIPTS[dataType]}?action=${action}`);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log(`${dataType} data response:`, result);
-
-      if (result.status === "success" || result.success) {
-        const dataArray = result.data || result.submissions || [];
-        const sortedData = dataArray.sort(
-          (a, b) =>
-            new Date(b.Timestamp || b.timestamp || b["Timestamp"]) -
-            new Date(a.Timestamp || a.timestamp || a["Timestamp"])
-        );
-        setData(sortedData);
-      } else {
-        throw new Error(result.message || "Failed to fetch data");
-      }
-    } catch (error) {
-      console.error(`Error fetching ${dataType} data:`, error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Handle refresh trigger to force SWR update
   useEffect(() => {
-    fetchData();
-  }, [dataType, refreshTrigger]);
+    if (refreshTrigger > 0) fetchData();
+  }, [refreshTrigger, fetchData]);
 
   // Test email connection on component mount
   useEffect(() => {
     testEmailConnection();
   }, []);
 
-  // Safe string conversion helper
-  const safeToString = (value) => {
-    if (value === null || value === undefined) return "";
-    if (typeof value === "string") return value;
-    if (typeof value === "number") return value.toString();
-    return String(value);
-  };
+  // Helpers are now imported from utils/adminHelpers
 
   const handleViewDetails = (item) => {
     setSelectedItem(item);
@@ -369,13 +316,6 @@ photographyclub@dccsa.uiu.ac.bd`,
         )
         .replace(/{custom_message}/g, customMessage);
 
-      console.log("Sending email with params:", {
-        recipientEmail,
-        subject,
-        bodyLength: body.length,
-        sentBy: user.email,
-      });
-
       // Use GET request with URL parameters as fallback
       const params = new URLSearchParams({
         action: "sendEmail",
@@ -397,14 +337,11 @@ photographyclub@dccsa.uiu.ac.bd`,
         },
       });
 
-      console.log("Email response status:", response.status);
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log("Email response data:", result);
 
       if (result.status === "success") {
         alert("Email sent successfully!");
@@ -441,10 +378,7 @@ photographyclub@dccsa.uiu.ac.bd`,
 
   const handleUpdateStatus = async (item, newStatus) => {
     try {
-      console.log("Updating status:", { item, newStatus });
-
       const applicationId = item.Timestamp || item.timestamp;
-      console.log("Application ID:", applicationId);
 
       const response = await fetch(SCRIPTS[dataType], {
         method: "POST",
@@ -459,10 +393,7 @@ photographyclub@dccsa.uiu.ac.bd`,
         }),
       });
 
-      console.log("Update status response:", response);
-
       const result = await response.json();
-      console.log("Update status result:", result);
 
       if (result.status === "success") {
         alert(`Application status updated to ${newStatus}`);
@@ -476,408 +407,13 @@ photographyclub@dccsa.uiu.ac.bd`,
     }
   };
 
-  const exportToCSV = () => {
-    let headers, csvData;
+  // Export is handled by utils/adminHelpers
 
-    if (dataType === "membership") {
-      headers = [
-        "Timestamp",
-        "Full Name",
-        "Student ID",
-        "Email",
-        "Department",
-        "Phone",
-        "Experience Level",
-        "Interests",
-        "Payment Method",
-        "Status",
-      ];
+  // getProperty imported from utils
 
-      csvData = data.map((item) => [
-        item.Timestamp || item.timestamp,
-        safeToString(item["Full Name"] || item.name),
-        safeToString(item["Student ID"] || item.studentId),
-        safeToString(item.Email || item.email),
-        safeToString(item.Department || item.department),
-        safeToString(item.Phone || item.phone),
-        safeToString(item["Experience Level"] || item.experience),
-        safeToString(item.Interests || item.interests),
-        safeToString(item["Payment Method"] || item.paymentMethod),
-        safeToString(item.Status || item.status || "pending"),
-      ]);
-    } else {
-      headers = [
-        "Timestamp",
-        "Name",
-        "Email",
-        "Phone",
-        "Institution",
-        "Category",
-        "Photo Count",
-        "Story Photo Count",
-        "Photo Names",
-        "Story Photo Names",
-        "Folder URL",
-        "Status",
-      ];
+  // AdminDetailsModal logic moved to src/components/admin/AdminDetailsModal
 
-      csvData = data.map((item) => [
-        item.Timestamp || item.timestamp || item["Timestamp"],
-        safeToString(item["Name"] || item.name || item["Full Name"]),
-        safeToString(item["Email"] || item.email),
-        safeToString(item["Phone"] || item.phone),
-        safeToString(item["Institution"] || item.institution),
-        safeToString(item["Category"] || item.category),
-        safeToString(item["Photo Count"] || item.photoCount),
-        safeToString(item["Story Photo Count"] || item.storyPhotoCount),
-        safeToString(item["Photo Names"] || item.photoNames),
-        safeToString(item["Story Photo Names"] || item.storyPhotoNames),
-        safeToString(item["Folder URL"] || item.folderUrl),
-        safeToString(item["Status"] || item.status),
-      ]);
-    }
-
-    const csvContent = [
-      headers.join(","),
-      ...csvData.map((row) => row.map((field) => `"${field}"`).join(",")),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `uiu-${dataType}-${
-      new Date().toISOString().split("T")[0]
-    }.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  const getProperty = (item, property) => {
-    const possibleKeys = [
-      property,
-      property.toLowerCase(),
-      property.toUpperCase(),
-      property.replace(/\s+/g, ""),
-      property.replace(/\s+/g, "").toLowerCase(),
-      property.replace(/\s+/g, "").toUpperCase(),
-    ];
-
-    for (const key of possibleKeys) {
-      if (item[key] !== undefined && item[key] !== null && item[key] !== "") {
-        return safeToString(item[key]);
-      }
-    }
-
-    return "N/A";
-  };
-
-  const renderModalDetails = () => {
-    if (!selectedItem) return null;
-
-    if (dataType === "membership") {
-      return (
-        <div className="details-grid">
-          <div className="detail-group">
-            <label>Name:</label>
-            <span>{getProperty(selectedItem, "Full Name")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Student ID:</label>
-            <span>{getProperty(selectedItem, "Student ID")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Email:</label>
-            <span>{getProperty(selectedItem, "Email")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Phone:</label>
-            <span>{getProperty(selectedItem, "Phone") || "Not provided"}</span>
-          </div>
-          <div className="detail-group">
-            <label>Department:</label>
-            <span>{getProperty(selectedItem, "Department")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Facebook Profile:</label>
-            <span>
-              {(() => {
-                // Use the same logic as in MembershipApplications.js
-                const facebookLink =
-                  selectedItem["Facebook Profile Link"] ||
-                  selectedItem["Facebook Link"] ||
-                  selectedItem["facebookLink"] ||
-                  selectedItem["Facebook"] ||
-                  selectedItem["facebook"] ||
-                  selectedItem["Facebook Profile"] ||
-                  selectedItem["facebookProfile"] ||
-                  selectedItem["FB Link"] ||
-                  selectedItem["fbLink"];
-
-                console.log("Modal Facebook link:", facebookLink); // Debug
-
-                if (
-                  !facebookLink ||
-                  facebookLink === "N/A" ||
-                  facebookLink === "" ||
-                  facebookLink === "Not provided"
-                ) {
-                  return "Not provided";
-                }
-
-                let formattedLink = facebookLink.trim();
-                formattedLink = formattedLink.replace(/['"]/g, "");
-
-                if (
-                  !formattedLink.startsWith("http://") &&
-                  !formattedLink.startsWith("https://")
-                ) {
-                  formattedLink = "https://" + formattedLink;
-                }
-
-                return (
-                  <a
-                    href={formattedLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      color: "var(--uiu-orange)",
-                      wordBreak: "break-all",
-                    }}
-                  >
-                    {formattedLink}
-                  </a>
-                );
-              })()}
-            </span>
-          </div>
-          <div className="detail-group">
-            <label>Experience Level:</label>
-            <span>{getProperty(selectedItem, "Experience Level")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Interests:</label>
-            <span>{getProperty(selectedItem, "Interests")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Payment Method:</label>
-            <span>{getProperty(selectedItem, "Payment Method")}</span>
-          </div>
-          <div className="detail-group full-width">
-            <label>Why they want to join:</label>
-            <p>{getProperty(selectedItem, "Message")}</p>
-          </div>
-          <div className="detail-group">
-            <label>Submitted:</label>
-            <span>
-              {new Date(
-                selectedItem.Timestamp || selectedItem.timestamp
-              ).toLocaleString()}
-            </span>
-          </div>
-          <div className="detail-group">
-            <label>Current Status:</label>
-            <span>{getProperty(selectedItem, "Status") || "Pending"}</span>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="details-grid">
-          <div className="detail-group">
-            <label>Timestamp:</label>
-            <span>
-              {new Date(
-                selectedItem.Timestamp ||
-                  selectedItem.timestamp ||
-                  selectedItem["Timestamp"]
-              ).toLocaleString()}
-            </span>
-          </div>
-          <div className="detail-group">
-            <label>Name:</label>
-            <span>{getProperty(selectedItem, "Name")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Email:</label>
-            <span>{getProperty(selectedItem, "Email")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Phone:</label>
-            <span>{getProperty(selectedItem, "Phone")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Institution:</label>
-            <span>{getProperty(selectedItem, "Institution")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Category:</label>
-            <span>{getProperty(selectedItem, "Category")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Photo Count:</label>
-            <span>{getProperty(selectedItem, "Photo Count")}</span>
-          </div>
-          <div className="detail-group">
-            <label>Story Photo Count:</label>
-            <span>{getProperty(selectedItem, "Story Photo Count")}</span>
-          </div>
-          <div className="detail-group full-width">
-            <label>Photo Names:</label>
-            <p>{getProperty(selectedItem, "Photo Names")}</p>
-          </div>
-          <div className="detail-group full-width">
-            <label>Story Photo Names:</label>
-            <p>{getProperty(selectedItem, "Story Photo Names")}</p>
-          </div>
-          <div className="detail-group full-width">
-            <label>Folder URL:</label>
-            {getProperty(selectedItem, "Folder URL") &&
-            getProperty(selectedItem, "Folder URL") !== "N/A" ? (
-              <a
-                href={getProperty(selectedItem, "Folder URL")}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "var(--uiu-orange)", wordBreak: "break-all" }}
-              >
-                {getProperty(selectedItem, "Folder URL")}
-              </a>
-            ) : (
-              <span>N/A</span>
-            )}
-          </div>
-          <div className="detail-group">
-            <label>Status:</label>
-            <span>{getProperty(selectedItem, "Status") || "IN_PROGRESS"}</span>
-          </div>
-        </div>
-      );
-    }
-  };
-
-  const renderEmailModal = () => {
-    if (!selectedEmailItem) return null;
-
-    const recipientName = getProperty(selectedEmailItem, "Name");
-    const recipientEmail = getProperty(selectedEmailItem, "Email");
-
-    return (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h3>Send Email to Participant</h3>
-            <button
-              onClick={() => {
-                setShowEmailModal(false);
-                setSelectedEmailItem(null);
-              }}
-              className="modal-close"
-            >
-              ×
-            </button>
-          </div>
-          <div className="modal-body">
-            <div className="email-recipient-info">
-              <p>
-                <strong>To:</strong> {recipientName} ({recipientEmail})
-              </p>
-            </div>
-
-            {connectionTest?.status === "error" && (
-              <div className="error-message" style={{ marginBottom: "1rem" }}>
-                <p>
-                  <strong>Email Service Issue:</strong> {connectionTest.message}
-                </p>
-                <button
-                  onClick={testEmailConnection}
-                  className="btn-secondary"
-                  style={{ marginTop: "0.5rem" }}
-                >
-                  Retest Connection
-                </button>
-              </div>
-            )}
-
-            <div className="email-templates">
-              <h4>Select Email Template:</h4>
-
-              <div className="email-template-option">
-                <button
-                  onClick={() => sendEmail("confirmation")}
-                  className="btn-primary email-template-btn"
-                  disabled={emailSending || connectionTest?.status === "error"}
-                >
-                  Send Confirmation Email
-                </button>
-                <p className="template-description">
-                  Confirms receipt of photo submission and provides basic
-                  details.
-                </p>
-              </div>
-
-              <div className="email-template-option">
-                <button
-                  onClick={() => sendEmail("renameRequest")}
-                  className="btn-primary email-template-btn"
-                  disabled={emailSending || connectionTest?.status === "error"}
-                >
-                  Send Rename Request
-                </button>
-                <p className="template-description">
-                  Requests participant to rename photos according to guidelines.
-                </p>
-              </div>
-
-              <div className="email-template-option">
-                <div className="custom-email-section">
-                  <h5>Custom Email</h5>
-                  <textarea
-                    placeholder="Enter your custom message here..."
-                    className="custom-message-input"
-                    rows="4"
-                    id="customMessageInput"
-                  />
-                  <button
-                    onClick={() => {
-                      const customMessage =
-                        document.getElementById("customMessageInput")?.value ||
-                        "";
-                      sendEmail("general", customMessage);
-                    }}
-                    className="btn-secondary email-template-btn"
-                    disabled={
-                      emailSending || connectionTest?.status === "error"
-                    }
-                  >
-                    Send Custom Email
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {emailSending && (
-              <div className="email-sending-indicator">
-                <FaSync className="spinner" />
-                <span>Sending email...</span>
-              </div>
-            )}
-          </div>
-          <div className="modal-footer">
-            <button
-              onClick={() => {
-                setShowEmailModal(false);
-                setSelectedEmailItem(null);
-              }}
-              className="btn-secondary"
-              disabled={emailSending}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  // AdminEmailModal logic moved to src/components/admin/AdminEmailModal
 
   if (loading) {
     return <Loading />;
@@ -1126,7 +662,7 @@ photographyclub@dccsa.uiu.ac.bd`,
                 onSearchChange={setSearchTerm}
                 onFilterChange={setFilterStatus}
                 onRefresh={fetchData}
-                onExport={exportToCSV}
+                onExport={() => exportToCSV(dataType, data)}
                 onViewDetails={handleViewDetails}
                 onUpdateStatus={handleUpdateStatus}
                 onEmailReply={handleEmailReply}
@@ -1227,7 +763,7 @@ photographyclub@dccsa.uiu.ac.bd`,
                 onSearchChange={setSearchTerm}
                 onFilterChange={setFilterStatus}
                 onRefresh={fetchData}
-                onExport={exportToCSV}
+                onExport={() => exportToCSV(dataType, data)}
                 onViewDetails={handleViewDetails}
                 onEmailReply={handleEmailReply}
                 connectionTest={connectionTest}
@@ -1251,38 +787,29 @@ photographyclub@dccsa.uiu.ac.bd`,
         </div>
       </div>
 
-      {/* Details Modal */}
+      {/* Details Modal Component */}
       {showDetailsModal && selectedItem && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>
-                {dataType === "membership"
-                  ? "Application Details"
-                  : "Submission Details"}
-              </h3>
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className="modal-close"
-              >
-                ×
-              </button>
-            </div>
-            <div className="modal-body">{renderModalDetails()}</div>
-            <div className="modal-footer">
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className="btn-secondary"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        <AdminDetailsModal
+          selectedItem={selectedItem}
+          dataType={dataType}
+          onClose={() => setShowDetailsModal(false)}
+        />
       )}
 
-      {/* Email Modal */}
-      {showEmailModal && renderEmailModal()}
+      {/* Email Modal Component */}
+      {showEmailModal && selectedEmailItem && (
+        <AdminEmailModal
+          selectedEmailItem={selectedEmailItem}
+          connectionTest={connectionTest}
+          emailSending={emailSending}
+          onSendEmail={sendEmail}
+          onTestConnection={testEmailConnection}
+          onClose={() => {
+            setShowEmailModal(false);
+            setSelectedEmailItem(null);
+          }}
+        />
+      )}
     </div>
   );
 };

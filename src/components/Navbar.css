@@ -1,11 +1,4 @@
 /* components/Navbar.css */
-:root {
-  --nav-bg: rgba(26, 26, 26, 0.95);
-  --nav-border: rgba(255, 107, 0, 0.2);
-  --nav-glass: rgba(26, 26, 26, 0.8);
-  --nav-blur: blur(20px);
-  --nav-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
 
 .navbar {
   position: fixed;

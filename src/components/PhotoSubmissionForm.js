@@ -1,6 +1,8 @@
 // components/PhotoSubmissionForm.js
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { db } from "../firebase";
+import { collection, addDoc } from "firebase/firestore";
 import {
   FaUpload,
   FaUser,
@@ -14,6 +16,7 @@ import {
   FaExclamationTriangle,
 } from "react-icons/fa";
 import "./PhotoSubmissionForm.css";
+import { useSubmissionStatus } from '../hooks/useSubmissionStatus';
 
 const PhotoSubmissionForm = () => {
   const { eventId } = useParams();
@@ -33,12 +36,8 @@ const PhotoSubmissionForm = () => {
   const [submissionDetails, setSubmissionDetails] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showRenameConfirm, setShowRenameConfirm] = useState(false);
-  const [submissionsEnabled, setSubmissionsEnabled] = useState(true);
-const [checkingStatus, setCheckingStatus] = useState(true);
-
-  // Updated Google Apps Script URL - make sure to deploy as web app
-  const GOOGLE_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbxgKSgkJqFM8SufLijVGHyJm8zJ-2pzXkbWZxkKU6iy8p-PDH7mHBkbmvNMPzFkCQw/exec";
+  // GAS URL for submissions
+  const GOOGLE_SCRIPT_URL = process.env.REACT_APP_GAS_PHOTOS || process.env.REACT_APP_GAS_PHOTO_SUBMIT;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -48,60 +47,8 @@ const [checkingStatus, setCheckingStatus] = useState(true);
     }));
   };
 
-useEffect(() => {
-    const checkSubmissionStatus = async () => {
-      try {
-        console.log("🔄 Checking photo submission status...");
-        
-        // Ensure this matches the 'photos' URL in UniversalAdmin.js exactly
-        const adminScriptUrl = "https://script.google.com/macros/s/AKfycbyUQVpwn4yvn4PJ6FXoai7hh-KC8jSGYooJD5-UcHvrsFraEpBmpUanUmskHn6i4I7i/exec";
-        
-        // Add timestamp to prevent caching
-        const url = `${adminScriptUrl}?action=getSubmissionStatus&timestamp=${new Date().getTime()}`;
-        
-        const response = await fetch(url, {
-          method: 'GET',
-          redirect: 'follow', // Explicitly follow GAS redirects
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        console.log("📊 Status Result:", result);
-        
-        if (result.success && result.enabled !== undefined) {
-           setSubmissionsEnabled(result.enabled);
-        } else if (result.status === 'success' && result.data) {
-           // Handle legacy wrapper if structure changes
-           setSubmissionsEnabled(result.data.enabled !== false);
-        } else {
-           // If JSON is valid but success is false, respect the 'enabled' flag if present
-           console.warn("⚠️ API returned success:false");
-           if (result.enabled !== undefined) setSubmissionsEnabled(result.enabled);
-        }
-        
-      } catch (error) {
-        console.error("❌ Error checking submission status:", error);
-        
-        // SAFETY CHECK: 
-        // If we cannot contact the server, should we allow submissions?
-        // Defaulting to TRUE is "Fail Open" (User friendly, but ignores Admin)
-        // Defaulting to FALSE is "Fail Safe" (Secure, but might block users if internet is bad)
-        
-        // Keep true for UX, but ensure the error isn't caused by permissions (See Step 3 below)
-        setSubmissionsEnabled(true); 
-      } finally {
-        setCheckingStatus(false);
-      }
-    };
-    
-    checkSubmissionStatus();
-  }, []);
+  const { status: currentStatus, loading: checkingStatus } = useSubmissionStatus(GOOGLE_SCRIPT_URL, "getSubmissionStatus");
+  const submissionsEnabled = currentStatus === "enabled";
 
   const handleSinglePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -216,7 +163,6 @@ useEffect(() => {
       new Promise((resolve) => setTimeout(resolve, 0));
 
     try {
-      console.log("🔄 Starting individual file upload process...");
 
       // Combine all files
       const allFiles = [
@@ -255,8 +201,6 @@ useEffect(() => {
           : null,
       };
 
-      console.log("🚀 Creating folder with URL encoded form data...");
-
       const formDataEncoded = new URLSearchParams();
       Object.keys(folderData).forEach((key) => {
         if (Array.isArray(folderData[key])) {
@@ -283,8 +227,6 @@ useEffect(() => {
       if (!folderResult.success) {
         throw new Error(folderResult.error || "Failed to create folder");
       }
-
-      console.log("✅ Folder created successfully:", folderResult);
 
       // Step 2: Upload files one by one
       setSubmissionDetails({
@@ -361,6 +303,27 @@ useEffect(() => {
       setUploadProgress(100);
       await forceRenderTick();
 
+      // Firebase Dual-Write Mirroring
+      try {
+        const firestoreDoc = {
+          eventId: eventId,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          institution: formData.institution,
+          category: formData.category,
+          photoCount: formData.photos.length,
+          storyPhotoCount: formData.photoStory.length,
+          hasStoryText: !!formData.storyTextFile,
+          folderUrl: folderResult.folderUrl,
+          timestamp: new Date().toISOString(),
+          type: "photos"
+        };
+        await addDoc(collection(db, "photoSubmissions"), firestoreDoc);
+      } catch (fbError) {
+        // We won't block the actual submission if GAS passes
+      }
+
       // Show success
       setSubmissionDetails({
         success: true,
@@ -428,9 +391,7 @@ useEffect(() => {
           if (response.ok) {
             const result = await response.json();
             if (result.success) {
-              console.log(
-                `✅ ${fileType} file ${index} uploaded: ${file.name}`
-              );
+
               resolve(result);
             } else {
               reject(

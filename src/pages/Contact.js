@@ -22,12 +22,10 @@ const Contact = () => {
   const [submitMessage, setSubmitMessage] = useState("");
   const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Add this line
 
-  // Replace these with your actual EmailJS credentials
-  const EMAILJS_CONFIG = {
-    serviceID: "service_sdytxvx", // From Email Services
-    templateID: "template_uretp9v", // From Email Templates
-    userID: "VI-iKC1S467IURbXu", // From Account > API Keys (Public Key)
-  };
+  // EmailJS configuration from environment variables
+  const EMAIL_SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID;
+  const EMAIL_TEMPLATE_ID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
+  const EMAIL_PUBLIC_KEY = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -36,13 +34,12 @@ const Contact = () => {
 
     emailjs
       .sendForm(
-        EMAILJS_CONFIG.serviceID,
-        EMAILJS_CONFIG.templateID,
+        EMAIL_SERVICE_ID,
+        EMAIL_TEMPLATE_ID,
         form.current,
-        EMAILJS_CONFIG.userID
+        EMAIL_PUBLIC_KEY
       )
       .then((result) => {
-        console.log("Email sent successfully:", result.text);
         setIsSubmitting(false);
         setSubmitStatus("success");
         setSubmitMessage(

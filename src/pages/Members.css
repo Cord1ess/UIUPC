@@ -1,20 +1,4 @@
 /* pages/Members.css */
-:root {
-  --uiu-orange: #FF6B00;
-  --uiu-orange-light: #FF8C42;
-  --uiu-orange-dark: #E55A00;
-  --black: #0A0A0A;
-  --dark-gray: #151515;
-  --medium-gray: #1E1E1E;
-  --light-gray: #2A2A2A;
-  --white: #FFFFFF;
-  --text-light: #F0F0F0;
-  --text-muted: #B0B0B0;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.4);
-  --shadow-orange: 0 8px 32px rgba(255, 107, 0, 0.4);
-  --glow-orange: 0 0 20px rgba(255, 107, 0, 0.3);
-}
 
 .members-page {
   min-height: 100vh;

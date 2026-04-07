@@ -1,70 +1,55 @@
-# Getting Started with Create React App
+# UIUPC Administrative Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A high-performance administrative and public-facing portal for the UIU Photography Club. This system facilitates photo submissions, member management, and event exhibitions through a secure, modular architecture.
 
-## Available Scripts
+## Core Features
 
-In the project directory, you can run:
+- Photo Submission Engine: Streamlined multi-file upload with progress tracking and submission windows.
+- Dynamic Gallery: Real-time photo exhibitions with automated state-driven filtering and pagination.
+- Admin Central: Secure management hub for membership applications, blog posts, and exhibition results.
+- Automated Results Publishing: Direct integration between Google Sheets and the public-facing results portal.
 
-### `npm start`
+## Technical Architecture
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Frontend: React 18 with modern functional hooks and Context API for global state management.
+- Backend Integration: Google Apps Script (GAS) acting as a serverless middleware between the frontend and Google-based data storage (Sheets/Drive).
+- Database & Auth: Firebase Authentication and Cloud Firestore for high-speed administrative data access.
+- Styling: Centralized vanilla CSS design tokens for consistent brand identity across all pages.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Performance Optimization
 
-### `npm test`
+- Route-Based Lazy Loading: Comprehensive implementation of React.lazy for all primary pages to minimize initial bundle size.
+- Resource Management: Deferral of off-screen images using native browser lazy loading for high-bandwidth galleries.
+- Bundle Reduction: Removal of hardcoded mock data in favor of dynamic API-driven state.
+- CSS Normalization: Elimination of redundant design tokens and variable blocks to ensure efficient style inheritance.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Security Standards
 
-### `npm run build`
+- Environment Isolation: Critical API endpoints and service credentials are managed strictly through environment variables.
+- Log Auditing: All production debug logs and sensitive data footprints have been stripped from the client-side bundle.
+- Access Control: Multi-level administrative protection via Firebase Auth and protected route wrappers.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Getting Started
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Prerequisites
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Node.js (v16.x or higher)
+- npm or yarn
 
-### `npm run eject`
+### Installation
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. Install dependencies:
+   npm install
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2. Start the development server:
+   npm start
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+3. Build for production:
+   npm run build
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Deployment
 
-## Learn More
+The application is optimized for deployment on Vercel or Netlify. Ensure all environment variables listed in .env.local are configured in your hosting provider's dashboard.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
+Copyright (c) 2026 UIU Photography Club. All rights reserved.

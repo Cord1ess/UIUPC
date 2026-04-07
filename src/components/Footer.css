@@ -1,14 +1,4 @@
 /* components/Footer.css - ENHANCED VERSION */
-:root {
-  --footer-bg: #0a0a0a;
-  --footer-glass: rgba(255, 255, 255, 0.05);
-  --footer-border: rgba(255, 255, 255, 0.1);
-  --footer-text: rgba(255, 255, 255, 0.8);
-  --footer-text-light: rgba(255, 255, 255, 0.6);
-  --uiu-orange: #FF6B35;
-  --uiu-orange-light: #FF8C5A;
-  --uiu-orange-dark: #E55A2B;
-}
 
 .footer {
   background: linear-gradient(135deg, var(--footer-bg) 0%, #1a0a0a 100%);

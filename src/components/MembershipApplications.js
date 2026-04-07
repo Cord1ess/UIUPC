@@ -117,8 +117,6 @@ const MembershipApplications = ({
       item["FB Link"] ||
       item["fbLink"];
 
-    console.log("Facebook link data:", { facebookLink, item }); // Debug log
-
     if (
       !facebookLink ||
       facebookLink === "N/A" ||

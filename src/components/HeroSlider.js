@@ -90,7 +90,6 @@ const HeroSlider = () => {
           // Reset and play the video from beginning
           videoRef.currentTime = 0;
           videoRef.play().catch((error) => {
-            console.log("Video autoplay failed:", error);
             // If video fails to autoplay, fall back to timer
             startSlideTimer(slide.duration);
           });

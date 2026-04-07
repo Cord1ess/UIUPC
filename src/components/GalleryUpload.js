@@ -35,8 +35,6 @@ const GalleryUpload = ({ user, scripts, onUploadSuccess }) => {
       setLoading(true);
       setError(null);
 
-      console.log("Fetching gallery photos...");
-
       // Use the correct action name "getGallery"
       const response = await fetch(`${scripts.gallery}?action=getGallery`);
 
@@ -45,7 +43,6 @@ const GalleryUpload = ({ user, scripts, onUploadSuccess }) => {
       }
 
       const result = await response.json();
-      console.log("Gallery photos response:", result);
 
       if (result.status === "success") {
         const photos = result.data || [];

@@ -1,5 +1,5 @@
 // App.js - Main Application Component
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -14,23 +14,27 @@ import { collection, getDocs } from "firebase/firestore";
 // Components
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Home from "./pages/Home";
-import Gallery from "./pages/Gallery";
-import Members from "./pages/Members";
-import Events from "./pages/Events";
-import Blog from "./pages/Blog";
-import Join from "./pages/Join";
-import Contact from "./pages/Contact";
-import Admin from "./pages/Admin";
+// Lazy Loaded Main Pages
+const Home = React.lazy(() => import("./pages/Home"));
+const Gallery = React.lazy(() => import("./pages/Gallery"));
+const Members = React.lazy(() => import("./pages/Members"));
+const Events = React.lazy(() => import("./pages/Events"));
+const Blog = React.lazy(() => import("./pages/Blog"));
+const Join = React.lazy(() => import("./pages/Join"));
+const Login = React.lazy(() => import("./pages/Login"));
+const Committee2026 = React.lazy(() => import("./pages/Committee2026"));
+
+// Lazy Loaded Components
+const Admin = React.lazy(() => import("./pages/Admin"));
+const EventDetail = React.lazy(() => import("./pages/EventDetail"));
+const PhotoSubmissionForm = React.lazy(() => import("./components/PhotoSubmissionForm"));
+const Contact = React.lazy(() => import("./pages/Contact"));
+const ResultsPage = React.lazy(() => import("./components/ResultsPage"));
 import Loading from "./components/Loading";
-import EventDetail from "./pages/EventDetail";
-import PhotoSubmissionForm from "./components/PhotoSubmissionForm";
-import Login from "./pages/Login";
-import ResultsPage from "./components/ResultsPage";
-import Committee2026 from "./pages/Committee2026";
 
 // Context
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { useFeaturedPhotos, useUpcomingEvents } from "./hooks/useFirebaseData";
 
 // Styles
 import "./styles/App.css";
@@ -60,55 +64,9 @@ const PublicRoute = ({ children }) => {
 
 // Main app content component
 function AppContent() {
-  const [featuredPhotos, setFeaturedPhotos] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [dataLoading, setDataLoading] = useState(true);
+  const { featuredPhotos } = useFeaturedPhotos();
+  const { events } = useUpcomingEvents();
   const { loading: authLoading } = useAuth();
-
-  useEffect(() => {
-    // Fetch initial data
-    const fetchData = async () => {
-      try {
-        await Promise.all([fetchFeaturedPhotos(), fetchUpcomingEvents()]);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const fetchFeaturedPhotos = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "featuredPhotos"));
-      const photos = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setFeaturedPhotos(photos);
-    } catch (error) {
-      console.error("Error fetching featured photos:", error);
-    }
-  };
-
-  const fetchUpcomingEvents = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "events"));
-      const eventsData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      // Filter upcoming events
-      const upcoming = eventsData
-        .filter((event) => new Date(event.date) >= new Date())
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
-      setEvents(upcoming);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    }
-  };
 
   // Show loading screen while auth is initializing
   if (authLoading) {
@@ -120,41 +78,43 @@ function AppContent() {
       <ScrollToTop />
       <Navbar />
       <main>
-        <Routes>
-          <Route
-            path="/"
-            element={<Home featuredPhotos={featuredPhotos} events={events} />}
-          />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/members" element={<Members />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/join" element={<Join />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/events/:eventId" element={<EventDetail />} />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <Admin />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/register/:eventId"
-            element={<PhotoSubmissionForm />}
-          />
-          <Route path="/results" element={<ResultsPage />} />
-          <Route path="/committee-2026" element={<Committee2026 />} />
-        </Routes>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route
+              path="/"
+              element={<Home featuredPhotos={featuredPhotos} events={events} />}
+            />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/members" element={<Members />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/join" element={<Join />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/events/:eventId" element={<EventDetail />} />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <Admin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/register/:eventId"
+              element={<PhotoSubmissionForm />}
+            />
+            <Route path="/results" element={<ResultsPage />} />
+            <Route path="/committee-2026" element={<Committee2026 />} />
+          </Routes>
+        </Suspense>
       </main>
       <Footer />
     </div>

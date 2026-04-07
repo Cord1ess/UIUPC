@@ -19,77 +19,9 @@ const Home = ({ featuredPhotos }) => {
       try {
         setLoading(true);
         
-        // Mock data - in real app, this would be an API call
-        const mockEvents = [
-          {
-            id: "Member-Recruitemet",
-            title: "Member Recruitment Spring 2026",
-            subtitle: "Join with Us!",
-            status: "ongoing",
-            chapter: "Spring'26",
-            date: "March 03 - March 04, 2026",
-            time: "8:30 PM - 4:00 PM",
-            location: "UIU Campus, Dhaka",
-            registrationLink: "/join",
-            entryFee: "1st Phase : Interview & Selected Members 500BDT",
-            description: "If any enquiry please contact us via Facebook or Instagram. or you come to the club room #Basement Table 03 ",
-          },
-          {
-            id: "Iftar-Mahfil",
-            title: "Iftar - e - Ziyafat",
-            subtitle: "Join with Us!",
-            status: "ongoing",
-            chapter: "Iftar'26",
-            date: "March 03 - March 05, 2026",
-            time: "4:00 PM",
-            location: "UIU Campus, Dhaka",
-            registrationLink: "https://forms.gle/u9jskfgWjqN12vd97",
-            entryFee: "400 BDT",
-            description: "If any enquiry please contact us via Facebook or Instagram. or you come to the club room #Basement Table 03 ",
-          },
-          {
-            id: "shutter-stories",
-            title: "Shutter Stories Chapter IV",
-            subtitle: "National Photography Exhibition",
-            status: "completed",
-            chapter: "Chapter IV",
-            date: "Jan 06 - Jan 07, 2026",
-            time: "10:00 AM - 4:30 PM",
-            location: "UIU Multipurpose Hall",
-            // registrationLink: "https://forms.gle/your-registration-link",
-            entryFee: "Initially Free, 1020BDT per Single Photos & 3060BDT per Photo Story after shortlisting",
-            submissionDeadline: "December 20, 2025",
-            announcementDate: "December 20, 2025",
-            description: "A prestigious national-level photography exhibition that brings together photography enthusiasts from across the country.",
-          },
-         
-          /*{
-            id: "photo-editing-masterclass",
-            title: "Photo Editing Masterclass",
-            subtitle: "Adobe Lightroom & Photoshop",
-            status: "upcoming",
-            chapter: "Skill Development",
-            date: "February 5, 2025",
-            time: "10:00 AM - 4:00 PM",
-            location: "UIU Computer Lab",
-            registrationLink: "#",
-            entryFee: "500 BDT",
-            submissionDeadline: "February 1, 2025",
-            description: "Comprehensive photo editing workshop covering advanced techniques.",
-            image: "/api/placeholder/600/400",
-            highlights: [
-              "Professional editing techniques",
-              "Color grading mastery",
-              "Workflow optimization",
-              "Before & after analysis"
-            ],
-            stats: {
-              participants: "25",
-              duration: "6 hours",
-              software: "Lightroom & Photoshop"
-            }
-          } */
-        ];
+        // Mock data removed to optimize bundle size
+        // TODO: Replace with live GAS API call (e.g. REACT_APP_GAS_EVENTS)
+        const mockEvents = [];
 
         // Simulate API delay
         setTimeout(() => {

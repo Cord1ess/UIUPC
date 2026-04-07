@@ -1,0 +1,272 @@
+[
+  {
+    "id": 1,
+    "name": "Ahmad Hasan",
+    "role": "President",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887594/Ahmad_c9unik.jpg",
+    "tag": "Core",
+    "positionType": "president"
+  },
+  {
+    "id": 2,
+    "name": "Md Zobaer Ahmed",
+    "role": "Vice President",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887572/Zobayer_wb181f.jpg",
+    "tag": "Core",
+    "positionType": "vicepresident"
+  },
+  {
+    "id": 3,
+    "name": "Anika Anjum Mona",
+    "role": "General Secretary",
+    "department": "Environment and Development Studies",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887676/Mona_kyuquj.jpg",
+    "tag": "Core",
+    "positionType": "generalSecretary"
+  },
+  {
+    "id": 4,
+    "name": "Dipto Mahdud Sultan",
+    "role": "Assistant General Secretary",
+    "department": "Department of MSJ",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887627/Dipto_jtswqk.jpg",
+    "tag": "Core",
+    "positionType": "assistantGeneralSecretary"
+  },
+  {
+    "id": 5,
+    "name": "Jonayed Shah Jesun",
+    "role": "Treasurer",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887573/Zonayed_ud4jkj.jpg",
+    "tag": "Core",
+    "positionType": "treasurer"
+  },
+  {
+    "id": 6,
+    "name": "Zannatul Amin",
+    "role": "Head of PR",
+    "department": "Deptartment of BBA",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887619/Amin_dcyrw0.jpg",
+    "tag": "Public Relations",
+    "positionType": "head"
+  },
+  {
+    "id": 7,
+    "name": "Jahid Hasan Sabbir",
+    "role": "Asst. Head of PR",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887631/Sabbir_yhyqkl.jpg",
+    "tag": "Public Relations",
+    "positionType": "assistantHead"
+  },
+  {
+    "id": 8,
+    "name": "Tahsin Moin Rhythm",
+    "role": "Asst. Head of PR",
+    "department": "Department of Data Science",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887565/Tahsin_ff8qxm.jpg",
+    "tag": "Public Relations",
+    "positionType": "assistantHead"
+  },
+  {
+    "id": 9,
+    "name": "Minhaz Hossain Shemul",
+    "role": "Head of ORG",
+    "department": "Electrical & Electronic Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887598/Shemul_qmlobd.jpg",
+    "tag": "Organizers",
+    "positionType": "head"
+  },
+  {
+    "id": 10,
+    "name": "Md Arean Nobi Kanok",
+    "role": "Asst. Head of Org",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887598/Arean_visqqz.jpg",
+    "tag": "Organizers",
+    "positionType": "assistantHead"
+  },
+  {
+    "id": 11,
+    "name": "Md. Eakub Ali",
+    "role": "Asst. Head of Org",
+    "department": "Electrical & Electronic Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887703/Hridoy_m4eczj.jpg",
+    "tag": "Organizers",
+    "positionType": "assistantHead"
+  },
+  {
+    "id": 12,
+    "name": "Mayesha Tun Nur",
+    "role": "Head of Event",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887645/Mayesha_sa4vl0.jpg",
+    "tag": "Event",
+    "positionType": "head"
+  },
+  {
+    "id": 13,
+    "name": "Tanzim Hasan",
+    "role": "Asst. Head of Event",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887576/Tanzim_v8kli1.jpg",
+    "tag": "Event",
+    "positionType": "assistantHead"
+  },
+  {
+    "id": 14,
+    "name": "Abdullah R Rafi",
+    "role": "Asst. Head of Event",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887531/Rafi_w0x154.png",
+    "tag": "Event",
+    "positionType": "assistantHead"
+  },
+  {
+    "id": 15,
+    "name": "Faiaz Nibir",
+    "role": "Asst. Head of Event",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887694/Nibir_cqx3ux.jpg",
+    "tag": "Event",
+    "positionType": "assistantHead"
+  },
+  {
+    "id": 16,
+    "name": "Pratoy Barua",
+    "role": "Head of HR",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887646/Pratoy_bmibzy.jpg",
+    "tag": "Human Resources",
+    "positionType": "head"
+  },
+  {
+    "id": 17,
+    "name": "Mahin Muntasin Rahul",
+    "role": "Asst. Head of HR",
+    "department": "Environment and Development Studies",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887812/Mahin_rapoj1.jpg",
+    "tag": "Human Resources",
+    "positionType": "assistantHead"
+  },
+  {
+    "id": 18,
+    "name": "Fahmid Khan",
+    "role": "Asst. Head of HR",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887557/Fahmid_s7rusd.jpg",
+    "tag": "Human Resources",
+    "positionType": "assistantHead"
+  },
+  {
+    "id": 19,
+    "name": "Md Fardin Jany",
+    "role": "Designer",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887621/Raad_qbh9a5.jpg",
+    "tag": "Design",
+    "positionType": "assistantHead"
+  },
+  {
+    "id": 20,
+    "name": "Md Abdul Aziz Arafat",
+    "role": "Designer",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887605/Aziz_qg8gdf.jpg",
+    "tag": "Design",
+    "positionType": "assistantHead"
+  },
+  {
+    "id": 21,
+    "name": "Yeasin Arafat Babu",
+    "role": "Executive Member",
+    "department": "Biotechnology & Genetic Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887534/Babu_hkqvqq.png",
+    "tag": "Executives",
+    "positionType": "executive"
+  },
+  {
+    "id": 22,
+    "name": "S.M. Atik Hasan",
+    "role": "Executive Member",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887589/Atik_fllgz4.jpg",
+    "tag": "Executives",
+    "positionType": "executive"
+  },
+  {
+    "id": 23,
+    "name": "Tanzin Tuli",
+    "role": "Executive Member",
+    "department": "Department of BBA",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887531/Tuli_lvjeze.png",
+    "tag": "Executives",
+    "positionType": "executive"
+  },
+  {
+    "id": 24,
+    "name": "Murad Hasan",
+    "role": "Executive Member",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887650/Million_aoejlh.jpg",
+    "tag": "Executives",
+    "positionType": "executive"
+  },
+  {
+    "id": 25,
+    "name": "Ameenah Binte Mahbub",
+    "role": "Executive Member",
+    "department": "Electrical & Electronic Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887608/Ameenah_hnlcps.jpg",
+    "tag": "Executives",
+    "positionType": "executive"
+  },
+  {
+    "id": 26,
+    "name": "Sadman Saleh",
+    "role": "Executive Member",
+    "department": "Department of Data Science",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887678/Sadman_nbyxrk.jpg",
+    "tag": "Executives",
+    "positionType": "executive"
+  },
+  {
+    "id": 27,
+    "name": "Sadika Salam",
+    "role": "Executive Member",
+    "department": "Department of BBA",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887549/Sadika_ngr4cp.jpg",
+    "tag": "Executives",
+    "positionType": "executive"
+  },
+  {
+    "id": 28,
+    "name": "Nusrat Subha",
+    "role": "Executive Member",
+    "department": "Department of Pharmacy",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887705/Nusrat_n4bm8q.jpg",
+    "tag": "Executives",
+    "positionType": "executive"
+  },
+  {
+    "id": 29,
+    "name": "Siam Arefin",
+    "role": "Executive Member",
+    "department": "Department of Data Science",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887684/Siam_xghr6a.jpg",
+    "tag": "Executives",
+    "positionType": "executive"
+  },
+  {
+    "id": 30,
+    "name": "Faysal Bin Ibrahim",
+    "role": "Executive Member",
+    "department": "Computer Science & Engineering",
+    "profileImage": "https://res.cloudinary.com/do0e8p5d2/image/upload/v1769887671/Faysal_s00gko.jpg",
+    "tag": "Executives",
+    "positionType": "executive"
+  }
+]

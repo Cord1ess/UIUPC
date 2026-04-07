@@ -1,17 +1,4 @@
 /* pages/Home.css - ENHANCED VERSION */
-:root {
-  --black: #0a0a0a;
-  --dark-gray: #1a1a1a;
-  --medium-gray: #2a2a2a;
-  --uiu-orange: #ff6b35;
-  --uiu-orange-light: #ff8c5a;
-  --uiu-orange-dark: #e55a2b;
-  --white: #f5f5f5;
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
-  --neon-glow: 0 0 10px rgba(255, 107, 53, 0.7), 0 0 20px rgba(255, 107, 53, 0.5), 0 0 30px rgba(255, 107, 53, 0.3);
-}
 
 .home-page {
   overflow-x: hidden;

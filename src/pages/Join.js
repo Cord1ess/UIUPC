@@ -1,5 +1,6 @@
-// pages/Join.js
 import React, { useState } from "react";
+import { db } from "../firebase";
+import { collection, addDoc } from "firebase/firestore";
 import {
   FaChalkboardTeacher,
   FaImages,
@@ -23,6 +24,7 @@ import {
   FaFileSignature,
   FaFacebook,
 } from "react-icons/fa";
+import { useSubmissionStatus } from "../hooks/useSubmissionStatus";
 import "./Join.css";
 
 const Join = () => {
@@ -48,25 +50,9 @@ const Join = () => {
   const [photo, setPhoto] = useState(null);
 
   // Google Apps Script Web App URL - You'll need to create this
-  const GOOGLE_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbz8kL7baJCadXaw35npWd6Aa_dYjZlP44xjttgh7WCcUQI-hioy9EI4Utf22yqsu5jv/exec";
+  const GOOGLE_SCRIPT_URL = process.env.REACT_APP_GAS_JOIN;
 
-  const checkJoinPageStatus = async () => {
-    try {
-      const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbz8kL7baJCadXaw35npWd6Aa_dYjZlP44xjttgh7WCcUQI-hioy9EI4Utf22yqsu5jv/exec?action=getJoinPageStatus"
-      );
-
-      if (response.ok) {
-        const result = await response.json();
-        return result.data?.status === "enabled";
-      }
-      return true; // Default to enabled if there's an error
-    } catch (error) {
-      console.error("Error checking join page status:", error);
-      return true; // Default to enabled if there's an error
-    }
-  };
+  const { status: joinStatus } = useSubmissionStatus(GOOGLE_SCRIPT_URL, "getJoinPageStatus");
 
   const departments = [
     "Computer Science & Engineering",
@@ -146,8 +132,7 @@ const Join = () => {
     e.preventDefault();
 
     // Check if join page submissions are enabled
-    const isEnabled = await checkJoinPageStatus();
-    if (!isEnabled) {
+    if (joinStatus !== "enabled") {
       setSubmitStatus("error");
       setSubmitMessage(
         "Membership applications are currently disabled. Please check back later or contact the photography club for more information."
@@ -187,15 +172,12 @@ const Join = () => {
     }
 
     try {
-      console.log("Starting submission process...");
-
       // Convert photo to base64 if exists
       let photoData = null;
       let photoName = null;
       let photoType = null;
 
       if (photo) {
-        console.log("Processing photo:", photo.name);
         photoData = await convertToBase64(photo);
         photoName = photo.name;
         photoType = photo.type;
@@ -224,9 +206,6 @@ const Join = () => {
       // Add timestamp
       submissionData.append("timestamp", new Date().toISOString());
 
-      console.log("Submitting to:", GOOGLE_SCRIPT_URL);
-
-      // FIXED: Use proper headers for URLSearchParams
       const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
         headers: {
@@ -235,10 +214,26 @@ const Join = () => {
         body: submissionData.toString(),
       });
 
-      console.log("Response status:", response.status);
+      // Firebase Dual-Write Mirroring
+      try {
+        const firestoreDoc = {
+          ...formData,
+          agreementAccepted: true,
+          timestamp: new Date().toISOString(),
+          type: "membership"
+        };
+        if (photoData) {
+          firestoreDoc.photoData = photoData;
+          firestoreDoc.photoName = photoName;
+          firestoreDoc.photoType = photoType;
+        }
+        await addDoc(collection(db, "membershipApplications"), firestoreDoc);
+      } catch (fbError) {
+        console.error("Firestore sync error:", fbError);
+        // We won't block the actual submission if GAS passes
+      }
 
       const result = await response.json();
-      console.log("Response data:", result);
 
       if (response.ok && result.status === "success") {
         setIsSubmitting(false);

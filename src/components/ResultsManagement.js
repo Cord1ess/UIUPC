@@ -12,7 +12,6 @@ import {
   FaUniversity,
   FaImage,
   FaSearch,
-  FaFilter,
   FaDownload,
   FaSync,
   FaCalendar,
@@ -21,7 +20,6 @@ import {
   FaHome,
   FaTshirt,
   FaExclamationTriangle,
-  FaDatabase,
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
@@ -42,7 +40,7 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
   const [selectedResult, setSelectedResult] = useState(null);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [usingDemoData, setUsingDemoData] = useState(false);
+
 
   // Pagination states
   const [currentResultsPage, setCurrentResultsPage] = useState(1);
@@ -67,93 +65,7 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
     { id: "event-3", name: "Annual Competition" },
   ];
 
-  // Demo data for fallback
-  const demoResults = [
-    {
-      id: 1,
-      name: "John Doe",
-      institute: "UIU",
-      category: "single",
-      photos: 3,
-      selected: true,
-      status: "selected",
-      timestamp: "2024-01-15T10:30:00Z",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      institute: "BUET",
-      category: "single",
-      photos: 2,
-      selected: true,
-      status: "selected",
-      timestamp: "2024-01-15T11:00:00Z",
-    },
-    {
-      id: 3,
-      name: "Alex Johnson",
-      institute: "DU",
-      category: "story",
-      photos: 5,
-      selected: true,
-      status: "selected",
-      timestamp: "2024-01-15T11:30:00Z",
-    },
-  ];
 
-  const demoPayments = [
-    {
-      id: 1,
-      name: "Michael Brown",
-      email: "michael@example.com",
-      phone: "01712345678",
-      institute: "UIU",
-      category: "single",
-      photoCount: 2,
-      tshirtSize: "M",
-      address: "Dhaka, Bangladesh",
-      paymentMethod: "bkash01",
-      transactionId: "BKA123456789",
-      totalAmount: 2040,
-      status: "pending",
-      timestamp: "2024-01-15T12:00:00Z",
-      eventName: "Shutter Stories Chapter IV",
-    },
-    {
-      id: 2,
-      name: "Sarah Wilson",
-      email: "sarah@example.com",
-      phone: "01898765432",
-      institute: "BUET",
-      category: "story",
-      photoCount: 1,
-      tshirtSize: "L",
-      address: "Chittagong, Bangladesh",
-      paymentMethod: "nagad",
-      transactionId: "NAG987654321",
-      totalAmount: 3060,
-      status: "pending",
-      timestamp: "2024-01-15T12:30:00Z",
-      eventName: "Shutter Stories Chapter IV",
-    },
-    {
-      id: 3,
-      name: "Robert Chen",
-      email: "robert@example.com",
-      phone: "01611223344",
-      institute: "DU",
-      category: "single",
-      photoCount: 3,
-      tshirtSize: "XL",
-      address: "Sylhet, Bangladesh",
-      paymentMethod: "rocket",
-      transactionId: "ROCK11223344",
-      totalAmount: 3060,
-      status: "pending",
-      timestamp: "2024-01-15T13:00:00Z",
-      eventName: "Shutter Stories Chapter IV",
-    },
-  ];
 
   // Fetch results and payments
   useEffect(() => {
@@ -166,34 +78,26 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
       setLoading(true);
       setError(null);
 
-      const url = `${
-        scripts.results
-      }?action=getAllResults&eventId=${selectedEvent}&t=${Date.now()}`;
+      const url = `${scripts.results}?action=getAllResults&eventId=${selectedEvent}&t=${Date.now()}`;
       const response = await fetch(url);
-
-      const responseText = await response.text();
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const result = JSON.parse(responseText);
+      const result = await response.json();
 
       if (result.success) {
         const resultsData = Array.isArray(result.data) ? result.data : [];
         setResults(resultsData);
-        setUsingDemoData(false);
         setError(null);
       } else {
         throw new Error(result.error || "API returned error");
       }
     } catch (error) {
-      console.error("❌ Error fetching results:", error);
+      console.error("Error fetching results:", error);
       setError(`Failed to load results: ${error.message}`);
-
-      // Use demo data as fallback
-      setResults(demoResults);
-      setUsingDemoData(true);
+      setResults([]);
     } finally {
       setLoading(false);
     }
@@ -201,76 +105,24 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
 
   const fetchPayments = async () => {
     try {
-      console.log("🔄 Fetching payments...");
-
-      // Use CORS proxy for payments
-      const targetUrl = `${
-        scripts.results
-      }?action=getAllPayments&eventId=${selectedEvent}&t=${Date.now()}`;
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(
-        targetUrl
-      )}`;
-
-      const response = await fetch(proxyUrl, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-      });
+      const url = `${scripts.results}?action=getAllPayments&eventId=${selectedEvent}&t=${Date.now()}`;
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const proxyResult = await response.json();
+      const result = await response.json();
 
-      if (proxyResult.contents) {
-        const result = JSON.parse(proxyResult.contents);
-
-        if (result.success) {
-          const paymentsData = Array.isArray(result.data) ? result.data : [];
-          console.log(
-            "✅ Payments fetched successfully:",
-            paymentsData.length,
-            "items"
-          );
-          console.log(
-            "📊 Sample payment statuses:",
-            paymentsData.map((p) => ({ id: p.id, status: p.status }))
-          );
-          setPayments(paymentsData);
-          return;
-        } else {
-          throw new Error(result.error || "API returned error");
-        }
+      if (result.success) {
+        const paymentsData = Array.isArray(result.data) ? result.data : [];
+        setPayments(paymentsData);
       } else {
-        throw new Error("No content in proxy response");
+        throw new Error(result.error || "API returned error");
       }
     } catch (error) {
-      console.error("❌ Error fetching payments via proxy:", error);
-
-      // Try direct fetch as last resort
-      try {
-        const directUrl = `${
-          scripts.results
-        }?action=getAllPayments&eventId=${selectedEvent}&t=${Date.now()}`;
-        const directResponse = await fetch(directUrl);
-
-        if (directResponse.ok) {
-          const result = await directResponse.json();
-          if (result.success) {
-            const paymentsData = Array.isArray(result.data) ? result.data : [];
-            setPayments(paymentsData);
-            return;
-          }
-        }
-      } catch (directError) {
-        console.error("❌ Direct fetch also failed:", directError);
-      }
-
-      // Use demo data
-      console.log("⚠️ Using demo payments data");
-      setPayments(demoPayments);
+      console.error("Error fetching payments:", error);
+      setPayments([]);
     }
   };
 
@@ -421,8 +273,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
   // Handle adding a new result
   const handleAddResult = async () => {
     try {
-      console.log("Adding new result:", newResult);
-
       // Validate required fields
       if (!newResult.name || !newResult.name.trim()) {
         alert("Name is required!");
@@ -445,8 +295,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
         eventId: selectedEvent,
       };
 
-      console.log("Request data:", requestData);
-
       // Use GET request with URL parameters (works better with Google Apps Script)
       const queryParams = new URLSearchParams({
         action: "addResult",
@@ -461,7 +309,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
       }).toString();
 
       const url = `${scripts.results}?${queryParams}`;
-      console.log("Request URL:", url);
 
       const response = await fetch(url, {
         method: "GET",
@@ -471,7 +318,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
       });
 
       const responseText = await response.text();
-      console.log("Response:", responseText);
 
       let result;
       try {
@@ -516,8 +362,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
   // Handle updating a result
   const handleUpdateResult = async (resultId, updatedData) => {
     try {
-      console.log("Updating result:", { resultId, updatedData });
-
       const formData = new FormData();
       formData.append("action", "updateResult");
       formData.append("resultId", resultId);
@@ -544,8 +388,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
     }
 
     try {
-      console.log("Deleting result:", resultId);
-
       const formData = new FormData();
       formData.append("action", "deleteResult");
       formData.append("resultId", resultId);
@@ -567,8 +409,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
   // Handle updating payment status
   const handleUpdatePaymentStatus = async (paymentId, status) => {
     try {
-      console.log(`Updating payment ${paymentId} to ${status}`);
-
       // First, update the local state optimistically
       const updatedPayments = payments.map((payment) => {
         if (payment.id === paymentId) {
@@ -603,7 +443,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
       });
 
       const responseText = await response.text();
-      console.log("Payment update response:", responseText);
 
       let result;
       try {
@@ -618,8 +457,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
       }
 
       if (result.success) {
-        console.log(`✅ Payment ${status} successfully`);
-
         // Optional: Refresh from server to ensure consistency
         setTimeout(() => {
           fetchPayments();
@@ -702,19 +539,10 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
     }
   };
 
-  // CORS proxy function
-  const useCorsProxy = async () => {
-    alert("Switching to CORS proxy for connections...");
-    // Implementation depends on how you want to handle this
-  };
+
 
   // Handle sending payment confirmation email with GET request
   const handleSendPaymentEmailGET = async (paymentId, paymentData) => {
-    console.log("📧 handleSendPaymentEmailGET called:", {
-      paymentId,
-      paymentData,
-    });
-
     if (
       !window.confirm(
         `Send payment confirmation email to ${paymentData.email}?`
@@ -724,12 +552,9 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
     }
 
     try {
-      console.log("📧 Sending email for payment:", paymentId);
-
       const url = `${
         scripts.results
       }?action=sendPaymentEmail&paymentId=${paymentId}&t=${Date.now()}`;
-      console.log("📧 Email request URL:", url);
 
       const response = await fetch(url, {
         method: "GET",
@@ -739,11 +564,9 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
       });
 
       const responseText = await response.text();
-      console.log("📧 Raw email response:", responseText);
 
       try {
         const result = JSON.parse(responseText);
-        console.log("📧 Parsed email response:", result);
 
         if (result.success) {
           alert("✅ Confirmation email sent successfully!");
@@ -756,7 +579,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
         }
       } catch (parseError) {
         console.error("Failed to parse response:", parseError);
-        console.error("Raw response that failed to parse:", responseText);
         alert(
           "⚠️ Email sent but server response was not clear. Check server logs."
         );
@@ -1040,10 +862,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
   };
 
   const renderPaymentsTable = () => {
-    console.log("🔍 renderPaymentsTable called");
-    console.log("🔍 filteredPayments:", filteredPayments);
-    console.log("🔍 paginatedPayments:", paginatedPayments);
-
     // Calculate counts for stats
     const pendingPaymentsCount = filteredPayments.filter(
       (p) => p.status && p.status.toLowerCase().trim() === "pending"
@@ -1103,12 +921,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
                       ? payment.status.toString().toLowerCase().trim()
                       : "pending";
 
-                    const shouldShowEmail = normalizedStatus === "pending";
-
-                    console.log(
-                      `🔍 Payment ${payment.id}: status=${payment.status}, normalized=${normalizedStatus}, showEmail=${shouldShowEmail}`
-                    );
-
                     return (
                       <tr key={payment.id || Math.random()}>
                         <td>{payment.id}</td>
@@ -1149,14 +961,10 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
                           </button>
 
                           {/* Email Button - Show only for pending payments */}
-                          {shouldShowEmail && (
+                          {normalizedStatus === "pending" && (
                             <button
                               className="action-btn email-btn"
                               onClick={() => {
-                                console.log(
-                                  "📧 Email button clicked for payment:",
-                                  payment.id
-                                );
                                 handleSendPaymentEmailGET(payment.id, payment);
                               }}
                               title="Send Confirmation Email"
@@ -1175,29 +983,9 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
                           {/* Show verify/reject buttons only for pending payments */}
                           {normalizedStatus === "pending" && (
                             <>
-                              {/* <button
-                                className="action-btn approve-btn"
-                                onClick={() => {
-                                  console.log(
-                                    "✅ Approve button clicked for payment:",
-                                    payment.id
-                                  );
-                                  handleUpdatePaymentStatus(
-                                    payment.id,
-                                    "verified"
-                                  );
-                                }}
-                                title="Verify Payment"
-                              >
-                                <FaCheck />
-                              </button> */}
                               <button
                                 className="action-btn reject-btn"
                                 onClick={() => {
-                                  console.log(
-                                    "❌ Reject button clicked for payment:",
-                                    payment.id
-                                  );
                                   handleUpdatePaymentStatus(
                                     payment.id,
                                     "rejected"
@@ -1532,10 +1320,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
             <button
               className="btn-primary email-btn"
               onClick={() => {
-                console.log(
-                  "📧 Modal email button clicked for payment:",
-                  selectedPayment.id
-                );
                 handleSendPaymentEmailGET(selectedPayment.id, selectedPayment);
                 setShowPaymentModal(false);
                 setSelectedPayment(null);
@@ -1599,9 +1383,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
               <button className="btn-small" onClick={testConnection}>
                 Test Connection
               </button>
-              <button className="btn-small" onClick={useCorsProxy}>
-                Try CORS Proxy
-              </button>
               <button
                 className="btn-small"
                 onClick={() => setRefreshTrigger((prev) => prev + 1)}
@@ -1612,13 +1393,7 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
           </div>
         )}
 
-        {usingDemoData && (
-          <div className="demo-warning">
-            <FaExclamationTriangle />
-            <strong>DEMO MODE:</strong> Using sample data. Real data connection
-            failed.
-          </div>
-        )}
+
 
         <div className="stats-summary">
           <div className="stat-card">
@@ -1626,7 +1401,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
             <div className="stat-content">
               <h3>{results.length}</h3>
               <p>Total Results</p>
-              {usingDemoData && <small>Demo Data</small>}
             </div>
           </div>
           <div className="stat-card">
@@ -1634,7 +1408,6 @@ const ResultsManagement = ({ scripts, user, onUpdate }) => {
             <div className="stat-content">
               <h3>{payments.length}</h3>
               <p>Total Payments</p>
-              {usingDemoData && <small>Demo Data</small>}
             </div>
           </div>
           <div className="stat-card">

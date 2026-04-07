@@ -55,7 +55,6 @@ const BlogManagement = ({ user, scripts, onUploadSuccess }) => {
       }
 
       const result = await response.json();
-      console.log("Blog posts response:", result);
 
       if (result.status === "success") {
         const sortedPosts = (result.data || []).sort(
@@ -178,8 +177,6 @@ const BlogManagement = ({ user, scripts, onUploadSuccess }) => {
         submissionData.postId = editingPost.id;
       }
 
-      console.log("Submitting blog post:", submissionData);
-
       const response = await fetch(scripts.blog, {
         method: "POST",
         headers: {
@@ -193,7 +190,6 @@ const BlogManagement = ({ user, scripts, onUploadSuccess }) => {
       }
 
       const result = await response.json();
-      console.log("Submission response:", result);
 
       if (result.status === "success") {
         alert(`Blog post ${editingPost ? "updated" : "added"} successfully!`);

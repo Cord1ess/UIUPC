@@ -35,8 +35,7 @@ const ResultsPage = () => {
   const isRegistrationClosed = new Date() > registrationEndDate;
 
   // Google Apps Script Web App URL - FIXED URL (remove any trailing slashes)
-  const GOOGLE_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycby2D-Ip0ThOlsbhGCgbApBQpeQVtNnKy0G1otpKMtr2OFORS-g41Ko3SvxXMlJjne-W9w/exec";
+  const GOOGLE_SCRIPT_URL = process.env.REACT_APP_GAS_RESULTS_PUBLIC;
 
   // Payment form state
   const [paymentData, setPaymentData] = useState({
@@ -65,8 +64,6 @@ const ResultsPage = () => {
           eventId || "shutter-stories"
         }&_=${new Date().getTime()}`;
 
-        console.log("Fetching from URL:", url);
-
         const response = await fetch(url, {
           method: "GET",
           headers: {
@@ -76,10 +73,7 @@ const ResultsPage = () => {
           credentials: "omit",
         });
 
-        console.log("Response status:", response.status, response.statusText);
-
         const responseText = await response.text();
-        console.log("Response text:", responseText);
 
         if (!response.ok) {
           console.error("HTTP error:", response.status);
@@ -105,12 +99,6 @@ const ResultsPage = () => {
         try {
           data = JSON.parse(responseText);
         } catch (parseError) {
-          console.error(
-            "Failed to parse JSON:",
-            parseError,
-            "Response was:",
-            responseText
-          );
           throw new Error("Invalid JSON response from server");
         }
 
@@ -119,159 +107,19 @@ const ResultsPage = () => {
           throw new Error(data.error);
         }
 
-        console.log("Data received successfully:", data);
         setResults(data);
         setError(null);
       } catch (err) {
         console.error("Error fetching results:", err);
         setError(err.message);
 
-        // Use fallback data only if we have no results
+        // Use empty state instead of massive mock data
         if (!results) {
-          console.log("Using fallback data due to fetch error");
           setResults({
             success: true,
-            title: "Shutter Stories Chapter IV - Selected Participants",
-            singlePhotos: [
-              {
-                id: 1,
-                name: "John Doe",
-                institute: "UIU",
-                photos: 3,
-                selected: true,
-                category: "single",
-              },
-              {
-                id: 2,
-                name: "Jane Smith",
-                institute: "BUET",
-                photos: 2,
-                selected: true,
-                category: "single",
-              },
-              {
-                id: 3,
-                name: "Alex Johnson",
-                institute: "DU",
-                photos: 4,
-                selected: true,
-                category: "single",
-              },
-              {
-                id: 4,
-                name: "Sarah Williams",
-                institute: "UIU",
-                photos: 2,
-                selected: true,
-                category: "single",
-              },
-              {
-                id: 5,
-                name: "Michael Brown",
-                institute: "NSU",
-                photos: 1,
-                selected: true,
-                category: "single",
-              },
-              {
-                id: 6,
-                name: "Emily Davis",
-                institute: "BRAC",
-                photos: 3,
-                selected: true,
-                category: "single",
-              },
-              {
-                id: 7,
-                name: "David Wilson",
-                institute: "IUB",
-                photos: 2,
-                selected: true,
-                category: "single",
-              },
-              {
-                id: 8,
-                name: "Lisa Anderson",
-                institute: "UIU",
-                photos: 4,
-                selected: true,
-                category: "single",
-              },
-              {
-                id: 9,
-                name: "Robert Taylor",
-                institute: "BUET",
-                photos: 1,
-                selected: true,
-                category: "single",
-              },
-              {
-                id: 10,
-                name: "Maria Garcia",
-                institute: "DU",
-                photos: 3,
-                selected: true,
-                category: "single",
-              },
-              {
-                id: 11,
-                name: "James Miller",
-                institute: "NSU",
-                photos: 2,
-                selected: true,
-                category: "single",
-              },
-              {
-                id: 12,
-                name: "Patricia Lee",
-                institute: "BRAC",
-                photos: 5,
-                selected: true,
-                category: "single",
-              },
-            ],
-            stories: [
-              {
-                id: 1,
-                name: "Emma Wilson",
-                institute: "UIU",
-                photos: 5,
-                selected: true,
-                category: "story",
-              },
-              {
-                id: 2,
-                name: "David Lee",
-                institute: "BUP",
-                photos: 4,
-                selected: true,
-                category: "story",
-              },
-              {
-                id: 3,
-                name: "Sophia Garcia",
-                institute: "IUB",
-                photos: 3,
-                selected: true,
-                category: "story",
-              },
-              {
-                id: 4,
-                name: "William Chen",
-                institute: "BUET",
-                photos: 6,
-                selected: true,
-                category: "story",
-              },
-              {
-                id: 5,
-                name: "Olivia Martinez",
-                institute: "UIU",
-                photos: 4,
-                selected: true,
-                category: "story",
-              },
-            ],
+            title: "Selected Participants",
+            singlePhotos: [],
+            stories: [],
           });
         }
       } finally {
@@ -358,8 +206,6 @@ const ResultsPage = () => {
         eventId: paymentData.eventId,
       };
 
-      console.log("Submitting payment:", paymentPayload);
-
       const url = GOOGLE_SCRIPT_URL;
       const response = await fetch(url, {
         method: "POST",
@@ -370,7 +216,6 @@ const ResultsPage = () => {
       });
 
       const result = await response.json();
-      console.log("Payment response:", result);
 
       if (result.success) {
         alert(
