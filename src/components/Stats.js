@@ -1,4 +1,5 @@
 // components/Stats.js - ENHANCED VERSION
+"use client";
 import React, { useEffect, useRef, useState } from "react";
 import {
   FaUsers,

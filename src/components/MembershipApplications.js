@@ -1,3 +1,4 @@
+"use client";
 // components/MembershipApplications.js
 import React, { useState } from "react";
 import {

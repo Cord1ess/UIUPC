@@ -1,3 +1,4 @@
+"use client";
 // components/PhotoGrid.js - With individual Facebook post links for each photo
 import React from 'react';
 import './PhotoGrid.css';
@@ -18,6 +19,10 @@ const PhotoGrid = ({ photos, onPhotoClick }) => {
     }
   };
 
+  const handleImgError = (e) => {
+    e.target.src = 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1762121162/uiupc_HeroSlider3_wrpuvz.jpg';
+  };
+
   return (
     <div className="photo-grid">
       {photos.map(photo => (
@@ -26,7 +31,12 @@ const PhotoGrid = ({ photos, onPhotoClick }) => {
           className="photo-item"
           onClick={() => onPhotoClick(photo)}
         >
-          <img src={photo.url} alt={photo.title || 'Photo'} loading="lazy" />
+          <img 
+            src={photo.url} 
+            alt={photo.title || 'Photo'} 
+            loading="lazy" 
+            onError={handleImgError}
+          />
 
           <div className="photo-overlay">
             <div className="photo-info">

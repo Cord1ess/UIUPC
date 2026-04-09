@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { db } from "../lib/firebase";
 
 const fetchFeaturedPhotos = async () => {
   const querySnapshot = await getDocs(collection(db, "featuredPhotos"));

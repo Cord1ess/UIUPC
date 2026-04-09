@@ -1,3 +1,4 @@
+"use client";
 // src/components/ResultsManagement.js
 import React, { useState, useEffect } from "react";
 import {

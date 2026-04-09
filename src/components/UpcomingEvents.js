@@ -1,6 +1,8 @@
 // components/UpcomingEvents.js
+"use client";
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaArrowRight, FaClock, FaImage } from 'react-icons/fa';
 import './UpcomingEvents.css';
 
@@ -147,7 +149,7 @@ const UpcomingEvents = ({ events }) => {
               </p>
 
               <div className="event-actions">
-                <Link to={`/events/${event.id}`} className="btn-primary event-detail-btn">
+                <Link href={`/events/${event.id}`} className="btn-primary event-detail-btn">
                   <span>View Details</span>
                   <FaArrowRight />
                 </Link>
@@ -173,7 +175,7 @@ const UpcomingEvents = ({ events }) => {
             <div className="no-events-icon">📸</div>
             <h3>No Upcoming Events</h3>
             <p>Stay tuned for exciting photography events and workshops!</p>
-            <Link to="/events" className="btn-primary">
+            <Link href="/events" className="btn-primary">
               Browse Past Events
             </Link>
           </div>

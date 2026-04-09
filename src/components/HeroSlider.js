@@ -1,5 +1,7 @@
-// components/HeroSlider.js - TEMPORARY LOCAL VERSION
-import React, { useState, useEffect, useRef } from "react";
+// components/HeroSlider.js
+"use client";
+
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import "./HeroSlider.css";
 
 const HeroSlider = () => {
@@ -8,7 +10,7 @@ const HeroSlider = () => {
   const slideTimerRef = useRef(null);
 
   // Local slides data
-  const localSlides = [
+  const localSlides = useMemo(() => [
     {
       id: 1,
       imageUrl:
@@ -17,7 +19,7 @@ const HeroSlider = () => {
       subtitle: "Capturing Moments, Creating Memories",
       eventLink: "/committee-2026",
       type: "image",
-      duration: 5000, // 5 seconds for images
+      duration: 5000, 
     },
     {
       id: 2,
@@ -27,39 +29,39 @@ const HeroSlider = () => {
       subtitle: "Learn, Share, and Grow Together",
       eventLink: "/join",
       type: "image",
-      duration: 5000, // 5 seconds for images
+      duration: 5000,
     },
     {
-      id: 2,
+      id: 3,
       imageUrl:
         "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772527954/Cover_mhro7f.jpg",
       title: "Iftar-e-Ziyafat",
       subtitle: "Lets Break Our Fast with UIUPC Family",
       eventLink: "https://forms.gle/u9jskfgWjqN12vd97",
       type: "image",
-      duration: 5000, // 5 seconds for images
+      duration: 5000,
     },
     {
-      id: 3,
+      id: 4,
       videoUrl:
         "https://res.cloudinary.com/do0e8p5d2/video/upload/v1763138349/Shutter_Stories_Chapter_4_-_2025_Promo_glsjvm.mp4",
       title: "Shutter Stories - Chapter IV",
       subtitle: "Showcase Your Talent",
       eventLink: "/committee-2026",
       type: "video",
-      duration: 74000, // 74 seconds for video (1 min 14 sec)
+      duration: 74000,
     },
     {
-      id: 4,
+      id: 5,
       imageUrl:
         "https://res.cloudinary.com/do0e8p5d2/image/upload/v1762121158/uiupc_HeroSlider2_cyl1xw.jpg",
       title: "Join Our Community",
       subtitle: "Learn, Share, and Grow Together",
       eventLink: "/committee-2026",
       type: "image",
-      duration: 5000, // 5 seconds for images
+      duration: 5000,
     },
-  ];
+  ], []);
 
   // Function to start slide timer
   const startSlideTimer = (duration) => {
@@ -77,20 +79,15 @@ const HeroSlider = () => {
     const currentSlideData = localSlides[currentSlide];
 
     if (currentSlideData.type === "image") {
-      // For images, use the timer
       startSlideTimer(currentSlideData.duration);
     }
-    // For videos, we rely on the video end event
 
-    // Handle video playback
     localSlides.forEach((slide, index) => {
       const videoRef = videoRefs.current[index];
       if (videoRef) {
         if (index === currentSlide && slide.type === "video") {
-          // Reset and play the video from beginning
           videoRef.currentTime = 0;
-          videoRef.play().catch((error) => {
-            // If video fails to autoplay, fall back to timer
+          videoRef.play().catch(() => {
             startSlideTimer(slide.duration);
           });
         } else {
@@ -113,8 +110,8 @@ const HeroSlider = () => {
   };
 
   const addVideoRef = (el, index) => {
-    videoRefs.current[index] = el;
     if (el) {
+      videoRefs.current[index] = el;
       el.addEventListener("ended", handleVideoEnd);
     }
   };
@@ -129,8 +126,9 @@ const HeroSlider = () => {
 
   // Cleanup event listeners
   useEffect(() => {
+    const refs = videoRefs.current;
     return () => {
-      videoRefs.current.forEach((videoRef) => {
+      refs.forEach((videoRef) => {
         if (videoRef) {
           videoRef.removeEventListener("ended", handleVideoEnd);
         }
@@ -147,13 +145,17 @@ const HeroSlider = () => {
         <div
           key={slide.id}
           className={`slide ${index === currentSlide ? "active" : ""}`}
-          style={
-            slide.type === "image"
-              ? { backgroundImage: `url(${slide.imageUrl})` }
-              : {}
-          }
         >
-          {slide.type === "video" && (
+          {slide.type === "image" ? (
+            <img 
+              src={slide.imageUrl} 
+              alt={slide.title} 
+              className="slide-image"
+              onError={(e) => {
+                e.currentTarget.src = 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1762121162/uiupc_HeroSlider3_wrpuvz.jpg';
+              }}
+            />
+          ) : (
             <video
               ref={(el) => addVideoRef(el, index)}
               className="slide-video"
@@ -173,23 +175,6 @@ const HeroSlider = () => {
                 Join With US
               </a>
             </div>
-            {/* <div className="cta-buttons">
-              <button
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      "The result will be published soon. Stay tuned with us!\n\nClick OK to continue."
-                    )
-                  ) {
-                    // You can add additional logic here if needed
-                  }
-                }}
-                className="btn btn-secondary"
-              >
-                Shutter Stories - Chapter IV <br />
-                View Results
-              </button>
-            </div> */}
           </div>
         </div>
       ))}

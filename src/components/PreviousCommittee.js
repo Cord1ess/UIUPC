@@ -1,3 +1,4 @@
+"use client";
 // components/PreviousCommittee.js
 import React, { useState } from 'react';
 import { FaChevronDown, FaChevronUp, FaHistory, FaUsers, FaAward } from 'react-icons/fa';

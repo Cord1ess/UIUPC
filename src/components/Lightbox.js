@@ -1,3 +1,4 @@
+"use client";
 // components/Lightbox.js
 import React from 'react';
 import './Lightbox.css';

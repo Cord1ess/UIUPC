@@ -1,3 +1,4 @@
+"use client";
 // components/PhotoSubmissions.js
 import React, { useState } from "react";
 import {

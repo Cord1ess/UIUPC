@@ -1,3 +1,4 @@
+"use client";
 // components/BlogManagement.js
 import React, { useState, useEffect } from "react";
 import {

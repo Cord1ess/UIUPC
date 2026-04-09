@@ -1,9 +1,11 @@
 // components/PhotoShowcase.js
+"use client";
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import './PhotoShowcase.css';
 
-const PhotoShowcase = ({ photos }) => {
+const PhotoShowcase = ({ photos = [] }) => {
   const featuredPhotos = photos.slice(0, 6);
 
   return (
@@ -17,7 +19,14 @@ const PhotoShowcase = ({ photos }) => {
         <div className="showcase-grid">
           {featuredPhotos.map(photo => (
             <div key={photo.id} className="showcase-item">
-              <img src={photo.url} alt={photo.title} loading="lazy" /> {/* Changed from imageUrl to url */}
+              <img 
+                src={photo.url} 
+                alt={photo.title} 
+                loading="lazy" 
+                onError={(e) => {
+                  e.target.src = 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1762121162/uiupc_HeroSlider3_wrpuvz.jpg';
+                }}
+              />
               <div className="showcase-overlay">
                 <h4>{photo.title}</h4>
                 <p>By {photo.photographerName}</p>
@@ -27,7 +36,7 @@ const PhotoShowcase = ({ photos }) => {
         </div>
         
         <div className="showcase-actions">
-          <Link to="/gallery" className="btn-primary">View Full Gallery</Link>
+          <Link href="/gallery" className="btn-primary">View Full Gallery</Link>
         </div>
       </div>
     </section>

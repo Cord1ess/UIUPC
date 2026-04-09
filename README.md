@@ -1,55 +1,58 @@
-# UIUPC Administrative Dashboard
+# UIU Photography Club (Next.js 15)
 
-A high-performance administrative and public-facing portal for the UIU Photography Club. This system facilitates photo submissions, member management, and event exhibitions through a secure, modular architecture.
+A high-performance administrative and public-facing portal for the UIU Photography Club, recently migrated to **Next.js 15 (App Router)** for enhanced performance, SEO, and developer experience.
 
-## Core Features
+## Recent Migration (Next.js 15)
 
-- Photo Submission Engine: Streamlined multi-file upload with progress tracking and submission windows.
-- Dynamic Gallery: Real-time photo exhibitions with automated state-driven filtering and pagination.
-- Admin Central: Secure management hub for membership applications, blog posts, and exhibition results.
-- Automated Results Publishing: Direct integration between Google Sheets and the public-facing results portal.
+We have successfully migrated the legacy Create React App (CRA) codebase to Next.js 15. Key improvements include:
+- **App Router Architecture**: Leverages modern React Server Components and nested layouts for efficient routing.
+- **Improved SEO**: Dynamic metadata implementation for all public routes (Gallery, Blog, Events, etc.).
+- **Enhanced Performance**: Native Next.js image optimization and Turbopack for lightning-fast development.
+- **Standardized Configuration**: Environment variables have been unified under the `NEXT_PUBLIC_` prefix for unified client/server access.
+- **Robust Image Handling**: Implemented custom error-handling and fallback logic across the entire platform to handle Cloudinary asset availability gracefully.
 
-## Technical Architecture
+## Technical Stack
 
-- Frontend: React 18 with modern functional hooks and Context API for global state management.
-- Backend Integration: Google Apps Script (GAS) acting as a serverless middleware between the frontend and Google-based data storage (Sheets/Drive).
-- Database & Auth: Firebase Authentication and Cloud Firestore for high-speed administrative data access.
-- Styling: Centralized vanilla CSS design tokens for consistent brand identity across all pages.
-
-## Performance Optimization
-
-- Route-Based Lazy Loading: Comprehensive implementation of React.lazy for all primary pages to minimize initial bundle size.
-- Resource Management: Deferral of off-screen images using native browser lazy loading for high-bandwidth galleries.
-- Bundle Reduction: Removal of hardcoded mock data in favor of dynamic API-driven state.
-- CSS Normalization: Elimination of redundant design tokens and variable blocks to ensure efficient style inheritance.
-
-## Security Standards
-
-- Environment Isolation: Critical API endpoints and service credentials are managed strictly through environment variables.
-- Log Auditing: All production debug logs and sensitive data footprints have been stripped from the client-side bundle.
-- Access Control: Multi-level administrative protection via Firebase Auth and protected route wrappers.
+- **Framework**: Next.js 15 (App Router), TypeScript
+- **Authentication**: Firebase Auth (with AuthContext provider)
+- **Database**: Cloud Firestore
+- **Backend Middleware**: Google Apps Script (GAS) integration for Sheets/Drive management.
+- **Media**: Cloudinary
+- **Animations**: Framer Motion
+- **Styling**: Vanilla CSS (modular design tokens)
 
 ## Getting Started
 
 ### Prerequisites
-
-- Node.js (v16.x or higher)
-- npm or yarn
+- Node.js 18.x or higher
+- npm / yarn / pnpm
 
 ### Installation
 
 1. Install dependencies:
+   ```bash
    npm install
+   ```
 
-2. Start the development server:
-   npm start
+2. Configure Environment Variables:
+   Create a `.env.local` file based on the provided template and ensure all `NEXT_PUBLIC_` variables are set.
 
-3. Build for production:
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Build for production:
+   ```bash
    npm run build
+   ```
 
-## Deployment
-
-The application is optimized for deployment on Vercel or Netlify. Ensure all environment variables listed in .env.local are configured in your hosting provider's dashboard.
+## Admin Panel
+Authorized administrators can access the management hub at `/admin` after logging in via `/login`. The panel provides controls for:
+- Membership Application Management
+- Shutter Stories (Photo) Submissions
+- Gallery & Blog publishing
+- Results & Payments tracking
 
 ---
-Copyright (c) 2026 UIU Photography Club. All rights reserved.
+© 2026 UIU Photography Club. All rights reserved.

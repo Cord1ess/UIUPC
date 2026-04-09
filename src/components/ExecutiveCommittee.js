@@ -1,3 +1,4 @@
+"use client";
 // components/ExecutiveCommittee.js
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {

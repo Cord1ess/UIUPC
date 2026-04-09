@@ -1,3 +1,4 @@
+"use client";
 // components/MemberCard.js
 import React from 'react';
 import './MemberCard.css';
@@ -23,6 +24,10 @@ const MemberCard = ({ member, index }) => {
     { platform: 'github', url: member.github }
   ].filter(link => link.url);
 
+  const handleImageError = (e) => {
+    e.target.src = 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1762121162/uiupc_HeroSlider3_wrpuvz.jpg'; // Consistent fallback
+  };
+
   return (
     <div 
       className="member-card"
@@ -30,9 +35,10 @@ const MemberCard = ({ member, index }) => {
     >
       <div className="member-image">
         <img 
-          src={member.profileImage || '/default-avatar.png'} 
+          src={member.profileImage || 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1762121162/uiupc_HeroSlider3_wrpuvz.jpg'} 
           alt={member.name}
           loading="lazy"
+          onError={handleImageError}
         />
         {member.role === 'President' && (
           <span className="role-badge president">President</span>

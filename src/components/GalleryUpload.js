@@ -1,3 +1,4 @@
+"use client";
 // components/GalleryUpload.js
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaUpload, FaSync, FaTimes, FaImages, FaCalendar, FaUser, FaEye, FaEdit, FaTrash, FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";

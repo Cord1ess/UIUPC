@@ -1,65 +1,33 @@
-// Loading.js
+// components/Loading.js
+"use client";
+
 import React from 'react';
 import './Loading.css';
 
 const Loading = () => {
   return (
     <div className="loading-container">
-      <div className="camera-loader">
-        {/* Camera Body */}
-        <div className="camera-body">
+      <div className="loading-content">
+        <div className="loading-spinner">
+          <div className="spinner-outer"></div>
+          <div className="spinner-inner"></div>
           <div className="camera-lens">
-            <div className="lens-inner">
-              <div className="lens-reflection"></div>
-            </div>
-          </div>
-          <div className="flash"></div>
-          <div className="shutter-button"></div>
-          <div className="flash-effect"></div>
-        </div>
-        
-        {/* Shutter Sound Indicator */}
-        <div className="shutter-sound">📸 *click*</div>
-        
-        {/* Film Strip */}
-        <div className="film-strip">
-          <div className="film-frame">
-            <div className="film-perforation">
-              <div className="perf"></div>
-              <div className="perf"></div>
-              <div className="perf"></div>
-              <div className="perf"></div>
-            </div>
-          </div>
-          <div className="film-frame">
-            <div className="film-perforation">
-              <div className="perf"></div>
-              <div className="perf"></div>
-              <div className="perf"></div>
-              <div className="perf"></div>
-            </div>
-          </div>
-          <div className="film-frame">
-            <div className="film-perforation">
-              <div className="perf"></div>
-              <div className="perf"></div>
-              <div className="perf"></div>
-              <div className="perf"></div>
-            </div>
-          </div>
-          <div className="film-frame">
-            <div className="film-perforation">
-              <div className="perf"></div>
-              <div className="perf"></div>
-              <div className="perf"></div>
-              <div className="perf"></div>
-            </div>
+            <div className="lens-outline"></div>
+            <div className="lens-shutter"></div>
           </div>
         </div>
-        
-        {/* Loading Text */}
-        <div className="loading-text">UIU Photography Club</div>
-        <div className="capturing-text">Capturing moments...</div>
+        <div className="loading-text">
+          <span className="loading-letter">L</span>
+          <span className="loading-letter">O</span>
+          <span className="loading-letter">A</span>
+          <span className="loading-letter">D</span>
+          <span className="loading-letter">I</span>
+          <span className="loading-letter">N</span>
+          <span className="loading-letter">G</span>
+        </div>
+        <div className="loading-bar-container">
+          <div className="loading-bar"></div>
+        </div>
       </div>
     </div>
   );

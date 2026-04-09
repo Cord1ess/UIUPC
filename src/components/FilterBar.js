@@ -1,3 +1,4 @@
+"use client";
 // components/FilterBar.js
 import React from 'react';
 import './FilterBar.css';
