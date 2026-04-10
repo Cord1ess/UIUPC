@@ -28,16 +28,54 @@ import {
   FaFacebook,
 } from "react-icons/fa";
 import { useSubmissionStatus } from "@/hooks/useSubmissionStatus";
+import { useRegistrationForm } from "@/hooks/useRegistrationForm";
 import "./Join.css";
 
+const departments = [
+  "Computer Science & Engineering",
+  "Electrical & Electronic Engineering",
+  "BBA",
+  "BBA in AIS",
+  "Economics",
+  "Data Science",
+  "English",
+  "Pharmacy",
+  "Civil",
+  "EDS",
+  "MSJ",
+  "Others",
+];
+
+const photographyInterests = [
+  "Portrait Photography",
+  "Landscape Photography",
+  "Street Photography",
+  "Wildlife Photography",
+  "Sports Photography",
+  "Event Photography",
+  "Macro Photography",
+  "Night Photography",
+  "Architectural Photography",
+  "Fashion Photography",
+];
+
+const experienceLevels = [
+  "Beginner",
+  "Intermediate",
+  "Advanced",
+  "Professional",
+];
+
+const paymentMethods = [
+  { value: "cash", label: "Cash Payment", icon: FaMoneyBillWave },
+  { value: "online", label: "Online Payment", icon: FaCreditCard },
+];
+
 const JoinPage = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null);
-  const [submitMessage, setSubmitMessage] = useState("");
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [showRulesPopup, setShowRulesPopup] = useState(false); 
-  const [agreementAccepted, setAgreementAccepted] = useState(false); 
-  const [formData, setFormData] = useState({
+  const GOOGLE_SCRIPT_URL = process.env.NEXT_PUBLIC_GAS_JOIN || "";
+  const { status: joinStatus } = useSubmissionStatus(GOOGLE_SCRIPT_URL, "getJoinPageStatus");
+
+  const initialFormData = {
     name: "",
     studentId: "",
     email: "",
@@ -50,214 +88,29 @@ const JoinPage = () => {
     receiverName: "",
     transactionId: "",
     facebookLink: "",
-  });
-  const [photo, setPhoto] = useState<File | null>(null);
-
-  const GOOGLE_SCRIPT_URL = process.env.NEXT_PUBLIC_GAS_JOIN || "";
-
-  const { status: joinStatus } = useSubmissionStatus(GOOGLE_SCRIPT_URL, "getJoinPageStatus");
-
-  const departments = [
-    "Computer Science & Engineering",
-    "Electrical & Electronic Engineering",
-    "BBA",
-    "BBA in AIS",
-    "Economics",
-    "Data Science",
-    "English",
-    "Pharmacy",
-    "Civil",
-    "EDS",
-    "MSJ",
-    "Others",
-  ];
-
-  const photographyInterests = [
-    "Portrait Photography",
-    "Landscape Photography",
-    "Street Photography",
-    "Wildlife Photography",
-    "Sports Photography",
-    "Event Photography",
-    "Macro Photography",
-    "Night Photography",
-    "Architectural Photography",
-    "Fashion Photography",
-  ];
-
-  const experienceLevels = [
-    "Beginner",
-    "Intermediate",
-    "Advanced",
-    "Professional",
-  ];
-
-  const paymentMethods = [
-    { value: "cash", label: "Cash Payment", icon: FaMoneyBillWave },
-    { value: "online", label: "Online Payment", icon: FaCreditCard },
-  ];
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
   };
 
-  const handlePaymentMethodChange = (method: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      paymentMethod: method,
-      receiverName: "",
-      transactionId: "",
-    }));
-  };
+  const {
+    formData,
+    setFormData,
+    isSubmitting,
+    submitStatus,
+    submitMessage,
+    showSuccessPopup,
+    setShowSuccessPopup,
+    showRulesPopup,
+    setShowRulesPopup,
+    agreementAccepted,
+    setAgreementAccepted,
+    handleInputChange,
+    handlePaymentMethodChange,
+    handlePhotoChange,
+    handleInitialSubmit,
+    handleFinalSubmit,
+  } = useRegistrationForm(initialFormData, GOOGLE_SCRIPT_URL);
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith("image/")) {
-        alert("Please select an image file");
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Please select an image smaller than 5MB");
-        return;
-      }
-      setPhoto(file);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (joinStatus !== "enabled") {
-      setSubmitStatus("error");
-      setSubmitMessage(
-        "Membership applications are currently disabled. Please check back later or contact the photography club for more information."
-      );
-      return;
-    }
-    setShowRulesPopup(true);
-  };
-
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
-  const handleFinalSubmit = async () => {
-    if (!agreementAccepted) {
-      alert("Please accept the membership agreement to continue.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setSubmitStatus(null);
-    setShowRulesPopup(false);
-
-    if (formData.paymentMethod === "cash" && !formData.receiverName) {
-      setSubmitStatus("error");
-      setSubmitMessage("Please enter the receiver name for cash payment.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (formData.paymentMethod === "online" && !formData.transactionId) {
-      setSubmitStatus("error");
-      setSubmitMessage("Please enter the transaction ID for online payment.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      let photoData = null;
-      let photoName = null;
-      let photoType = null;
-
-      if (photo) {
-        photoData = await convertToBase64(photo);
-        photoName = photo.name;
-        photoType = photo.type;
-      }
-
-      const submissionData = new URLSearchParams();
-      Object.keys(formData).forEach((key) => {
-        if ((formData as any)[key]) {
-          submissionData.append(key, (formData as any)[key]);
-        }
-      });
-
-      if (photoData) {
-        submissionData.append("photoData", photoData);
-        submissionData.append("photoName", photoName || "");
-        submissionData.append("photoType", photoType || "");
-      }
-
-      submissionData.append("agreementAccepted", "true");
-      submissionData.append("timestamp", new Date().toISOString());
-
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        },
-        body: submissionData.toString(),
-      });
-
-      try {
-        const firestoreDoc: any = {
-          ...formData,
-          agreementAccepted: true,
-          timestamp: new Date().toISOString(),
-          type: "membership"
-        };
-        if (photoData) {
-          firestoreDoc.photoData = photoData;
-          firestoreDoc.photoName = photoName;
-          firestoreDoc.photoType = photoType;
-        }
-        await addDoc(collection(db, "membershipApplications"), firestoreDoc);
-      } catch (fbError) {
-        console.error("Firestore sync error:", fbError);
-      }
-
-      const result = await response.json();
-
-      if (response.ok && result.status === "success") {
-        setIsSubmitting(false);
-        setSubmitStatus("success");
-        setSubmitMessage("Thank you for your application! We will review it and get back to you soon.");
-        setShowSuccessPopup(true);
-        setFormData({
-            name: "",
-            studentId: "",
-            email: "",
-            department: "",
-            phone: "",
-            interests: "",
-            experience: "",
-            message: "",
-            paymentMethod: "",
-            receiverName: "",
-            transactionId: "",
-            facebookLink: "",
-        });
-        setPhoto(null);
-        setAgreementAccepted(false);
-      } else {
-        throw new Error(result.message || "Failed to submit application");
-      }
-    } catch (error: any) {
-      console.error("Submission error:", error);
-      setIsSubmitting(false);
-      setSubmitStatus("error");
-      setSubmitMessage("Sorry, there was an error submitting your application. Please try again.");
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    handleInitialSubmit(e, joinStatus === "enabled");
   };
 
   return (

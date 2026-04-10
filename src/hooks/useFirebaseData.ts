@@ -10,7 +10,7 @@ export interface Photo {
   [key: string]: any;
 }
 
-export interface Event {
+export interface UIUPCEvent {
   id: string;
   title: string;
   date: string;
@@ -28,12 +28,12 @@ const fetchFeaturedPhotos = async (): Promise<Photo[]> => {
   })) as Photo[];
 };
 
-const fetchUpcomingEvents = async (): Promise<Event[]> => {
+const fetchUpcomingEvents = async (): Promise<UIUPCEvent[]> => {
   const querySnapshot = await getDocs(collection(db, "events"));
   const eventsData = querySnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
-  })) as Event[];
+  })) as UIUPCEvent[];
   
   return eventsData
     .filter((event) => new Date(event.date) >= new Date())
@@ -49,7 +49,7 @@ export const useFeaturedPhotos = () => {
 };
 
 export const useUpcomingEvents = () => {
-  const { data, error, isLoading } = useSWR<Event[]>("upcomingEvents", fetchUpcomingEvents, {
+  const { data, error, isLoading } = useSWR<UIUPCEvent[]>("upcomingEvents", fetchUpcomingEvents, {
     revalidateOnFocus: false,
     dedupingInterval: 60000,
   });

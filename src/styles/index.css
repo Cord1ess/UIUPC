@@ -1,46 +1,44 @@
-:root {
-  /* Brand Colors */
-  --uiu-orange: #FF6B00;
-  --uiu-orange-light: #FF8C42;
-  --uiu-orange-dark: #E55A00;
-  --white: #FFFFFF;
-  --black: #1A1A1A;
-  --gray-light: #F5F5F5;
-  --gray: #E0E0E0;
-  --gray-dark: #757575;
+@import "tailwindcss";
 
-  /* Dark Theme Tokens */
-  --dark-gray: #1E1E1E;
-  --medium-gray: #2D2D2D;
-  --light-gray: #3A3A3A;
-  --text-light: #E0E0E0;
-  --text-muted: #e4e0e0;
-
-  /* Shadows */
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --shadow-orange: 0 4px 20px rgba(255, 107, 0, 0.3);
-
-  /* Glass Effects */
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
-  --neon-glow: 0 0 10px rgba(255, 107, 53, 0.7), 0 0 20px rgba(255, 107, 53, 0.5), 0 0 30px rgba(255, 107, 53, 0.3);
+@theme {
+  --color-uiupc-orange: #f58920;
+  --color-uiupc-white: #f9f5ea;
+  --color-uiupc-navy-deep: #0b1422;
+  --color-uiupc-navy-light: #0e2d4c;
+  
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer utilities {
+  .bg-grid-giant {
+    background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='0' y1='0' x2='0' y2='200' stroke='rgba(0,0,0,0.06)' stroke-width='1' /%3E%3Cline x1='0' y1='0' x2='200' y2='0' stroke='rgba(0,0,0,0.06)' stroke-width='1' /%3E%3Cpath d='M-5,0 h10 M0,-5 v10' stroke='%23f58920' stroke-width='1.5' /%3E%3Cpath d='M195,0 h10 M200,-5 v10' stroke='%23f58920' stroke-width='1.5' /%3E%3Cpath d='M-5,200 h10 M0,195 v10' stroke='%23f58920' stroke-width='1.5' /%3E%3Cpath d='M195,200 h10 M200,195 v10' stroke='%23f58920' stroke-width='1.5' /%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
 }
 
-body {
-  font-family: 'Poppins', sans-serif;
-  line-height: 1.6;
-  color: var(--black);
-  background-color: var(--white);
-}
+@layer base {
+  :root {
+    --uiu-orange: #f58920;
+    --white: #f9f5ea;
+    --black: #1A1A1A;
+  }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans bg-uiupc-white text-black;
+    line-height: 1.6;
+    padding-top: 80px;
+  }
+
+  main {
+    @apply min-h-screen flex flex-col;
+  }
+
+  /* Resetting margins for a cleaner look */
+  h1, h2, h3, h4, h5, h6, p {
+    margin: 0;
+  }
 }

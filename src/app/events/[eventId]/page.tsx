@@ -87,7 +87,6 @@ const EventDetail = () => {
         phone: "+8801783503006",
         coordinator: "Md Zobayer Ahmed",
       },
-      registrationLink: "/join",
     },
   };
 

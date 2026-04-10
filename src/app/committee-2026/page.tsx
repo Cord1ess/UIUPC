@@ -186,7 +186,7 @@ const Committee2026 = () => {
   };
 
   const handleImageError = (e: any) => {
-    e.target.src = 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1762121162/uiupc_HeroSlider3_wrpuvz.jpg'; // Consistent fallback
+    e.target.src = 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg'; // Consistent fallback
   };
 
   const CommitteeCard = ({ member, onClick }: { member: any, onClick: any }) => (
@@ -201,7 +201,7 @@ const Committee2026 = () => {
     >
       <div className="committee-card-image">
         <img 
-          src={member.profileImage || 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1762121162/uiupc_HeroSlider3_wrpuvz.jpg'} 
+          src={member.profileImage || 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg'} 
           alt={member.name} 
           onError={handleImageError}
           loading="lazy"

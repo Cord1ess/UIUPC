@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Inter } from "next/font/google";
 import "../styles/index.css";
-import "../styles/App.css";
 
-const poppins = Poppins({
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-poppins",
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -17,6 +15,7 @@ export const metadata: Metadata = {
 import { AuthProvider } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import GlobalLoader from "@/components/common/GlobalLoader";
 
 export default function RootLayout({
   children,
@@ -25,8 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} font-sans`}>
+      <body className={`${inter.variable} font-sans`}>
         <AuthProvider>
+          <GlobalLoader />
           <Navbar />
           <main>{children}</main>
           <Footer />
