@@ -10,10 +10,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "UIU Photography Club",
   description: "Official website of United International University Photography Club (UIUPC)",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 import { AuthProvider } from "@/contexts/AuthContext";
-import Navbar from "@/components/layout/Navbar";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import GlobalLoader from "@/components/common/GlobalLoader";
 
@@ -24,13 +28,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans`}>
-        <AuthProvider>
-          <GlobalLoader />
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
-        </AuthProvider>
+      <body className={`${inter.variable} font-sans transition-colors duration-300`}>
+        <ThemeProvider>
+          <AuthProvider>
+            <GlobalLoader />
+            <Header />
+            <main>{children}</main>
+            <Footer />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

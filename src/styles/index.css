@@ -16,6 +16,29 @@
   }
 }
 
+/* ── Header Animations ─────────────────────────────── */
+@keyframes header-expand {
+  0% {
+    transform: scaleX(0.06);
+    opacity: 0;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes header-item-in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @layer base {
   :root {
     --uiu-orange: #f58920;
@@ -28,16 +51,18 @@
   }
 
   body {
-    @apply font-sans bg-uiupc-white text-black;
+    @apply font-sans bg-[#f9f5ea] text-[#1A1A1A] transition-colors duration-300;
     line-height: 1.6;
-    padding-top: 80px;
+  }
+
+  .dark body {
+    @apply bg-[#0D0D0D] text-white;
   }
 
   main {
     @apply min-h-screen flex flex-col;
   }
 
-  /* Resetting margins for a cleaner look */
   h1, h2, h3, h4, h5, h6, p {
     margin: 0;
   }

@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { FaArrowRight } from "react-icons/fa";
-import myLogo from "@/assets/logo.jpg";
+import myLogo from "@/assets/UIUPC Logo.svg";
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -22,7 +22,7 @@ const Footer: React.FC = () => {
           {/* Brand Section */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-6 mb-8 group">
-              <div className="w-14 h-14 border border-black/10 p-1 bg-white transition-all group-hover:border-uiupc-orange">
+              <div className="w-14 h-14 border border-black/10 p-1 bg-white transition-all group-hover:border-uiupc-orange rounded-md">
                 <img src={myLogo.src} alt="UIUPC Logo" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">

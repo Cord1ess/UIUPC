@@ -20,10 +20,8 @@ const Home = () => {
       <div className="absolute inset-0 bg-grid-giant opacity-[0.03] pointer-events-none z-0" />
       
       <div className="relative z-10 flex flex-col">
-        {/* Phase 1: New Complex Hero (Placeholder) */}
-        <ModernHero />
+          <ModernHero />
 
-        {/* Phase 2: Secondary Hero / Carousel Section */}
         <section className="w-full border-b border-black/10">
           <HeroSlider />
         </section>
