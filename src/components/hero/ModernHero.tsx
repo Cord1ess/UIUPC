@@ -18,11 +18,13 @@
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import GridCanvas from "./GridCanvas";
+import { motion } from "framer-motion";
+import DynamicGrid from "../ui/DynamicGrid";
 import ImagePreviewModal from "./ImagePreviewModal";
 import { useLoaderStore } from "@/store/useLoaderStore";
 import { useTimelineEngine } from "./hooks/useTimelineEngine";
 import { useInteractionSystem } from "./hooks/useInteractionSystem";
+import ScrollRevealText from "../home/ScrollRevealText";
 import { IMAGE_WIDTH, IMAGE_HEIGHT, getCloudinaryUrl, failedUrls, type HeroImage } from "./utils/constants";
 
 const ModernHero: React.FC = () => {
@@ -185,16 +187,26 @@ const ModernHero: React.FC = () => {
   return (
     <section
       ref={containerRef}
-      className="relative w-full h-screen overflow-hidden select-none"
+      className="relative w-full h-[110vh] overflow-hidden select-none bg-transparent"
       onPointerDown={onPointerDown}
       style={{ cursor: "grab", touchAction: "none" }}
     >
-      {/* Background Grid */}
-      <GridCanvas phase={phase} gridOffset={gridOffset.current} />
+      {/* Dynamic Background Bulge Lens — Warps the grid underneath */}
+      <div 
+        className="absolute inset-0 z-0 pointer-events-none transition-transform duration-1000 ease-out"
+        style={{
+          maskImage: "radial-gradient(ellipse at 50% 50%, black 0%, transparent 60%)",
+          WebkitMaskImage: "radial-gradient(ellipse at 50% 50%, black 0%, transparent 60%)",
+          transform: "scale(1.1)", // Creates the dimensional bulging effect
+          opacity: 0.9
+        }}
+      >
+        <DynamicGrid isLens={true} />
+      </div>
 
       {/* Image Stream — rendered once, updated via refs */}
       <div 
-        className={`absolute inset-0 z-10 pointer-events-none transition-opacity duration-700`}
+        className={`absolute inset-0 z-10 pointer-events-none transition-opacity duration-700 py-20`}
       >
         {imagePool.map((image, index) => (
           <div
@@ -234,41 +246,76 @@ const ModernHero: React.FC = () => {
         ))}
       </div>
 
-      {/* Bottom-Left Text Overlay — SMALLER */}
-      <div className="absolute bottom-8 left-8 md:bottom-12 md:left-14 z-30 max-w-sm pointer-events-auto">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-[1px] bg-black/20" />
-          <span className="text-[8px] font-black text-black/30 uppercase tracking-[0.3em]">
-            Selected Work &bull; 2005 &mdash; 2026
+      {/* Bottom-Left Text Overlay — REFINED */}
+      <div className="absolute bottom-12 left-8 md:bottom-20 md:left-14 z-30 max-w-4xl pointer-events-auto">
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1.2 }}
+          className="flex items-center gap-2 mb-2"
+        >
+          <div className="w-6 h-[1px] bg-uiupc-orange" />
+          <span className="text-[8px] font-black text-zinc-900 dark:text-zinc-400 uppercase tracking-[0.4em]">
+            Established 2005
           </span>
+          <div className="w-6 h-[1px] bg-uiupc-orange" />
+        </motion.div>
+
+        <div className="mb-3">
+          <div className="overflow-visible">
+            <ScrollRevealText 
+              text="Welcome to"
+              delayOffset={1.6}
+              className="text-2xl md:text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-tight"
+            />
+          </div>
+          <div className="overflow-visible">
+            <ScrollRevealText 
+              text="UIU Photography Club"
+              delayOffset={2.0}
+              className="text-2xl md:text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-tight"
+            />
+          </div>
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-black text-black uppercase tracking-tighter leading-[0.9] mb-3">
-          Every Frame,
-          <br />
-          <span className="text-uiupc-orange">Every Story.</span>
-        </h1>
+        <motion.p 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 3.2, duration: 1 }}
+          className="text-zinc-700 dark:text-zinc-400 text-[10px] md:text-xs font-medium leading-relaxed mb-6 max-w-sm"
+        >
+          We are a community of passionate photographers at United International University dedicated to exploring the art of photography, sharing knowledge, and capturing campus life.
+        </motion.p>
 
-        <p className="text-black/40 text-xs md:text-sm font-medium leading-relaxed mb-5 max-w-xs">
-          Capturing campus life and creative photography. Drag to explore, click to preview.
-        </p>
-
-        <div className="flex items-center gap-4">
-          <Link
-            href="/join"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white text-[9px] font-black uppercase tracking-widest hover:bg-uiupc-orange transition-colors"
+        <div className="flex items-center gap-5">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 3.2, duration: 0.5 }}
           >
-            Join Club
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
-          <Link
-            href="/gallery"
-            className="text-[9px] font-black text-black/30 uppercase tracking-widest hover:text-black transition-colors"
+            <Link
+              href="/join"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-black dark:bg-zinc-800 text-white text-[9px] font-black uppercase tracking-widest hover:bg-uiupc-orange dark:hover:bg-uiupc-orange transition-all rounded-sm shadow-md hover:-translate-y-0.5"
+            >
+              Join Club
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 3.5 }}
           >
-            Gallery
-          </Link>
+            <Link
+              href="/gallery"
+              className="text-[9px] font-black text-zinc-900 dark:text-zinc-500 uppercase tracking-widest hover:text-uiupc-orange dark:hover:text-white transition-colors"
+            >
+              Gallery
+            </Link>
+          </motion.div>
         </div>
       </div>
 

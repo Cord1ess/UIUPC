@@ -121,8 +121,8 @@ const Header: React.FC = memo(() => {
               <span className={`text-2xl font-black uppercase tracking-tighter transition-colors duration-300 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
                 UIUPC
               </span>
-              <span className="text-uiupc-orange text-[7px] font-bold uppercase tracking-[0.14em] whitespace-nowrap">
-                UIU Photography Club
+              <span className="text-uiupc-orange text-[8px] font-bold uppercase tracking-[0.12em] whitespace-nowrap">
+                UIU <span className="font-serif italic normal-case text-[10px] tracking-normal px-0.5">Photography</span> Club
               </span>
             </div>
           </Link>

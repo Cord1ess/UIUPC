@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "../styles/index.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
+// Import Variable Fonts from Fontsource
+import "@fontsource-variable/dm-sans";
+import "@fontsource-variable/playfair-display";
 
 export const metadata: Metadata = {
   title: "UIU Photography Club",
@@ -20,16 +17,22 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import GlobalLoader from "@/components/common/GlobalLoader";
+import DynamicGrid from "@/components/ui/DynamicGrid";
+import { cookies } from "next/headers";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const theme = cookieStore.get("theme")?.value || "light";
+
   return (
-    <html lang="en">
-      <body className={`${inter.variable} font-sans transition-colors duration-300`}>
+    <html lang="en" className={theme === "dark" ? "dark" : ""} suppressHydrationWarning>
+      <body className="font-sans antialiased transition-colors duration-300 relative min-h-screen">
         <ThemeProvider>
+          <DynamicGrid />
           <AuthProvider>
             <GlobalLoader />
             <Header />

@@ -1,6 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface Slide {
   id: number;
@@ -15,10 +18,12 @@ interface Slide {
 
 const HeroSlider: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const { theme } = useTheme();
+  
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const slideTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const slideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Local slides data
   const localSlides: Slide[] = useMemo(() => [
     {
       id: 1,
@@ -67,124 +72,139 @@ const HeroSlider: React.FC = () => {
     },
   ], []);
 
-  const startSlideTimer = (duration: number) => {
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % localSlides.length);
+  }, [localSlides.length]);
+
+  const startSlideTimer = useCallback((duration: number) => {
     if (slideTimerRef.current) clearTimeout(slideTimerRef.current);
-    slideTimerRef.current = setTimeout(() => {
-      setCurrentSlide((prev) => (prev + 1) % localSlides.length);
-    }, duration);
-  };
+    if (!isHovered) {
+      slideTimerRef.current = setTimeout(nextSlide, duration);
+    }
+  }, [isHovered, nextSlide]);
 
   useEffect(() => {
-    const currentSlideData = localSlides[currentSlide];
-    if (currentSlideData.type === "image") startSlideTimer(currentSlideData.duration);
-    localSlides.forEach((slide, index) => {
-      const videoRef = videoRefs.current[index];
-      if (videoRef) {
-        if (index === currentSlide && slide.type === "video") {
-          videoRef.currentTime = 0;
-          videoRef.play().catch(() => startSlideTimer(slide.duration));
+    const slide = localSlides[currentSlide];
+    
+    // Video handling
+    const videos = videoRefs.current;
+    videos.forEach((v, i) => {
+      if (v) {
+        if (i === currentSlide && slide.type === "video") {
+          v.currentTime = 0;
+          v.play().catch(() => startSlideTimer(slide.duration));
         } else {
-          videoRef.pause();
-          videoRef.currentTime = 0;
+          v.pause();
         }
       }
     });
 
-    return () => { if (slideTimerRef.current) clearTimeout(slideTimerRef.current); };
-  }, [currentSlide, localSlides]);
-
-  const handleVideoEnd = () => setCurrentSlide((prev) => (prev + 1) % localSlides.length);
-
-  const addVideoRef = (el: HTMLVideoElement | null, index: number) => {
-    if (el) {
-      videoRefs.current[index] = el;
-      el.addEventListener("ended", handleVideoEnd);
+    if (slide.type === "image") {
+      startSlideTimer(slide.duration);
     }
-  };
 
-  const handleManualSlideChange = (index: number) => {
+    return () => {
+      if (slideTimerRef.current) clearTimeout(slideTimerRef.current);
+    };
+  }, [currentSlide, localSlides, startSlideTimer]);
+
+  const handleManualChange = (index: number) => {
     if (slideTimerRef.current) clearTimeout(slideTimerRef.current);
     setCurrentSlide(index);
   };
 
-  useEffect(() => {
-    const refs = videoRefs.current;
-    return () => {
-      refs.forEach((videoRef) => { if (videoRef) videoRef.removeEventListener("ended", handleVideoEnd); });
-      if (slideTimerRef.current) clearTimeout(slideTimerRef.current);
-    };
-  }, []);
-
   return (
-    <div className="relative h-[600px] md:h-[750px] w-full bg-black overflow-hidden">
-      {localSlides.map((slide, index) => (
-        <div
-          key={slide.id}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
-          }`}
+    <div 
+      className="relative w-full h-[500px] md:h-[650px] overflow-hidden group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentSlide}
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.98 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute inset-0"
         >
-          {slide.type === "image" ? (
-            <img 
-              src={slide.imageUrl} 
-              alt={slide.title} 
-              className="w-full h-full object-cover opacity-80"
-              onError={(e) => {
-                e.currentTarget.src = 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg';
-              }}
+          {localSlides[currentSlide].type === "image" ? (
+            <motion.img
+              src={localSlides[currentSlide].imageUrl}
+              alt=""
+              className="w-full h-full object-cover"
+              initial={{ scale: 1.1 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 10, ease: "linear" }}
             />
           ) : (
             <video
-              ref={(el) => addVideoRef(el, index)}
-              className="w-full h-full object-cover opacity-70"
+              ref={(el) => { videoRefs.current[currentSlide] = el; }}
+              onEnded={nextSlide}
+              className="w-full h-full object-cover"
               muted
               playsInline
+              autoPlay
             >
-              <source src={slide.videoUrl} type="video/mp4" />
+              <source src={localSlides[currentSlide].videoUrl} type="video/mp4" />
             </video>
           )}
 
-          <div className="absolute inset-0 bg-black/40 z-10" />
-          
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-20">
-            <h1 className={`text-white text-4xl md:text-7xl font-black uppercase tracking-tighter mb-4 transition-all duration-700 delay-300 ${
-              index === currentSlide ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-            }`}>
-              {slide.title}
-            </h1>
-            <p className={`text-uiupc-orange text-sm md:text-base font-black uppercase tracking-[0.4em] mb-12 transition-all duration-700 delay-500 ${
-              index === currentSlide ? "opacity-100" : "opacity-0"
-            }`}>
-              {slide.subtitle}
-            </p>
-            <div className={`transition-all duration-700 delay-700 ${
-               index === currentSlide ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-            }`}>
-              <a 
-                href={slide.eventLink} 
-                className="inline-flex px-10 py-4 bg-transparent text-white text-xs font-black uppercase tracking-widest border-2 border-white transition-all hover:bg-white hover:text-black"
-              >
-                View Details
-              </a>
-            </div>
-          </div>
-        </div>
-      ))}
+          {/* Minimalist Bottom Gradient for text readability */}
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
 
-      {localSlides.length > 1 && (
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-30">
-          {localSlides.map((_, index) => (
-            <button
-              key={index}
-              className={`h-1 transition-all duration-500 ${
-                index === currentSlide ? "bg-uiupc-orange w-12" : "bg-white/20 w-8 hover:bg-white/40"
-              }`}
-              onClick={() => handleManualSlideChange(index)}
-              aria-label={`Go to slide ${index + 1}`}
+          {/* Content Overlay */}
+          <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-20 z-20">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="max-w-4xl"
+            >
+              <span className="text-uiupc-orange text-[10px] md:text-sm font-black uppercase tracking-[0.4em] mb-4 block">
+                {localSlides[currentSlide].subtitle}
+              </span>
+              <h2 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter mb-8 leading-[0.9]">
+                {localSlides[currentSlide].title.split(' ').map((word, i, arr) => (
+                  <React.Fragment key={i}>
+                    <span className={i === arr.length - 1 ? "font-serif italic font-normal normal-case tracking-normal" : ""}>
+                      {word}
+                    </span>
+                    {i < arr.length - 1 && ' '}
+                  </React.Fragment>
+                ))}
+              </h2>
+              <Link
+                href={localSlides[currentSlide].eventLink}
+                className={`inline-flex items-center px-8 py-3.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all
+                  ${theme === 'dark' ? 'bg-white text-black hover:bg-neutral-200' : 'bg-white text-black hover:shadow-lg hover:scale-105'}`}
+              >
+                Discover More
+              </Link>
+            </motion.div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Modern Pill Indicators */}
+      <div className="absolute bottom-6 right-8 md:right-20 flex items-center gap-1.5 z-40">
+        {localSlides.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => handleManualChange(index)}
+            className="relative h-4 flex items-center px-1 group/pill"
+            aria-label={`Slide ${index + 1}`}
+          >
+            <div 
+              className={`h-1 rounded-full transition-all duration-500 ease-out
+                ${index === currentSlide 
+                  ? "bg-uiupc-orange w-10 ring-1 ring-uiupc-orange/50 ring-offset-2 ring-offset-black/20" 
+                  : "bg-white/40 w-5 hover:bg-white/60"
+                }`}
             />
-          ))}
-        </div>
-      )}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

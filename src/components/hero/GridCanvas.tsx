@@ -10,6 +10,7 @@
 import React from "react";
 import { GRID_SPACING, GRID_COLOR } from "./utils/constants";
 import type { AnimationPhase } from "./hooks/useTimelineEngine";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface GridCanvasProps {
   phase: AnimationPhase;
@@ -17,19 +18,23 @@ interface GridCanvasProps {
 }
 
 const GridCanvas: React.FC<GridCanvasProps> = ({ phase, gridOffset = { x: 0, y: 0 } }) => {
+  const { theme } = useTheme();
   // Bulge opacity: fades in during transition, 1 during normal
   const bulgeOpacity = phase === "transition" ? 0.5 : 1;
+
+  const bgColor = theme === "dark" ? "#0D0D0D" : "#f9f5ea";
+  const lineColor = theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)";
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       {/* Primary grid */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 transition-colors duration-500"
         style={{
-          backgroundColor: "#ffffff",
+          backgroundColor: bgColor,
           backgroundImage: `
-            linear-gradient(to right, ${GRID_COLOR} 1px, transparent 1px),
-            linear-gradient(to bottom, ${GRID_COLOR} 1px, transparent 1px)
+            linear-gradient(to right, ${lineColor} 1px, transparent 1px),
+            linear-gradient(to bottom, ${lineColor} 1px, transparent 1px)
           `,
           backgroundSize: `${GRID_SPACING}px ${GRID_SPACING}px`,
           backgroundPosition: `${gridOffset.x}px ${gridOffset.y}px`,

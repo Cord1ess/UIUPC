@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaArrowRight, FaClock, FaImage } from 'react-icons/fa';
+import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaArrowRight, FaClock } from 'react-icons/fa';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface EventData {
   id: string | number;
@@ -24,7 +25,7 @@ interface UpcomingEventsProps {
 }
 
 const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
-  const upcomingEvents = events.slice(0, 3);
+  const { theme } = useTheme();
 
   const getStatusColorClasses = (status: string) => {
     switch (status) {
@@ -41,124 +42,118 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'upcoming':
-        return 'Upcoming';
-      case 'ongoing':
-        return 'Ongoing';
-      case 'completed':
-        return 'Completed';
-      default:
-        return status;
+      case 'upcoming': return 'Upcoming';
+      case 'ongoing': return 'Ongoing';
+      case 'completed': return 'Completed';
+      default: return status;
     }
   };
 
-  const getEventImage = (event: EventData) => {
-    if (event.image && event.image.startsWith('http')) {
-      return event.image;
+  const displayEvents = events.length > 0 ? events : [
+    {
+      id: "recruitment-2026",
+      title: "Member Recruitment 2026",
+      subtitle: "Join the Legacy",
+      status: "upcoming",
+      chapter: "Main",
+      date: "May 15, 2026",
+      time: "10:00 AM",
+      location: "UIU Campus",
+      entryFee: "Free",
+      description: "Join United International University Photography Club. Experience the art of capturing moments and become part of our creative family.",
+      image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772526242/Artboard_1-100_u1jtvp.jpg"
+    },
+    {
+      id: "iftar-2026",
+      title: "Iftar e Ziafat",
+      subtitle: "Ramadan Special",
+      status: "upcoming",
+      chapter: "Social",
+      date: "March 20, 2026",
+      time: "05:30 PM",
+      location: "Grand Hall",
+      entryFee: "350 BDT",
+      description: "A special iftar gathering for all members and alumni of UIUPC. Let's share a meal and stories under the evening sky.",
+      image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772527923/Post_air114.jpg"
     }
-    
-    const title = event.title?.toLowerCase() || '';
-    if (title.includes('workshop')) {
-      return 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=800&q=80';
-    } else if (title.includes('exhibition')) {
-      return 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80';
-    } else if (title.includes('shutter')) {
-      return 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1762799836/Blog5_lbkrue.png';
-    } else if (title.includes('iftar')) {
-      return 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1772527923/Post_air114.jpg';
-    } else if (title.includes('member')) {
-      return 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1772526242/Artboard_1-100_u1jtvp.jpg';
-    } else {
-      return 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg';
-    }
-  };
+  ];
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const defaultImages = [
-      'https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg',
-      'https://images.unsplash.com/photo-1563089144-8c600a727265?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=800&q=80'
-    ];
-    const randomImage = defaultImages[Math.floor(Math.random() * defaultImages.length)];
-    (e.target as HTMLImageElement).src = randomImage;
-  };
+  const upcomingEvents = displayEvents.slice(0, 3);
 
   return (
-    <section className="w-full py-12">
+    <div className="w-full">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
         {upcomingEvents.map((event) => (
           <div 
             key={event.id} 
-            className="group relative bg-white border border-black/10 flex flex-col transition-all duration-300 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_rgba(0,0,0,0.1)] hover:border-uiupc-orange"
+            className={`group relative ${theme === 'dark' ? 'bg-black' : 'bg-white'} flex flex-col transition-all duration-300 rounded-slight shadow-m3-1 dark:shadow-none hover:shadow-m3-3 dark:hover:shadow-uiupc-orange/10 hover:-translate-y-1 border ${theme === 'dark' ? 'border-white/5' : 'border-black/5'}`}
           >
             {/* Badges */}
             <div className="absolute top-4 left-4 z-20 flex gap-2">
-              <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-widest ${getStatusColorClasses(event.status || 'upcoming')}`}>
+              <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-widest rounded-md ${getStatusColorClasses(event.status || 'upcoming')}`}>
                 {getStatusText(event.status || 'upcoming')}
               </span>
-              <span className="px-2 py-0.5 bg-black text-white text-[10px] font-black uppercase tracking-widest">
+              <span className="px-2 py-0.5 bg-zinc-900 dark:bg-zinc-800 text-white text-[10px] font-black uppercase tracking-widest rounded-md">
                 {event.chapter || 'Main'}
               </span>
             </div>
 
             {/* Image Section */}
-            <div className="relative h-56 overflow-hidden bg-gray-100">
+            <div className="relative h-56 overflow-hidden bg-zinc-100 dark:bg-zinc-800 rounded-t-slight">
               <img 
-                src={getEventImage(event)} 
+                src={event.image} 
                 alt={event.title}
-                onError={handleImageError}
-                loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-black/20 z-10" />
+              <div className="absolute inset-0 bg-black/10 z-10" />
             </div>
 
             {/* Content Section */}
-            <div className="p-10 flex-1 flex flex-col">
-              <h3 className="text-2xl font-black text-uiupc-orange uppercase tracking-tighter leading-none mb-1 break-words">
+            <div className="p-8 flex-1 flex flex-col">
+              <h3 className={`text-2xl font-black uppercase tracking-tighter leading-tight mb-2 break-all ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
                 {event.title}
               </h3>
-              <p className="text-sm text-gray-400 font-black uppercase tracking-widest mb-4">{event.subtitle || ''}</p>
+              <p className="text-[10px] text-uiupc-orange font-black uppercase tracking-[0.2em] mb-4">{event.subtitle || ''}</p>
 
-              <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 border border-black/5">
+              <div className={`grid grid-cols-2 gap-x-4 gap-y-3 mb-6 p-0 border-t pt-4 ${theme === 'dark' ? 'border-white/5' : 'border-black/5'}`}>
                 <div className="flex gap-2">
-                  <FaCalendarAlt className="text-uiupc-orange mt-1 text-xs" />
+                  <FaCalendarAlt className="text-uiupc-orange mt-1 text-[10px]" />
                   <div>
-                    <span className="block text-[10px] text-gray-400 uppercase font-black tracking-widest">Date</span>
-                    <span className="block text-xs text-black font-black uppercase">{event.date}</span>
+                    <span className={`block text-[8px] uppercase font-bold tracking-widest ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-400'}`}>Date</span>
+                    <span className={`block text-[10px] font-black uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>{event.date}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <FaClock className="text-uiupc-orange mt-1 text-xs" />
+                  <FaClock className="text-uiupc-orange mt-1 text-[10px]" />
                   <div>
-                    <span className="block text-[10px] text-gray-400 uppercase font-black tracking-widest">Time</span>
-                    <span className="block text-xs text-black font-black uppercase">{event.time || 'TBA'}</span>
+                    <span className={`block text-[8px] uppercase font-bold tracking-widest ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-400'}`}>Time</span>
+                    <span className={`block text-[10px] font-black uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>{event.time || 'TBA'}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <FaMapMarkerAlt className="text-uiupc-orange mt-1 text-xs" />
+                  <FaMapMarkerAlt className="text-uiupc-orange mt-1 text-[10px]" />
                   <div>
-                    <span className="block text-[10px] text-gray-400 uppercase font-black tracking-widest">Venue</span>
-                    <span className="block text-xs text-black font-black uppercase truncate max-w-[80px]">{event.location}</span>
+                    <span className={`block text-[8px] uppercase font-bold tracking-widest ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-400'}`}>Venue</span>
+                    <span className={`block text-[10px] font-black uppercase tracking-tighter truncate max-w-[80px] ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>{event.location}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <FaUsers className="text-uiupc-orange mt-1 text-xs" />
+                  <FaUsers className="text-uiupc-orange mt-1 text-[10px]" />
                   <div>
-                    <span className="block text-[10px] text-gray-400 uppercase font-black tracking-widest">Entry</span>
-                    <span className="block text-xs text-black font-black uppercase">{event.entryFee || 'Free'}</span>
+                    <span className={`block text-[8px] uppercase font-bold tracking-widest ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-400'}`}>Entry</span>
+                    <span className={`block text-[10px] font-black uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>{event.entryFee || 'Free'}</span>
                   </div>
                 </div>
               </div>
 
-              <p className="text-gray-600 text-sm mb-6 flex-1 line-clamp-3 font-medium border-l-2 border-uiupc-orange/20 pl-4">
+              <p className={`text-[13px] mb-8 flex-1 line-clamp-2 leading-relaxed ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-600'}`}>
                 {event.description}
               </p>
 
-              <div className="flex gap-4">
+              <div className="flex gap-3">
                 <Link 
                   href={`/events/${event.id}`} 
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest border border-uiupc-orange transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_rgba(0,0,0,0.1)] active:translate-x-0 active:translate-y-0"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-black dark:bg-zinc-800 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm hover:shadow-md transition-all hover:bg-zinc-800 dark:hover:bg-zinc-700"
                 >
                   Details <FaArrowRight />
                 </Link>
@@ -167,7 +162,7 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
                     href={event.registrationLink} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-transparent text-uiupc-orange text-[10px] font-black uppercase tracking-widest border-2 border-uiupc-orange transition-all hover:bg-uiupc-orange hover:text-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_rgba(0,0,0,0.1)] active:translate-x-0 active:translate-y-0"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm hover:shadow-md transition-all hover:brightness-110"
                   >
                     Register
                   </a>
@@ -179,19 +174,19 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
       </div>
       
       {upcomingEvents.length === 0 && (
-        <div className="bg-white border-2 border-black/10 py-16 px-8 text-center">
+        <div className={`bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/10 py-20 px-8 text-center rounded-slight shadow-m3-1 dark:shadow-none`}>
           <div className="text-6xl mb-6 grayscale opacity-20">📸</div>
-          <h3 className="text-3xl font-black text-black uppercase tracking-tighter mb-4">No Upcoming Events</h3>
-          <p className="text-gray-500 font-bold mb-8 max-w-sm mx-auto">Stay tuned for exciting photography events and workshops!</p>
+          <h3 className="text-3xl font-black text-black dark:text-white uppercase tracking-tighter mb-4">No Upcoming Events</h3>
+          <p className="text-gray-500 dark:text-gray-400 font-bold mb-8 max-w-sm mx-auto uppercase text-[10px] tracking-widest">Stay tuned for exciting photography events and workshops!</p>
           <Link 
             href="/events" 
-            className="inline-flex px-8 py-4 border-2 border-uiupc-orange text-uiupc-orange font-black uppercase tracking-widest hover:bg-uiupc-orange hover:text-white transition-all"
+            className="inline-flex px-8 py-4 border-2 border-uiupc-orange text-uiupc-orange font-black uppercase tracking-widest hover:bg-uiupc-orange hover:text-white transition-all rounded-full"
           >
             Browse Past Events
           </Link>
         </div>
       )}
-    </section>
+    </div>
   );
 };
 
