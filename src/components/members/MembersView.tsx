@@ -96,11 +96,11 @@ const MembersView: React.FC<MembersViewProps> = ({ committee2026 }) => {
         </div>
       </section>
 
-      {/* ── ZONE 2: YEAR SELECTOR (Underlined Tabs) ───────────────────── */}
-      <section className="sticky top-24 z-50 mb-12 px-6">
-        <div className="max-w-7xl mx-auto">
+      {/* ── ZONE 2: YEAR SELECTOR (Horizontal Scroll on Mobile) ───────────────────── */}
+      <section className="sticky top-24 z-50 mb-12 px-6 overflow-x-auto no-scrollbar">
+        <div className="max-w-7xl mx-auto min-w-max">
           <div className="flex items-center justify-center border-b border-black/5 dark:border-white/5">
-            <div className="flex gap-8 md:gap-16">
+            <div className="flex gap-8 md:gap-16 px-4">
               {archiveYears.map(year => (
                 <button
                   key={year}
@@ -144,7 +144,7 @@ const MembersView: React.FC<MembersViewProps> = ({ committee2026 }) => {
                   </span>
                 </div>
                 {filteredData && filteredData.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-12">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12">
                     {filteredData.map(m => <MemberCard key={m.id} member={m} />)}
                   </div>
                 ) : (
@@ -181,7 +181,7 @@ const MembersView: React.FC<MembersViewProps> = ({ committee2026 }) => {
                       className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white leading-none"
                     />
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-12">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 md:gap-x-8 gap-y-12">
                     {(activeYear === "2026" ? data2026.core : historyData[activeYear].core).map((m, idx) => (
                       <MemberCard key={m.id} member={m} priority={idx < 5} />
                     ))}
@@ -199,7 +199,7 @@ const MembersView: React.FC<MembersViewProps> = ({ committee2026 }) => {
                           className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white leading-none"
                         />
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-12">
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12">
                         {members.map(m => <MemberCard key={m.id} member={m} />)}
                       </div>
                     </div>
@@ -213,7 +213,7 @@ const MembersView: React.FC<MembersViewProps> = ({ committee2026 }) => {
 
       {/* ── ZONE 4: JOIN CTA ─────────────────────────────────────────── */}
       <section className="mt-40 px-6">
-        <div className="max-w-7xl mx-auto bg-zinc-950 rounded-[3rem] p-12 md:p-24 text-center relative overflow-hidden">
+        <div className="max-w-7xl mx-auto bg-zinc-950 rounded-[2rem] md:rounded-[3rem] p-8 md:p-24 text-center relative overflow-hidden">
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-uiupc-orange via-transparent to-transparent scale-150" />
           </div>

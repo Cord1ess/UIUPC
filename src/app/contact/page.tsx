@@ -1,40 +1,36 @@
-// src/app/contact/page.tsx
 "use client";
 
 import React, { useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FaFacebookF,
   FaInstagram,
   FaYoutube,
   FaLinkedinIn,
   FaEnvelope,
-  FaMapMarkerAlt,
   FaClock,
   FaPaperPlane,
   FaCheck,
   FaExclamationTriangle,
+  FaArrowRight,
 } from "react-icons/fa";
 import emailjs from "emailjs-com";
-import "./Contact.css";
+import ScrollRevealText from "@/components/home/ScrollRevealText";
 
 const ContactPage = () => {
   const form = useRef<HTMLFormElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null);
-  const [submitMessage, setSubmitMessage] = useState("");
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // EmailJS configuration from environment variables
   const EMAIL_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
   const EMAIL_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
   const EMAIL_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!EMAIL_SERVICE_ID || !EMAIL_TEMPLATE_ID || !EMAIL_PUBLIC_KEY) {
       setSubmitStatus("error");
-      setSubmitMessage("Contact form is not configured properly. Please contact us directly via email.");
       return;
     }
 
@@ -43,286 +39,200 @@ const ContactPage = () => {
 
     if (form.current) {
       emailjs
-        .sendForm(
-          EMAIL_SERVICE_ID,
-          EMAIL_TEMPLATE_ID,
-          form.current,
-          EMAIL_PUBLIC_KEY
-        )
+        .sendForm(EMAIL_SERVICE_ID, EMAIL_TEMPLATE_ID, form.current, EMAIL_PUBLIC_KEY)
         .then(() => {
           setIsSubmitting(false);
           setSubmitStatus("success");
-          setSubmitMessage(
-            "Thank you! Your message has been sent successfully. We will get back to you soon."
-          );
-          
-          setShowSuccessPopup(true);
+          setShowSuccessModal(true);
           form.current?.reset();
         })
-        .catch((error) => {
-          console.error("Email sending failed:", error.text);
+        .catch(() => {
           setIsSubmitting(false);
           setSubmitStatus("error");
-          setSubmitMessage(
-            "Sorry, there was an error sending your message. Please try again or email us directly at photographyclub@dccsa.uiu.ac.bd"
-          );
         });
     }
   };
 
+  const socialLinks = [
+    { icon: <FaFacebookF />, label: "Facebook", href: "https://facebook.com/UIUPC" },
+    { icon: <FaInstagram />, label: "Instagram", href: "https://www.instagram.com/uiuphotographyclub" },
+    { icon: <FaYoutube />, label: "YouTube", href: "https://www.youtube.com/@uiupc6885" },
+    { icon: <FaLinkedinIn />, label: "LinkedIn", href: "https://linkedin.com/company/uiupc" },
+  ];
+
   return (
-    <div className="contact-page">
-      <div className="page-header">
-        <h1>Contact Us</h1>
-        <p>Get in touch with UIU Photography Club</p>
-      </div>
+    <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] pb-32">
+      {/* ── ZONE 1: HERO ─────────────────────────────────────────────── */}
+      <section className="pt-40 pb-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <ScrollRevealText 
+            text="Get in Touch" 
+            className="text-[12vw] md:text-[8vw] font-black uppercase tracking-tighter leading-[0.8] text-zinc-900 dark:text-white"
+          />
+          <p className="mt-8 max-w-2xl text-zinc-500 dark:text-zinc-400 font-medium text-lg md:text-xl leading-relaxed">
+            Collaborations, inquiries, or just sharing a vision. We're here to turn perspectives into possibilities.
+          </p>
+        </div>
+      </section>
 
-      <div className="container">
-        <div className="contact-content">
-          <div className="contact-grid">
-            {/* Contact Information */}
-            <div className="contact-info">
-              {/* Social Media Links */}
-              <div className="social-section">
-                <h3>Follow Us</h3>
-                <div className="social-links">
-                  <a
-                    href="https://facebook.com/UIUPC"
+      {/* ── ZONE 2: INTERACTIVE CONTENT ────────────────────────────────── */}
+      <section className="px-6">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-20">
+          
+          {/* LEFT: INFO PANEL */}
+          <div className="w-full lg:w-2/5 space-y-12">
+            {/* Digital Presence (No Card) */}
+            <div className="space-y-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-uiupc-orange">Digital Presence</span>
+              <div className="flex flex-wrap gap-4 pt-2">
+                {socialLinks.map((social) => (
+                  <a 
+                    key={social.label} 
+                    href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="social-link facebook"
+                    className="w-12 h-12 flex items-center justify-center rounded-full bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 text-zinc-900 dark:text-white hover:bg-uiupc-orange hover:text-white hover:scale-110 transition-all shadow-sm"
                   >
-                    <FaFacebookF className="social-icon" />
-                    <span>Facebook</span>
+                    {social.icon}
                   </a>
-
-                  <a
-                    href="https://www.instagram.com/uiuphotographyclub"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="social-link instagram"
-                  >
-                    <FaInstagram className="social-icon" />
-                    <span>Instagram</span>
-                  </a>
-
-                  <a
-                    href="https://www.youtube.com/@uiupc6885"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="social-link youtube"
-                  >
-                    <FaYoutube className="social-icon" />
-                    <span>YouTube</span>
-                  </a>
-
-                  <a
-                    href="https://linkedin.com/company/uiupc"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="social-link linkedin"
-                  >
-                    <FaLinkedinIn className="social-icon" />
-                    <span>LinkedIn</span>
-                  </a>
-                </div>
-              </div>
-
-              <div className="contact-details">
-                <div className="contact-item">
-                  <div className="contact-icon">
-                    <FaClock className="icon" />
-                  </div>
-                  <div className="contact-text">
-                    <h3>Club Hours</h3>
-                    <p>Saturday - Sunday: 8:30 AM - 4:30 PM</p>
-                    <p>
-                      Tuesday - Thursday: 8:30 AM - 4:30 PM
-                      <br />
-                      Makeup classday : By appointment
-                    </p>
-                  </div>
-                </div>
-
-                <div className="contact-item">
-                  <div className="contact-icon">
-                    <FaEnvelope className="icon" />
-                  </div>
-                  <div className="contact-text">
-                    <h3>Email</h3>
-                    <a href="mailto:photographyclub@dccsa.uiu.ac.bd">
-                      photographyclub@dccsa.uiu.ac.bd
-                    </a>
-                  </div>
-                </div>
-
-                <div className="contact-item">
-                  <div className="contact-icon">
-                    <FaMapMarkerAlt className="icon" />
-                  </div>
-                  <div className="contact-text">
-                    <h3>Location</h3>
-                    <p>
-                      United International University
-                      <br />
-                      United City, Madani Avenue
-                      <br />
-                      Dhaka 1212, Bangladesh
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* Contact Form */}
-            <div className="contact-form-container">
-              <h2>Send us a Message</h2>
+            {/* Say Hello (No Card) */}
+            <div className="space-y-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-uiupc-orange">Say Hello</span>
+              <div className="space-y-2 overflow-hidden">
+                <a href="mailto:photographyclub@dccsa.uiu.ac.bd" className="text-lg md:text-2xl font-black text-zinc-900 dark:text-white hover:text-uiupc-orange transition-colors break-words block">
+                  photographyclub@dccsa.uiu.ac.bd
+                </a>
+              </div>
+            </div>
 
-              {submitStatus === "success" && (
-                <div className="status-message success">
-                  <FaCheck className="status-icon" />
-                  {submitMessage}
+            {/* Visit Us (No Card) */}
+            <div className="space-y-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-uiupc-orange">Visit Us</span>
+              <p className="text-zinc-600 dark:text-zinc-400 font-medium text-sm md:text-base">
+                United City, Madani Avenue<br />
+                Dhaka 1212, Bangladesh
+              </p>
+            </div>
+
+            {/* Club Hours (No Card) */}
+            <div className="space-y-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-uiupc-orange">Club Hours</span>
+              <p className="text-zinc-600 dark:text-zinc-400 font-medium text-sm md:text-base">
+                SAT - SUN / TUE - THU<br />
+                08:30 AM — 04:30 PM
+              </p>
+            </div>
+          </div>
+
+          {/* RIGHT: CONTACT FORM (IN CARD) */}
+          <div className="w-full lg:w-3/5">
+            <motion.div 
+               initial={{ opacity: 0, x: 20 }}
+               whileInView={{ opacity: 1, x: 0 }}
+               viewport={{ once: true }}
+               className="bg-white dark:bg-zinc-950 p-8 md:p-12 lg:p-16 rounded-[2.5rem] md:rounded-[3rem] border border-black/5 dark:border-white/5 shadow-sm overflow-hidden"
+            >
+              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white mb-12">
+                Draft a message
+              </h2>
+
+              <form ref={form} onSubmit={handleSubmit} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Name */}
+                  <div className="space-y-2 group">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 group-focus-within:text-uiupc-orange transition-colors">Full Name</label>
+                    <input 
+                      type="text" name="from_name" required placeholder="Jonayed Ahmed"
+                      className="w-full bg-transparent border-b-2 border-black/10 dark:border-white/10 py-4 outline-none focus:border-uiupc-orange transition-colors text-zinc-900 dark:text-white font-bold"
+                    />
+                  </div>
+                  {/* Email */}
+                  <div className="space-y-2 group">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 group-focus-within:text-uiupc-orange transition-colors">Email Address</label>
+                    <input 
+                      type="email" name="from_email" required placeholder="hello@uiupc.com"
+                      className="w-full bg-transparent border-b-2 border-black/10 dark:border-white/10 py-4 outline-none focus:border-uiupc-orange transition-colors text-zinc-900 dark:text-white font-bold"
+                    />
+                  </div>
                 </div>
-              )}
+
+                {/* Subject */}
+                <div className="space-y-2 group">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 group-focus-within:text-uiupc-orange transition-colors">Subject</label>
+                  <input 
+                    type="text" name="subject" required placeholder="What's this regarding?"
+                    className="w-full bg-transparent border-b-2 border-black/10 dark:border-white/10 py-4 outline-none focus:border-uiupc-orange transition-colors text-zinc-900 dark:text-white font-bold"
+                  />
+                </div>
+
+                {/* Message */}
+                <div className="space-y-2 group">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 group-focus-within:text-uiupc-orange transition-colors">Your Vision</label>
+                  <textarea 
+                    name="message" required rows={4} placeholder="I have an idea for..."
+                    className="w-full bg-transparent border-b-2 border-black/10 dark:border-white/10 py-4 outline-none focus:border-uiupc-orange transition-colors text-zinc-900 dark:text-white font-bold resize-none"
+                  />
+                </div>
+
+                <div className="pt-6">
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="group relative flex items-center gap-4 bg-zinc-900 dark:bg-white text-white dark:text-black px-10 py-6 rounded-2xl overflow-hidden shadow-2xl transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                  >
+                    <span className="relative z-10 text-[10px] font-black uppercase tracking-[0.3em]">
+                      {isSubmitting ? "Submitting..." : "Send Message"}
+                    </span>
+                    <FaArrowRight className={`relative z-10 transition-transform ${isSubmitting ? 'animate-pulse' : 'group-hover:translate-x-1'}`} />
+                  </button>
+                </div>
+              </form>
 
               {submitStatus === "error" && (
-                <div className="status-message error">
-                  <FaExclamationTriangle className="status-icon" />
-                  {submitMessage}
-                </div>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8 flex items-center gap-3 text-red-500 font-bold text-xs uppercase tracking-widest">
+                  <FaExclamationTriangle />
+                  <span>Submission Failed. Please try again.</span>
+                </motion.div>
               )}
-
-              <form ref={form} className="contact-form" onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <label htmlFor="name">Full Name *</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="from_name"
-                    placeholder="Enter your full name"
-                    required
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="email">Email Address *</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="from_email"
-                    placeholder="Enter your email"
-                    required
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="subject">Subject *</label>
-                  <input
-                    type="text"
-                    id="subject"
-                    name="subject"
-                    placeholder="What is this regarding?"
-                    required
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="department">Department (Optional)</label>
-                  <input
-                    type="text"
-                    id="department"
-                    name="department"
-                    placeholder="Your department at UIU"
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="message">Message *</label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={5}
-                    placeholder="Tell us about your inquiry, collaboration idea, or anything else..."
-                    required
-                    disabled={isSubmitting}
-                  ></textarea>
-                </div>
-
-                <button
-                  type="submit"
-                  className={`btn-primary submit-btn ${
-                    isSubmitting ? "submitting" : ""
-                  }`}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="spinner"></div>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <FaPaperPlane className="btn-icon" />
-                      Send Message
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
+            </motion.div>
           </div>
+        </div>
+      </section>
 
-          {/* Map Section */}
-          <div className="map-section">
-            <h2>Find Us at UIU</h2>
-            <div className="map-container">
-              <div className="map-placeholder">
-                <div className="map-icon">🗺️</div>
-                <h3>United International University</h3>
-                <p>United City, Madani Avenue, Badda, Dhaka 1212, Bangladesh</p>
-                <div className="map-actions">
-                  <a
-                    href="https://maps.google.com/?q=United+International+University+Dhaka"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-secondary"
-                  >
-                    Open in Google Maps
-                  </a>
-                </div>
+      {/* ── ZONE 3: SUCCESS MODAL ─────────────────────────────────────── */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-xl"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              className="bg-[#f9f5ea] dark:bg-zinc-900 p-12 md:p-16 rounded-[3rem] max-w-lg w-full text-center space-y-8 shadow-2xl"
+            >
+              <div className="w-20 h-20 bg-uiupc-orange/10 text-uiupc-orange rounded-full flex items-center justify-center mx-auto text-3xl">
+                <FaCheck />
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Success Popup */}
-      {showSuccessPopup && (
-        <div className="success-popup-overlay">
-          <div className="success-popup">
-            <div className="popup-header">
-              <FaCheck className="popup-icon" />
-              <h3>Message Sent Successfully!</h3>
-            </div>
-            <div className="popup-content">
-              <p>Thank you for contacting UIU Photography Club!</p>
-              <p>We have received your message and will respond to you shortly.</p>
-              <p>You should receive a confirmation email within the next few hours.</p>
-            </div>
-            <div className="popup-actions">
+              <div className="space-y-4">
+                <h3 className="text-3xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white">Success</h3>
+                <p className="text-zinc-500 dark:text-zinc-400 font-medium">
+                  Your message has been caught. We'll get back to you with the same precision we use for our lenses.
+                </p>
+              </div>
               <button 
-                className="btn-primary"
-                onClick={() => setShowSuccessPopup(false)}
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full bg-zinc-900 dark:bg-white text-white dark:text-black py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-uiupc-orange dark:hover:bg-uiupc-orange transition-colors"
               >
-                Got It!
+                Got It
               </button>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

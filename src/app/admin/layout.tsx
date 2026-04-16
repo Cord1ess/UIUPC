@@ -1,18 +1,42 @@
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Admin Panel | UIU Photography Club",
-  description: "Secure administrative access for managing UIU Photography Club membership, events, and content.",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+import React, { useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import AdminSidebar from '@/components/admin/AdminSidebar';
+import Loading from '@/components/Loading';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Unified Auth Guard for all admin pages
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] flex items-center justify-center">
+        <Loading />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] transition-colors duration-500 pt-0">
+      <AdminSidebar />
+      <main className="flex-1 overflow-x-hidden min-h-screen">
+        <div className="max-w-[1440px] mx-auto p-6 md:p-12 lg:p-24">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
 }

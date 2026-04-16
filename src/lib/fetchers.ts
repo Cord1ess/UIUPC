@@ -74,3 +74,29 @@ export const fetchGalleryPhotos = async (): Promise<Photo[]> => {
     return [];
   }
 };
+
+export const fetchBlogPosts = async (): Promise<any[]> => {
+  const BLOG_SCRIPT_URL = process.env.NEXT_PUBLIC_GAS_BLOG;
+
+  try {
+    if (!BLOG_SCRIPT_URL) return [];
+
+    const response = await fetch(`${BLOG_SCRIPT_URL}?action=getBlogPosts`, {
+      next: { revalidate: 3600 } // Revalidate every hour
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch blog posts");
+
+    const result = await response.json();
+
+    if (result.status === "success" && result.data) {
+      return (result.data || []).sort((a: any, b: any) => 
+        new Date(b.date || b.timestamp).getTime() - new Date(a.date || a.timestamp).getTime()
+      );
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching blog posts:", error);
+    return [];
+  }
+};

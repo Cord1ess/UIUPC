@@ -52,16 +52,16 @@ const EventDetailPage = async ({ params }: EventDetailPageProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#121212] transition-colors duration-500">
+    <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] transition-colors duration-500">
       {/* Back Button Overlay */}
       <div className="fixed top-24 left-6 z-50">
-        <Link href="/events" className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-uiupc-orange transition-all flex items-center justify-center">
+        <Link href="/events" className="p-3 rounded-full bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-zinc-900 dark:text-white hover:bg-uiupc-orange hover:text-white transition-all flex items-center justify-center shadow-lg">
           <FaArrowLeft />
         </Link>
       </div>
 
       {/* --- HERO BANNER --- */}
-      <section className="relative h-[60vh] min-h-[500px] w-full overflow-hidden">
+      <section className="relative h-[70vh] min-h-[600px] w-full overflow-hidden">
         <Image 
           src={data.image ? getCloudinaryUrl(data.image, 1920, 'auto:best') : ''}
           alt={data.title}
@@ -69,22 +69,23 @@ const EventDetailPage = async ({ params }: EventDetailPageProps) => {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#f9f5ea] via-[#f9f5ea]/20 to-transparent dark:from-[#121212] dark:via-[#121212]/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#f9f5ea] dark:from-[#0a0a0a] via-transparent to-transparent" />
         
-        <div className="absolute bottom-0 left-0 w-full p-6 md:p-12">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-wrap gap-3 mb-6">
-              <span className="px-4 py-1.5 rounded-full bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest shadow-lg">
+        <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 pb-24">
+          <div className="max-w-[1440px] mx-auto">
+            <div className="flex flex-wrap gap-4 mb-10">
+              <span className="px-4 py-1.5 rounded-full bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-[0.3em] shadow-lg">
                 {data.status || 'Archived'}
               </span>
-              <span className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-widest">
+              <span className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-[0.3em]">
                 {data.chapter}
               </span>
             </div>
-            <h1 className="text-5xl md:text-8xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-[0.9] mb-4">
+            
+            <h1 className="text-6xl md:text-9xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-[0.8] mb-8">
               {data.title}
             </h1>
-            <p className="text-xl md:text-2xl font-serif italic text-zinc-600 dark:text-zinc-400">
+            <p className="text-xl md:text-3xl font-serif italic text-zinc-600 dark:text-zinc-400 max-w-2xl">
               {data.subtitle}
             </p>
           </div>
@@ -92,14 +93,14 @@ const EventDetailPage = async ({ params }: EventDetailPageProps) => {
       </section>
 
       {/* --- CONTENT GRID --- */}
-      <section className="px-6 py-20">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16">
+      <section className="px-6 py-32">
+        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
           
           {/* Main Info Column */}
-          <div className="lg:col-span-8 space-y-16">
+          <div className="lg:col-span-8 space-y-24">
             
             {/* Quick Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-zinc-200 dark:border-white/5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 pt-12 border-t border-black/5 dark:border-white/5">
               <DetailItem icon={<FaCalendarAlt />} title="Registration Dates" value={data.date} />
               <DetailItem icon={<FaClock />} title="Event Time" value={data.time || "Full Day Access"} />
               <DetailItem icon={<FaMapMarkerAlt />} title="Venue" value={data.location} />
@@ -107,60 +108,65 @@ const EventDetailPage = async ({ params }: EventDetailPageProps) => {
             </div>
 
             {/* About Section */}
-            <div className="space-y-6">
-              <h2 className="text-3xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
-                About the Event
+            <div className="space-y-8">
+              <h2 className="text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
+                The Narrative
               </h2>
-              <div className="prose prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
+              <div className="prose prose-zinc dark:prose-invert max-w-none text-zinc-500 dark:text-zinc-400 text-lg md:text-xl leading-relaxed font-medium">
                 {data.description}
               </div>
             </div>
 
             {/* Highlights Section */}
-            <div className="p-8 md:p-12 bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-white/5 shadow-sm">
-              <h2 className="text-2xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-8 flex items-center gap-3">
-                <FaTrophy className="text-uiupc-orange" /> Event Highlights
+            <div className="p-8 md:p-16 bg-[#ffffff] dark:bg-[#050505] rounded-2xl border border-black/5 dark:border-white/5 shadow-[0_20px_80px_rgba(0,0,0,0.03)]">
+              <h2 className="text-3xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-12 flex items-center gap-4">
+                <FaTrophy className="text-uiupc-orange text-2xl" /> Curator's Highlights
               </h2>
-              <ul className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                 {data.highlights?.map((item: string, idx: number) => (
-                  <li key={idx} className="flex items-start gap-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-uiupc-orange mt-2 ring-4 ring-uiupc-orange/10" />
-                    <span className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 font-medium">
+                  <div key={idx} className="flex items-start gap-4 p-4 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <div className="w-1.5 h-1.5 rounded-full bg-uiupc-orange mt-2 shrink-0 shadow-[0_0_10px_rgba(245,137,32,0.5)]" />
+                    <span className="text-sm text-zinc-600 dark:text-zinc-400 font-bold uppercase tracking-tight leading-relaxed">
                       {item}
                     </span>
-                  </li>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
 
           {/* Sidebar Column */}
-          <div className="lg:col-span-4 space-y-8">
+          <div className="lg:col-span-4 space-y-12">
             
             {/* Action Card */}
-            <div className="p-8 bg-zinc-900 dark:bg-zinc-950 rounded-3xl text-center space-y-6 shadow-2xl shadow-black/10">
-              <h3 className="text-white text-xl font-black uppercase tracking-tighter">
-                Ready to Join?
-              </h3>
-              <p className="text-white/50 text-xs font-medium leading-relaxed">
-                The results for this event have been published. Stay tuned for the next grand chapter!
-              </p>
-              <div className="flex flex-col gap-3">
-                <Link href="/results" className="w-full py-4 bg-uiupc-orange text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all">
-                  Check Results
+            <div className="p-8 md:p-12 bg-zinc-950 dark:bg-[#050505] rounded-2xl text-center space-y-10 shadow-3xl shadow-black/20 border border-white/5">
+              <div className="space-y-4">
+                <h3 className="text-white text-2xl font-black uppercase tracking-tighter">
+                  Experience the Vision
+                </h3>
+                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] leading-relaxed">
+                  The lens has closed for this entry. Explore the results or join our current cohort.
+                </p>
+              </div>
+              <div className="flex flex-col gap-4">
+                <Link href="/results" className="w-full py-5 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-xl hover:scale-[1.05] active:scale-[0.98] transition-all shadow-xl shadow-uiupc-orange/20">
+                  Exhibition Results
                 </Link>
-                <Link href="/join" className="w-full py-4 bg-white/5 text-white border border-white/10 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-white/10 transition-all">
-                  Join the Club
+                <Link href="/join" className="w-full py-5 bg-white/5 text-white border border-white/10 text-[10px] font-black uppercase tracking-[0.3em] rounded-xl hover:bg-white/10 transition-all">
+                  Join the Legacy
                 </Link>
               </div>
             </div>
 
             {/* Contact Card */}
-            <div className="p-8 bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-white/5">
-              <h3 className="text-zinc-900 dark:text-white text-lg font-black uppercase tracking-tighter mb-6">
-                Organization Team
-              </h3>
-              <div className="space-y-6">
+            <div className="p-10 bg-[#ffffff] dark:bg-[#050505] rounded-2xl border border-black/5 dark:border-white/5 space-y-10">
+              <div className="space-y-2">
+                <h3 className="text-zinc-900 dark:text-white text-xs font-black uppercase tracking-[0.3em]">
+                  Directorate
+                </h3>
+                <div className="h-0.5 w-12 bg-uiupc-orange" />
+              </div>
+              <div className="space-y-8">
                 <ContactItem icon={<FaUser />} label="Coordinator" value={data.contact?.coordinator} />
                 <ContactItem icon={<FaEnvelope />} label="Email" value={data.contact?.email} href={`mailto:${data.contact?.email}`} />
                 <ContactItem icon={<FaPhoneAlt />} label="Phone" value={data.contact?.phone} href={`tel:${data.contact?.phone}`} />

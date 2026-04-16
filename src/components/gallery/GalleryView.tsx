@@ -128,9 +128,9 @@ const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
         </div>
       </div>
 
-      {/* Category Navigation (Sticky - Single Line) */}
-      <div className="sticky top-24 z-40 mb-16 p-2 bg-[#f9f5ea]/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-full border border-black/5 dark:border-white/5 shadow-md max-w-7xl mx-auto">
-        <div className="flex items-center justify-center gap-1 md:gap-6 py-1">
+      {/* Category Navigation (Sticky - Horizontal Scroll on Mobile) */}
+      <div className="sticky top-24 z-40 mb-16 p-2 bg-[#f9f5ea]/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-full border border-black/5 dark:border-white/5 shadow-md max-w-7xl mx-auto overflow-x-auto no-scrollbar">
+        <div className="flex items-center justify-start md:justify-center gap-1 md:gap-6 py-1 min-w-max md:min-w-0 px-4">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}

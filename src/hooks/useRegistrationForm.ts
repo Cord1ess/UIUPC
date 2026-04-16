@@ -15,6 +15,7 @@ interface FormData {
   receiverName: string;
   transactionId: string;
   facebookLink: string;
+  bloodGroup: string;
 }
 
 export const useRegistrationForm = (initialData: FormData, endpointUrl: string) => {

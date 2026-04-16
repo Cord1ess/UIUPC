@@ -12,7 +12,14 @@ interface AdminResult {
 const fetcher = async ([url, dataType]: [string, string]): Promise<any[]> => {
   if (!url) return [];
   
-  const action = dataType === "membership" ? "getApplications" : "getSubmissions";
+  const actionMap: Record<string, string> = {
+    membership: "getApplications",
+    photos: "getSubmissions",
+    blog: "getBlogPosts",
+    gallery: "getGallery",
+  };
+
+  const action = actionMap[dataType] || "getSubmissions";
   const response = await fetch(`${url}?action=${action}`);
   
   if (!response.ok) {
@@ -25,8 +32,8 @@ const fetcher = async ([url, dataType]: [string, string]): Promise<any[]> => {
     const dataArray = result.data || result.submissions || [];
     return dataArray.sort(
       (a: any, b: any) =>
-        new Date(b.Timestamp || b.timestamp || b["Timestamp"]).getTime() -
-        new Date(a.Timestamp || a.timestamp || a["Timestamp"]).getTime()
+        new Date(b.date || b.uploadedAt || b.Timestamp || b.timestamp || b["Timestamp"]).getTime() -
+        new Date(a.date || a.uploadedAt || a.Timestamp || a.timestamp || a["Timestamp"]).getTime()
     );
   } else {
     throw new Error(result.message || "Failed to fetch data");
@@ -34,7 +41,7 @@ const fetcher = async ([url, dataType]: [string, string]): Promise<any[]> => {
 };
 
 export const useAdminData = (dataType: string, scriptUrl: string) => {
-  const shouldFetch = dataType === "membership" || dataType === "photos";
+  const shouldFetch = ["membership", "photos", "blog", "gallery"].includes(dataType);
   
   const { data, error, isLoading, mutate } = useSWR(
     shouldFetch && scriptUrl ? [scriptUrl, dataType] : null,

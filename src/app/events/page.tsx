@@ -39,9 +39,9 @@ const EventsPage = async () => {
   return (
     <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#121212] transition-colors duration-500 pb-20">
       {/* ── ZONE 0: INTERACTIVE MAP (ENTRY) ────────────────────────── */}
-      <section id="map" className="w-full pt-20 md:pt-24 px-6 md:pb-8">
+      <section id="map" className="w-full pt-32 md:pt-24 px-6 md:pb-8">
         <div className="max-w-7xl mx-auto">
-          <div className="w-full h-[350px] md:h-[450px] bg-white dark:bg-zinc-900 rounded-3xl border border-black/5 dark:border-white/5 shadow-inner flex flex-col items-center justify-center text-center p-8 relative overflow-hidden">
+          <div className="w-full h-[320px] md:h-[450px] bg-white dark:bg-zinc-900 rounded-3xl border border-black/5 dark:border-white/5 shadow-inner flex flex-col items-center justify-center text-center p-6 md:p-8 relative overflow-hidden">
              {/* Abstract Grid Decor */}
              <div className="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none bg-grid-giant" />
              
@@ -220,7 +220,7 @@ const EventCard = ({ event }: { event: any }) => (
       </div>
     </div>
     
-    <div className="p-10 flex flex-col flex-grow">
+    <div className="p-6 md:p-10 flex flex-col flex-grow">
       <h3 className="text-2xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-4 group-hover:text-uiupc-orange transition-colors">
         {event.title}
       </h3>

@@ -2,11 +2,16 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { FaArrowRight } from "react-icons/fa";
 import myLogo from "@/assets/UIUPC Logo.svg";
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
+  const pathname = usePathname();
+  const isAdminPage = pathname.startsWith('/admin');
+
+  if (isAdminPage) return null;
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });

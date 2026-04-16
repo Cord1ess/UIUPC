@@ -62,6 +62,8 @@ const Header: React.FC = memo(() => {
 
   const isActive = useCallback((path: string) => pathname === path, [pathname]);
   const isAboutActive = ALL_ABOUT_PATHS.includes(pathname);
+  const isAdminPage = pathname.startsWith('/admin');
+
 
   const handleSignOut = useCallback(async () => {
     try {
@@ -206,13 +208,22 @@ const Header: React.FC = memo(() => {
 
           <div className="hidden lg:block">
             {user ? (
-              <button
-                onClick={handleSignOut}
-                className={`h-9 px-5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all
-                  ${theme === 'light' ? 'bg-black text-white' : 'bg-white text-black'}`}
-              >
-                Sign Out
-              </button>
+              isAdminPage ? (
+                <button
+                  onClick={handleSignOut}
+                  className={`h-9 px-5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all
+                    ${theme === 'light' ? 'bg-black text-white' : 'bg-white text-black'}`}
+                >
+                  Sign Out
+                </button>
+              ) : (
+                <Link
+                  href="/admin"
+                  className="h-9 px-5 flex items-center justify-center rounded-lg bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg"
+                >
+                  Admin Panel
+                </Link>
+              )
             ) : (
               <Link
                 href="/join"
@@ -233,25 +244,47 @@ const Header: React.FC = memo(() => {
 
         {/* ── Mobile Dropdown ── */}
         <div className={`absolute top-[calc(100%+8px)] left-0 right-0 z-[999] border rounded-xl shadow-2xl transition-all origin-top lg:hidden
-          ${theme === 'light' ? 'bg-white border-black/[0.06]' : 'bg-neutral-900 border-white/[0.06]'}
+          ${theme === 'light' ? 'bg-white border-black/[0.06]' : 'bg-neutral-800 border-white/[0.06]'}
           ${mobileOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}>
           <div className="p-4 flex flex-col gap-1">
-            {PRIMARY_LINKS.map((item) => (
-              <Link key={item.path} href={item.path} className={`w-full text-center py-3 rounded-lg text-xs font-black uppercase tracking-widest
-                ${isActive(item.path) ? "text-uiupc-orange bg-uiupc-orange-500/10" : theme === 'light' ? "text-black/60" : "text-white/60"}`}
-                onClick={() => setMobileOpen(false)}>
+            {[...PRIMARY_LINKS, ...ABOUT_SUBMENU].map((item) => (
+              <Link 
+                key={item.path} 
+                href={item.path} 
+                className={`w-full py-3.5 px-4 rounded-lg text-xs font-black uppercase tracking-widest transition-colors
+                  ${isActive(item.path) 
+                    ? "text-uiupc-orange bg-uiupc-orange/5" 
+                    : theme === 'light' ? "text-black/60 hover:bg-black/5" : "text-white/60 hover:bg-white/5"}`}
+                onClick={() => setMobileOpen(false)}
+              >
                 {item.label}
               </Link>
             ))}
-            {/* About Accordion (ignored for briefness) */}
             <div className="mt-2 pt-2 border-t border-black/5 dark:border-white/5 flex flex-col gap-2">
               {user ? (
-                <button onClick={handleSignOut} className={`w-full py-3 rounded-lg text-xs font-black uppercase tracking-widest
-                  ${theme === 'light' ? 'bg-black text-white' : 'bg-white text-black'}`}>
-                  Sign Out
-                </button>
+                isAdminPage ? (
+                  <button 
+                    onClick={handleSignOut} 
+                    className={`w-full py-4 px-4 rounded-lg text-xs font-black uppercase tracking-widest text-left
+                      ${theme === 'light' ? 'bg-black text-white' : 'bg-white text-black'}`}
+                  >
+                    Sign Out
+                  </button>
+                ) : (
+                  <Link 
+                    href="/admin" 
+                    className="block w-full text-center py-4 rounded-lg bg-uiupc-orange text-white text-xs font-black uppercase tracking-widest" 
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Admin Panel
+                  </Link>
+                )
               ) : (
-                <Link href="/join" className="block w-full text-center py-3 rounded-lg bg-uiupc-orange text-white text-xs font-black uppercase tracking-widest" onClick={() => setMobileOpen(false)}>
+                <Link 
+                  href="/join" 
+                  className="block w-full text-center py-4 rounded-lg bg-uiupc-orange text-white text-xs font-black uppercase tracking-widest" 
+                  onClick={() => setMobileOpen(false)}
+                >
                   Join Us
                 </Link>
               )}
