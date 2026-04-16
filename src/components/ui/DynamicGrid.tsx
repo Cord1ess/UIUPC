@@ -66,4 +66,4 @@ const DynamicGrid: React.FC<DynamicGridProps> = ({ isLens }) => {
   );
 };
 
-export default DynamicGrid;
+export default React.memo(DynamicGrid);

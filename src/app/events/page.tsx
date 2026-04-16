@@ -1,367 +1,245 @@
-// src/app/events/page.tsx
-"use client";
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { FaTrophy, FaEye, FaArrowRight, FaCalendarAlt, FaMapMarkerAlt, FaHistory, FaStar } from 'react-icons/fa';
+import { fetchAllEvents } from '@/lib/fetchers';
+import { getCloudinaryUrl } from '@/components/hero/utils/constants';
+import CountdownTimer from '@/components/events/CountdownTimer';
+import ScrollRevealText from '@/components/home/ScrollRevealText';
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import {
-  FaCalendarAlt,
-  FaMapMarkerAlt,
-  FaUsers,
-  FaCamera,
-  FaArrowRight,
-  FaPlay,
-  FaPause,
-  FaEye,
-  FaTrophy,
-} from "react-icons/fa";
-import "./Events.css";
-
-const EventsPage = () => {
-  const [activeEvent, setActiveEvent] = useState("shutter-stories");
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number, seconds: number}>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const router = useRouter();
-
-  // Calculate time until December 17, 2025
-  const calculateTimeLeft = useCallback(() => {
-    const eventDate = new Date("December 17, 2025 24:00:00").getTime();
-    const now = new Date().getTime();
-    const difference = eventDate - now;
-
-    if (difference > 0) {
-      return {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor(
-          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        ),
-        minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((difference % (1000 * 60)) / 1000),
-      };
-    }
-    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-  }, []);
-
-  useEffect(() => {
-    setTimeLeft(calculateTimeLeft());
-
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [calculateTimeLeft]);
-
-  const signatureEvents = useMemo(
-    () => ({
-      "shutter-stories": {
-        id: "shutter-stories",
-        title: "Shutter Stories",
-        subtitle: "National Photography Exhibition",
-        status: "completed",
-        chapter: "Chapter IV",
-        date: "TBA",
-        location: "UIU Multipurpose Hall",
-        description: "Official photography exhibition of UIUPC.",
-        fullDescription: "Details coming soon.",
-        entryFee: "TBA",
-        submissionDeadline: "TBA",
-        highlights: [],
-        stats: { participants: "0", photos: "0", chapters: "4", awards: "0" },
-        image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1762799836/Blog5_lbkrue.png",
-        gallery: [],
-      }
-    }),
-    []
-  );
-
-  const handleAutoPlay = useCallback(() => {
-    if (isPlaying) {
-      const eventKeys = Object.keys(signatureEvents);
-      const currentIndex = eventKeys.indexOf(activeEvent);
-      const nextIndex = (currentIndex + 1) % eventKeys.length;
-      setActiveEvent(eventKeys[nextIndex]);
-    }
-  }, [activeEvent, isPlaying, signatureEvents]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isPlaying) {
-      interval = setInterval(handleAutoPlay, 5000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [handleAutoPlay, isPlaying]);
-
-  const handleRegisterClick = (eventId: string) => {
-    if (eventId === "shutter-stories") {
-      window.open("/register/shutter-stories", "_blank");
-    } else {
-      router.push(`/events/${eventId}`);
-    }
+const EventsPage = async () => {
+  const allEvents = await fetchAllEvents();
+  
+  // Categorization Logic
+  const upcomingEvents = allEvents.filter(e => e.status === 'upcoming' || e.status === 'ongoing');
+  const recentlyEnded = allEvents.filter(e => e.status === 'completed').slice(0, 1);
+  const archive = allEvents.filter(e => e.status === 'completed').slice(recentlyEnded.length);
+  
+  const flagship = upcomingEvents[0] || {
+    id: "recruitment-2026",
+    title: "Member Recruitment 2026",
+    subtitle: "Join the Legacy",
+    date: "May 15, 2026",
+    location: "UIU Campus",
+    description: "Start your journey in visual storytelling with UIUPC. We are looking for passionate individuals to join our creative family.",
+    image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772526242/Artboard_1-100_u1jtvp.jpg",
+    status: 'upcoming'
   };
 
-  const currentEvent = (signatureEvents as any)[activeEvent];
+  const endedEvent = recentlyEnded[0] || {
+    id: "shutter-stories",
+    title: "Shutter Stories Chapter IV",
+    date: "December 17, 2025",
+    location: "UIU Multipurpose Hall",
+    description: "National Photography Exhibition concluded with grand success.",
+    image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1763223291/Blog_7_suqqrn.jpg",
+    status: 'completed'
+  };
 
   return (
-    <div className="events-page">
-      {/* Grand Header */}
-      <section className="events-hero">
-        <div className="hero-background">
-          <div className="hero-overlay"></div>
-          <div className="floating-elements">
-            <div className="floating-camera"></div>
-            <div className="floating-lens"></div>
-            <div className="floating-aperture"></div>
+    <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#121212] transition-colors duration-500 pb-20">
+      {/* ── ZONE 0: INTERACTIVE MAP (ENTRY) ────────────────────────── */}
+      <section id="map" className="w-full pt-20 md:pt-24 px-6 md:pb-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="w-full h-[350px] md:h-[450px] bg-white dark:bg-zinc-900 rounded-3xl border border-black/5 dark:border-white/5 shadow-inner flex flex-col items-center justify-center text-center p-8 relative overflow-hidden">
+             {/* Abstract Grid Decor */}
+             <div className="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none bg-grid-giant" />
+             
+             <div className="relative z-10">
+               <div className="w-16 h-16 rounded-full bg-uiupc-orange/10 flex items-center justify-center mx-auto mb-6 ring-8 ring-uiupc-orange/5">
+                 <FaMapMarkerAlt className="text-2xl text-uiupc-orange" />
+               </div>
+               <ScrollRevealText 
+                text="Interactive Event Map"
+                as="h2"
+                className="text-3xl md:text-5xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-4"
+               />
+               <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 dark:text-zinc-500">
+                 Explore the location of our upcoming and past chapters. <br />
+                 <span className="text-uiupc-orange/60">Module undergoing maintenance.</span>
+               </p>
+             </div>
           </div>
-        </div>
-        <div className="hero-content">
-          <div className="container">
-            <div className="hero-text">
-              <h1 className="hero-title">
-                <span className="title-line">UIU Photography Club</span>
-                <span className="title-line highlight">Signature Events</span>
-              </h1>
-              <p className="hero-subtitle">
-                Experience the pinnacle of photographic excellence through our
-                signature events that celebrate creativity, talent, and visual
-                storytelling
-              </p>
-              <div className="hero-stats">
-                <div className="stat">
-                  <span className="stat-number">50K+</span>
-                  <span className="stat-label">Prize Pools</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="hero-scroll-indicator">
-          <div className="scroll-arrow"></div>
         </div>
       </section>
 
-      {/* Upcoming Event Banner */}
-      <section className="upcoming-banner">
-        <div className="container">
-          <div className="banner-content">
-            <div className="banner-badge">
-              <span className="badge-text">Completed Event</span>
-              <div className="badge-pulse"></div>
-            </div>
-            <h2 className="banner-title">Shutter Stories Chapter IV</h2>
-            <p className="banner-subtitle">
-              Result Have Been Published • December 14, 2025
-            </p>
-            <h2 className="banner-title">Registration is Closed</h2>
-            <p className="banner-subtitle">
-              Registration Deadline • December 17, 2025
-            </p>
+      {/* ── ZONE 1: UPCOMING EVENTS ─────────────────────────────────── */}
+      <section id="upcoming" className="py-12 md:py-20 px-6">
 
-            <div className="banner-countdown">
-              <div className="countdown-item">
-                <span className="countdown-number">
-                  {String(timeLeft.days).padStart(2, "0")}
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <ScrollRevealText 
+              text="Check our upcoming events"
+              as="h2"
+              className="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter"
+            />
+          </div>
+
+          {/* Upcoming Event (NO CARD - DIRECT ON BACKGROUND) */}
+          <div className="relative flex flex-col md:flex-row items-center gap-12 md:gap-20 transition-all">
+            <div className="w-full md:w-[600px] aspect-square relative rounded-2xl overflow-hidden shadow-2xl">
+              <Image 
+                src={flagship.image ? getCloudinaryUrl(flagship.image, 1000, 'auto:best') : ''}
+                alt={flagship.title}
+                fill
+                className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                priority
+              />
+              <div className="absolute top-6 left-6">
+                <span className="px-4 py-2 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
+                  Next Up
                 </span>
-                <span className="countdown-label">Days</span>
-              </div>
-              <div className="countdown-item">
-                <span className="countdown-number">
-                  {String(timeLeft.hours).padStart(2, "0")}
-                </span>
-                <span className="countdown-label">Hours</span>
-              </div>
-              <div className="countdown-item">
-                <span className="countdown-number">
-                  {String(timeLeft.minutes).padStart(2, "0")}
-                </span>
-                <span className="countdown-label">Minutes</span>
-              </div>
-              <div className="countdown-item">
-                <span className="countdown-number">
-                  {String(timeLeft.seconds).padStart(2, "0")}
-                </span>
-                <span className="countdown-label">Seconds</span>
               </div>
             </div>
 
-            <div className="banner-actions">
-              <button
-                className="btn-primary banner-btn"
-                onClick={() => router.push("/results")}
-              >
-                <FaTrophy /> View Results
-              </button>
-              <button
-                className="btn-secondary banner-btn"
-                onClick={() => router.push(`/events/shutter-stories`)}
-              >
-                <FaEye /> View Details
-              </button>
-              <button
-                className="btn-secondary banner-btn"
-                onClick={() => handleRegisterClick("shutter-stories")}
-              >
-                Submit Now <FaArrowRight />
-              </button>
+            <div className="flex-1 flex flex-col justify-center text-center md:text-left">
+              <ScrollRevealText 
+                text={flagship.title}
+                as="h3"
+                className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-6 leading-none"
+              />
+              <div className="flex flex-wrap justify-center md:justify-start gap-4 mb-8">
+                <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                  <FaCalendarAlt className="text-uiupc-orange" /> {flagship.date}
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                  <FaMapMarkerAlt className="text-uiupc-orange" /> {flagship.location || 'UIU Campus'}
+                </div>
+              </div>
+              
+              <div className="mb-10 flex justify-center md:justify-start">
+                <CountdownTimer targetDate="2026-05-15T10:00:00" />
+              </div>
+
+              <Link href={`/events/${flagship.id}`} className="px-12 py-5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-uiupc-orange dark:hover:bg-uiupc-orange hover:text-white dark:hover:text-white transition-all shadow-xl group/btn active:scale-95 w-max">
+                Register for Event <FaArrowRight className="inline ml-3 group-hover/btn:translate-x-2 transition-transform" />
+              </Link>
             </div>
           </div>
-          <div className="banner-visual">
-            <div className="visual-glow"></div>
-            <div className="visual-frame">
-              <img
-                src="https://res.cloudinary.com/do0e8p5d2/image/upload/v1763223291/Blog_7_suqqrn.jpg"
-                alt="Shutter Stories"
+        </div>
+      </section>
+
+      {/* ── ZONE 2: RECENTLY CONCLUDED ───────────────────────────────── */}
+      <section id="concluded" className="py-12 md:py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-16">
+            <div className="max-w-2xl">
+              <ScrollRevealText 
+                text="Recently Concluded"
+                as="h2"
+                className="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter"
               />
             </div>
+            <Link href="/results" className="group flex items-center gap-4 text-[11px] font-black uppercase tracking-widest text-zinc-500 hover:text-uiupc-orange transition-all">
+              <FaTrophy className="text-uiupc-orange" /> Browse Event Results
+            </Link>
+          </div>
+
+          {/* Recently Ended Spotlight (NO CARD - DIRECT ON BACKGROUND) */}
+          <div className="flex flex-col lg:flex-row items-center gap-16 group">
+             <div className="w-full lg:w-[600px] aspect-square relative rounded-2xl overflow-hidden shadow-2xl">
+               <Image 
+                src={endedEvent.image ? getCloudinaryUrl(endedEvent.image, 1000, 'auto:best') : ''}
+                alt={endedEvent.title}
+                fill
+                className="object-cover transition-transform duration-1000 group-hover:scale-105"
+               />
+               <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
+               <div className="absolute bottom-6 left-6">
+                 <div className="px-4 py-2 bg-black/40 backdrop-blur-md border border-white/20 text-white text-[9px] font-black uppercase tracking-widest rounded-full">
+                   Completed
+                 </div>
+               </div>
+             </div>
+
+             <div className="flex-1 space-y-8 text-center lg:text-left">
+                <ScrollRevealText 
+                  text={endedEvent.title}
+                  as="h3"
+                  className="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-tight"
+                />
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm md:text-base font-medium max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                  {endedEvent.description}
+                </p>
+                <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+                  <Link href={`/events/${endedEvent.id}`} className="px-10 py-5 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-uiupc-orange dark:hover:bg-uiupc-orange hover:text-white dark:hover:text-white transition-all shadow-md">
+                    View Archival Gallery
+                  </Link>
+                  <Link href="/results" className="px-10 py-5 border border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-zinc-400 text-[11px] font-black uppercase tracking-widest rounded-xl hover:border-uiupc-orange hover:text-uiupc-orange transition-all">
+                    Results Breakdown
+                  </Link>
+                </div>
+             </div>
           </div>
         </div>
       </section>
 
-      {/* Signature Events Section */}
-      <section className="signature-events">
-        <div className="container">
-          <div className="section-header">
-            <h2>Signature Events</h2>
-            <p>
-              Discover our premier photography events that define excellence
-            </p>
-            <div className="header-decoration">
-              <div className="decoration-line"></div>
-              <FaCamera className="decoration-icon" />
-              <div className="decoration-line"></div>
-            </div>
+      {/* ── ZONE 3: THE VAULT ────────────────────────────────────────── */}
+      <section id="vault" className="py-12 md:py-20 px-6">
+
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <ScrollRevealText 
+              text="The Vault"
+              as="h2"
+              className="text-5xl md:text-7xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter"
+            />
           </div>
 
-          <div className="events-navigation">
-            <div className="nav-controls">
-              {Object.values(signatureEvents).map((event: any) => (
-                <button
-                  key={event.id}
-                  className={`nav-item ${
-                    activeEvent === event.id ? "active" : ""
-                  }`}
-                  onClick={() => setActiveEvent(event.id)}
-                >
-                  <span className="nav-icon">
-                    {event.id === "shutter-stories" ? "🎭" : "📸"}
-                  </span>
-                  <span className="nav-text">{event.title}</span>
-                </button>
-              ))}
-            </div>
-            <button
-              className="auto-play-btn"
-              onClick={() => setIsPlaying(!isPlaying)}
-            >
-              {isPlaying ? <FaPause /> : <FaPlay />}
-            </button>
-          </div>
-
-          <div className="event-details">
-            <div className="event-hero">
-              <div className="event-image">
-                <img src={currentEvent.image} alt={currentEvent.title} />
-                <div className="event-status">
-                  <span className={`status-badge ${currentEvent.status}`}>
-                    {currentEvent.status === "upcoming"
-                      ? "Upcoming"
-                      : currentEvent.status === "ongoing"
-                      ? "Ongoing"
-                      : "Completed"}
-                  </span>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {archive.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+            {archive.length === 0 && (
+              <div className="lg:col-span-3 text-center py-24 border-2 border-dashed border-zinc-200 dark:border-white/10 rounded-[2.5rem]">
+                <FaHistory className="text-5xl text-zinc-200 dark:text-zinc-800 mx-auto mb-6" />
+                <p className="text-zinc-400 dark:text-zinc-500 font-black uppercase text-[10px] tracking-[0.3em]">
+                  The Archival Vault is being indexed.
+                </p>
               </div>
-
-              <div className="event-content">
-                <div className="event-header">
-                  <h3 className="event-title">{currentEvent.title}</h3>
-                  <p className="event-subtitle">{currentEvent.subtitle}</p>
-                  <div className="event-chapter">{currentEvent.chapter}</div>
-                </div>
-
-                <div className="event-info">
-                  <div className="info-item">
-                    <FaCalendarAlt className="info-icon" />
-                    <span>{currentEvent.date}</span>
-                  </div>
-                  <div className="info-item">
-                    <FaMapMarkerAlt className="info-icon" />
-                    <span>{currentEvent.location}</span>
-                  </div>
-                  <div className="info-item">
-                    <FaUsers className="info-icon" />
-                    <span>{currentEvent.stats.participants} Participants</span>
-                  </div>
-                </div>
-
-                <p className="event-description">{currentEvent.description}</p>
-
-                <div className="event-highlights">
-                  <h4>Event Highlights</h4>
-                  <div className="highlights-grid">
-                    {(currentEvent.highlights as string[]).map((highlight, index) => (
-                      <div key={index} className="highlight-item">
-                        <div className="highlight-bullet"></div>
-                        <span>{highlight}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="event-stats">
-                  {Object.entries(currentEvent.stats).map(([key, value]: [string, any]) => (
-                    <div key={key} className="stat-card">
-                      <span className="stat-value">{value}</span>
-                      <span className="stat-name">
-                        {key.charAt(0).toUpperCase() + key.slice(1)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="event-actions">
-                  <button
-                    className="btn-secondary"
-                    onClick={() => router.push(`/events/${currentEvent.id}`)}
-                  >
-                    <FaEye /> View Details
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="events-cta">
-        <div className="container">
-          <div className="cta-content">
-            <h2>Ready to Capture Moments With Us?</h2>
-            <p>
-              Join our next event and showcase your photography talent to the
-              world
-            </p>
-            <div className="cta-actions">
-              <button
-                className="btn-primary cta-btn"
-                onClick={() => router.push("/events")}
-              >
-                View All Events
-              </button>
-              <button
-                className="btn-secondary cta-btn"
-                onClick={() => router.push("/join")}
-              >
-                Become a Member
-              </button>
-            </div>
+            )}
           </div>
         </div>
       </section>
     </div>
   );
 };
+
+const EventCard = ({ event }: { event: any }) => (
+  <Link href={`/events/${event.id}`} className="group flex flex-col bg-white dark:bg-zinc-900/40 rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden transition-all duration-500 hover:shadow-2xl dark:hover:shadow-uiupc-orange/10 hover:-translate-y-3">
+    {/* 1:1 Image Header */}
+    <div className="relative aspect-square overflow-hidden shadow-sm">
+      <Image 
+        src={event.image ? getCloudinaryUrl(event.image, 800, 'auto:best') : ''}
+        alt={event.title}
+        fill
+        className="object-cover transition-transform duration-1000 group-hover:scale-110"
+      />
+      <div className="absolute top-6 right-6 px-3 py-1 bg-black/40 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest rounded-full">
+        {event.chapter || 'Legacy'}
+      </div>
+    </div>
+    
+    <div className="p-10 flex flex-col flex-grow">
+      <h3 className="text-2xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-4 group-hover:text-uiupc-orange transition-colors">
+        {event.title}
+      </h3>
+      <div className="flex flex-col gap-3 mb-8">
+        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+          <FaCalendarAlt className="text-uiupc-orange/40" /> {event.date}
+        </div>
+        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+          <FaMapMarkerAlt className="text-uiupc-orange/40" /> {event.location || 'UIU'}
+        </div>
+      </div>
+      <div className="mt-auto pt-8 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-uiupc-orange group-hover:translate-x-3 transition-transform">
+          Detailed Archive
+        </span>
+        <FaArrowRight className="text-uiupc-orange" />
+      </div>
+    </div>
+  </Link>
+);
 
 export default EventsPage;

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaArrowRight, FaClock } from 'react-icons/fa';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -100,11 +101,15 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
 
             {/* Image Section */}
             <div className="relative h-56 overflow-hidden bg-zinc-100 dark:bg-zinc-800 rounded-t-slight">
-              <img 
-                src={event.image} 
-                alt={event.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+              {event.image && (
+                <Image 
+                  src={event.image} 
+                  alt={event.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              )}
               <div className="absolute inset-0 bg-black/10 z-10" />
             </div>
 
@@ -179,7 +184,7 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
           <h3 className="text-3xl font-black text-black dark:text-white uppercase tracking-tighter mb-4">No Upcoming Events</h3>
           <p className="text-gray-500 dark:text-gray-400 font-bold mb-8 max-w-sm mx-auto uppercase text-[10px] tracking-widest">Stay tuned for exciting photography events and workshops!</p>
           <Link 
-            href="/events" 
+            href="/events#hall-of-fame" 
             className="inline-flex px-8 py-4 border-2 border-uiupc-orange text-uiupc-orange font-black uppercase tracking-widest hover:bg-uiupc-orange hover:text-white transition-all rounded-full"
           >
             Browse Past Events

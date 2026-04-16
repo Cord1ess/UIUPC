@@ -9,13 +9,14 @@ export interface HeroImage {
   title: string;
   photographer: string;
   isHorizontal: boolean;
+  facebookPost?: string;
 }
 
 /** Utility to generate Cloudinary LOD variants dynamically */
 export const getCloudinaryUrl = (baseUrl: string, width: number, quality: 'auto:eco' | 'auto:best' | 'auto' = 'auto:eco') => {
   if (!baseUrl.includes('/upload/')) return baseUrl;
   const parts = baseUrl.split('/upload/');
-  return `${parts[0]}/upload/c_scale,w_${width},q_${quality}/${parts[1]}`;
+  return `${parts[0]}/upload/c_scale,w_${width},q_${quality},f_auto/${parts[1]}`;
 };
 
 /** Global registry of URLs that failed to load — never retry these */

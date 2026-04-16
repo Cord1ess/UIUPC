@@ -119,15 +119,26 @@ const ModernHero: React.FC = () => {
 
         const finalScale = entry.scale * globalScale;
 
-        // LOD Progressive Resolution Swapping — skip if base URL is known-broken
+        // Double-Buffered LOD Swapping (Zero-Flicker)
         if (entry.focusFactor > 0.4) {
           const baseUrl = imagePool[entry.imageIndex]?.url;
           const highResUrl = baseUrl ? getCloudinaryUrl(baseUrl, 1200, "auto:best") : null;
-          if (highResUrl && !failedUrls.has(highResUrl) && !failedUrls.has(getCloudinaryUrl(baseUrl, 400, "auto:eco"))) {
-            const imgEl = el.querySelector("img");
-            if (imgEl && imgEl.dataset.lod !== "high") {
-              imgEl.src = highResUrl;
-              imgEl.dataset.lod = "high";
+          if (highResUrl && !failedUrls.has(highResUrl)) {
+            const highResImg = el.querySelector(".high-res") as HTMLImageElement;
+            if (highResImg && highResImg.dataset.lod !== "high" && highResImg.dataset.fetching !== "true") {
+              highResImg.dataset.fetching = "true";
+              
+              const preloader = new window.Image();
+              preloader.src = highResUrl;
+              preloader.onload = () => {
+                highResImg.src = highResUrl;
+                highResImg.dataset.lod = "high";
+                highResImg.style.opacity = "1";
+              };
+              preloader.onerror = () => {
+                failedUrls.add(highResUrl);
+                highResImg.dataset.fetching = "false";
+              };
             }
           }
         }
@@ -208,42 +219,58 @@ const ModernHero: React.FC = () => {
       <div 
         className={`absolute inset-0 z-10 pointer-events-none transition-opacity duration-700 py-20`}
       >
-        {imagePool.map((image, index) => (
-          <div
-            key={image.id}
-            ref={(el) => { imageRefs.current[index] = el; }}
-            className="absolute top-0 left-0 pointer-events-auto"
-            style={{
-              width: IMAGE_WIDTH,
-              height: IMAGE_HEIGHT,
-              borderRadius: 6,
-              overflow: "hidden",
-              willChange: "transform, opacity",
-              backfaceVisibility: "hidden",
-              transform: "translate3d(-100vw, -100vh, 0)", // Start off-screen
-              opacity: 0, // Start invisible
-            }}
-            onClick={(e) => handleImageClick(index, e)}
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
-          >
-            <img
-              src={getCloudinaryUrl(image.url, 400, "auto:eco")} // Default to low res init
-              alt={image.title}
-              data-lod="low"
-              className="w-full h-full object-cover"
-              draggable={false}
-              loading="eager"
-              onError={(e) => {
-                const imgEl = e.currentTarget;
-                failedUrls.add(imgEl.src);
-                // Hide the entire card so it doesn't show a broken image placeholder
-                const card = imgEl.parentElement;
-                if (card) card.style.display = "none";
+        {imagePool.map((image, index) => {
+          const initUrl = getCloudinaryUrl(image.url, 320, "auto:eco");
+          // LCP Hero Preload Injection
+          if (index === 0 && typeof window !== "undefined") {
+            const link = document.createElement("link");
+            link.rel = "preload";
+            link.as = "image";
+            link.href = initUrl;
+            (link as any).fetchPriority = "high";
+            document.head.appendChild(link);
+          }
+
+          return (
+            <div
+              key={image.id}
+              ref={(el) => { imageRefs.current[index] = el; }}
+              className="absolute top-0 left-0 pointer-events-auto"
+              style={{
+                width: IMAGE_WIDTH,
+                height: IMAGE_HEIGHT,
+                borderRadius: 6,
+                overflow: "hidden",
+                willChange: "transform, opacity",
+                backfaceVisibility: "hidden",
+                transform: "translate3d(-100vw, -100vh, 0)", // Start off-screen
+                opacity: 0, // Start invisible
               }}
-            />
-          </div>
-        ))}
+              onClick={(e) => handleImageClick(index, e)}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              <img
+                src={initUrl}
+                alt={image.title}
+                className="base-layer w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                draggable={false}
+                loading="eager"
+                decoding="async"
+                {...({ fetchPriority: "high" } as any)}
+              />
+              <img
+                alt={image.title}
+                className="high-res absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 pointer-events-none"
+                draggable={false}
+                loading="lazy"
+                decoding="async"
+                data-lod="low"
+              />
+              <div className="absolute inset-0 bg-transparent" /> { /* Shield for layout/focus factor checks */ }
+            </div>
+          );
+        })}
       </div>
 
       {/* Bottom-Left Text Overlay — REFINED */}
@@ -322,6 +349,8 @@ const ModernHero: React.FC = () => {
       {/* Preview Modal */}
       <ImagePreviewModal
         image={selectedImageIndex >= 0 ? imagePool[selectedImageIndex] : null}
+        nextImageUrl={selectedImageIndex >= 0 ? getCloudinaryUrl(imagePool[(selectedImageIndex + 1) % imagePool.length].url, 1600, "auto:best") : undefined}
+        prevImageUrl={selectedImageIndex >= 0 ? getCloudinaryUrl(imagePool[(selectedImageIndex - 1 + imagePool.length) % imagePool.length].url, 1600, "auto:best") : undefined}
         isOpen={isModalOpen}
         onClose={closeModal}
         originRect={originRect}

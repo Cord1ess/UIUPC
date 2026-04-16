@@ -11,7 +11,7 @@ const GlobalLoader = () => {
 
   useEffect(() => {
     // Only fetch unique URLs, mapped to their low-res variant for insanely fast preloading
-    const urls = Array.from(new Set(buildImagePool(IMAGE_COUNT).map(img => getCloudinaryUrl(img.url, 400, 'auto:eco'))));
+    const urls = Array.from(new Set(buildImagePool(IMAGE_COUNT).map(img => getCloudinaryUrl(img.url, 320, 'auto:eco'))));
     let loadedCount = 0;
 
     urls.forEach(url => {

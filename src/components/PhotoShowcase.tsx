@@ -3,6 +3,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface Photo {
@@ -67,14 +68,12 @@ const PhotoShowcase: React.FC<PhotoShowcaseProps> = ({ photos = [] }) => {
             key={photo.id} 
             className={`group relative aspect-[4/3] ${theme === 'dark' ? 'bg-zinc-800' : 'bg-gray-100'} overflow-hidden shadow-m3-1 dark:shadow-none hover:shadow-m3-3 dark:hover:shadow-uiupc-orange/10 rounded-slight transition-all duration-300 hover:shadow-m3-3 hover:-translate-y-1 border border-black/[0.03] dark:border-white/[0.05]`}
           >
-            <img 
+            <Image 
               src={photo.url} 
-              alt={photo.title} 
-              loading="lazy" 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg';
-              }}
+              alt={photo.title}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 translate-y-8 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 backdrop-blur-[2px]">
               <h4 className="text-white text-xl font-black uppercase tracking-tight mb-2">

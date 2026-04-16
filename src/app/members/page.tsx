@@ -1,5 +1,12 @@
-import MembersPortal from "@/features/members/MembersPortal";
+import MembersView from "@/components/members/MembersView";
+// Import JSON directly on server
+import committee2026 from "@/data/committee2026.json";
+
+export const metadata = {
+  title: "The Community | UIUPC",
+  description: "Meet the visionaries, storytellers, and leaders of the UIU Photography Club community.",
+};
 
 export default function MembersPage() {
-  return <MembersPortal />;
+  return <MembersView committee2026={committee2026} />;
 }

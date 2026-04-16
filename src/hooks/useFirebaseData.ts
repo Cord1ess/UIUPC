@@ -20,25 +20,7 @@ export interface UIUPCEvent {
   [key: string]: any;
 }
 
-const fetchFeaturedPhotos = async (): Promise<Photo[]> => {
-  const querySnapshot = await getDocs(collection(db, "featuredPhotos"));
-  return querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Photo[];
-};
-
-const fetchUpcomingEvents = async (): Promise<UIUPCEvent[]> => {
-  const querySnapshot = await getDocs(collection(db, "events"));
-  const eventsData = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as UIUPCEvent[];
-  
-  return eventsData
-    .filter((event) => new Date(event.date) >= new Date())
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-};
+import { fetchFeaturedPhotos, fetchUpcomingEvents } from "../lib/fetchers";
 
 export const useFeaturedPhotos = () => {
   const { data, error, isLoading } = useSWR<Photo[]>("featuredPhotos", fetchFeaturedPhotos, {

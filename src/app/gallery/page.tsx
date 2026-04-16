@@ -1,216 +1,43 @@
-// src/app/gallery/page.tsx
-"use client";
+import React from 'react';
+import { fetchGalleryPhotos } from '@/lib/fetchers';
+import GalleryView from '@/components/gallery/GalleryView';
+import ScrollRevealText from '@/components/home/ScrollRevealText';
 
-import React, { useState, useEffect, useCallback } from "react";
-import PhotoGrid from "@/components/PhotoGrid";
-import FilterBar from "@/components/FilterBar";
-import Lightbox from "@/components/Lightbox";
-import "./Gallery.css";
+export const metadata = {
+  title: 'Gallery | UIUPC',
+  description: 'Explore the visual legacy of United International University Photography Club.',
+};
 
-const Gallery = () => {
-  const [photos, setPhotos] = useState<any[]>([]);
-  const [filteredPhotos, setFilteredPhotos] = useState<any[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
-  const [activeFilter, setActiveFilter] = useState("all");
-  const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [photosPerPage] = useState(12);
-
-  // Use absolute URL from env
-  const GALLERY_SCRIPT_URL = process.env.NEXT_PUBLIC_GAS_GALLERY_PUBLIC;
-
-  // Mock events (these remain the same)
-  const mockEvents = [
-    { id: "1", name: "Friday Exposure", slug: "Friday-Exposure" },
-    { id: "2", name: "Photo Adda", slug: "Photo-Adda" },
-    { id: "3", name: "Photo Walk", slug: "Photo-Walk" },
-    { id: "4", name: "Exhibitions Visit", slug: "Exhibitions-Visit" },
-    { id: "5", name: "Workshops & Talks", slug: "Workshops-and-Talks" },
-    { id: "6", name: "Shutter Stories", slug: "Shutter-Stories" },
-  ];
-
-  const fetchGalleryData = useCallback(async () => {
-    try {
-      setLoading(true);
-
-      if (!GALLERY_SCRIPT_URL) {
-        setPhotos([]);
-        setEvents(mockEvents);
-        setLoading(false);
-        return;
-      }
-
-      // Try to fetch from the API first
-      const response = await fetch(`${GALLERY_SCRIPT_URL}?action=getGallery`);
-
-      if (response.ok) {
-        const result = await response.json();
-
-        if (
-          result.status === "success" &&
-          result.data &&
-          result.data.length > 0
-        ) {
-          // Transform API data to match our photo structure
-          const apiPhotos = result.data.map((photo: any) => ({
-            id: photo.id ? photo.id.toString() : Math.random().toString(),
-            url: photo.url || photo.imageUrl,
-            title: photo.title || "Untitled",
-            description: photo.description || "",
-            eventId: photo.eventId ? photo.eventId.toString() : "1", // Ensure eventId is string
-            uploadedAt: new Date(
-              photo.uploadedAt || photo.timestamp || Date.now()
-            ),
-            facebookPost: photo.facebookPost || "",
-          }));
-
-          setPhotos(apiPhotos);
-          setEvents(mockEvents);
-          setLoading(false);
-          return;
-        }
-      }
-
-      setPhotos([]);
-      setEvents(mockEvents);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching gallery data:", error);
-      setPhotos([]);
-      setEvents(mockEvents);
-      setLoading(false);
-    }
-  }, [GALLERY_SCRIPT_URL]);
-
-  // Fetch data from Google Sheets
-  useEffect(() => {
-    fetchGalleryData();
-  }, [fetchGalleryData]);
-
-  const filterPhotos = useCallback(() => {
-    let filtered = photos;
-
-    if (activeFilter !== "all") {
-      filtered = photos.filter((photo) => photo.eventId === activeFilter);
-    }
-
-    // Sort by ID in descending order (newest first)
-    const sortedPhotos = [...filtered].sort((a, b) => {
-      const idA = parseInt(a.id) || 0;
-      const idB = parseInt(b.id) || 0;
-      return idB - idA;
-    });
-    
-    setFilteredPhotos(sortedPhotos);
-    setCurrentPage(1); // Reset to first page when filter changes
-  }, [activeFilter, photos]);
-
-  useEffect(() => {
-    filterPhotos();
-  }, [filterPhotos]);
-
-  // Get current photos for pagination
-  const indexOfLastPhoto = currentPage * photosPerPage;
-  const indexOfFirstPhoto = indexOfLastPhoto - photosPerPage;
-  const currentPhotos = filteredPhotos.slice(
-    indexOfFirstPhoto,
-    indexOfLastPhoto
-  );
-
-  // Change page
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
-  // Calculate total pages
-  const totalPages = Math.ceil(filteredPhotos.length / photosPerPage);
-
-  const handleFilterChange = (filter: string) => {
-    setActiveFilter(filter);
-  };
-
-  const openLightbox = (photo: any) => {
-    setSelectedPhoto(photo);
-  };
-
-  const closeLightbox = () => {
-    setSelectedPhoto(null);
-  };
-
-  if (loading) {
-    return <div className="loading" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading gallery...</div>;
-  }
+const GalleryPage = async () => {
+  const photos = await fetchGalleryPhotos();
 
   return (
-    <div className="gallery-page">
-      <div className="page-header">
-        <h1>Photo Gallery</h1>
-        <p>Explore our collection of stunning photographs</p>
-      </div>
-
-      <FilterBar
-        events={events}
-        activeFilter={activeFilter}
-        onFilterChange={handleFilterChange}
-      />
-
-      <PhotoGrid photos={currentPhotos} onPhotoClick={openLightbox} />
-
-      {/* Pagination Component */}
-      {totalPages > 1 && (
-        <div className="pagination-container">
-          <div className="pagination">
-            <button
-              className={`pagination-btn ${
-                currentPage === 1 ? "disabled" : ""
-              }`}
-              onClick={() => paginate(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </button>
-
-            <div className="pagination-numbers">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (number) => (
-                  <button
-                    key={number}
-                    className={`pagination-btn ${
-                      currentPage === number ? "active" : ""
-                    }`}
-                    onClick={() => paginate(number)}
-                  >
-                    {number}
-                  </button>
-                )
-              )}
-            </div>
-
-            <button
-              className={`pagination-btn ${
-                currentPage === totalPages ? "disabled" : ""
-              }`}
-              onClick={() => paginate(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
+    <main className="min-h-screen bg-[#f9f5ea] dark:bg-[#121212] transition-colors duration-500 pt-32 pb-20 px-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Hero Section */}
+        <div className="flex flex-col items-center text-center mb-20">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="h-[1px] w-8 bg-uiupc-orange" />
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">The Visual Archive</span>
+            <div className="h-[1px] w-8 bg-uiupc-orange" />
           </div>
-
-          <div className="pagination-info">
-            Showing {indexOfFirstPhoto + 1}-
-            {Math.min(indexOfLastPhoto, filteredPhotos.length)} of{" "}
-            {filteredPhotos.length} photos
-          </div>
+          
+          <ScrollRevealText 
+            text="Photo Gallery"
+            as="h1"
+            className="text-6xl md:text-8xl font-black text-zinc-900 dark:text-white mb-6 uppercase tracking-tighter leading-none"
+          />
+          <p className="max-w-xl text-zinc-600 dark:text-zinc-400 text-sm md:text-base font-medium leading-relaxed">
+            Every frame tells a story. Journey through the chapters of UIU Photography Club 
+            and witness the art of capturing light.
+          </p>
         </div>
-      )}
 
-      {selectedPhoto && (
-        <Lightbox photo={selectedPhoto} onClose={closeLightbox} />
-      )}
-    </div>
+        {/* Gallery View (Client Layer) */}
+        <GalleryView initialPhotos={photos} />
+      </div>
+    </main>
   );
 };
 
-export default Gallery;
+export default GalleryPage;

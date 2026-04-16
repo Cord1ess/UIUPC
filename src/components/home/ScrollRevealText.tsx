@@ -27,6 +27,7 @@ const ScrollRevealText: React.FC<ScrollRevealTextProps> = ({
   const words = text.split(" ");
   const { theme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
+  const [hasAnimated, setHasAnimated] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
@@ -36,6 +37,27 @@ const ScrollRevealText: React.FC<ScrollRevealTextProps> = ({
   const finalThemeColor = theme === "dark" ? "#FFFFFF" : "#1A1A1A";
   const finalColor = useOrange ? "#f58920" : finalThemeColor;
 
+  if (!mounted) {
+    return (
+      <Tag className={`${className} opacity-0`}>
+        {text}
+      </Tag>
+    );
+  }
+
+  // Once the sequence has fully completed, swap to a purely functional DOM node.
+  // This ensures changing the theme later instantly toggles color WITHOUT re-playing the intro!
+  if (hasAnimated) {
+    return (
+      <Tag className={`${className} inline-flex flex-wrap`} style={{ color: finalColor }}>
+        {words.map((word, i) => (
+          <span key={i} className="inline-block mr-[0.3em] whitespace-nowrap">
+            {word}
+          </span>
+        ))}
+      </Tag>
+    );
+  }
 
   const wordVariants: Variants = {
     hidden: { opacity: 0 },
@@ -57,18 +79,11 @@ const ScrollRevealText: React.FC<ScrollRevealTextProps> = ({
     },
   };
 
-  if (!mounted) {
-    return (
-      <Tag className={`${className} opacity-0`}>
-        {text}
-      </Tag>
-    );
-  }
-
   return (
     <Tag className={`${className} inline-flex flex-wrap`}>
       {words.map((word, i) => (
         <motion.span
+          // Removed 'theme' from the key to prevent re-mounting on theme switch
           key={`${i}-${mounted}`}
           custom={i}
           variants={wordVariants}
@@ -77,6 +92,12 @@ const ScrollRevealText: React.FC<ScrollRevealTextProps> = ({
           animate={{ color: finalColor }}
           transition={{ duration: 0.3 }}
           viewport={{ once: true, margin: "20%" }}
+          onAnimationComplete={(def) => {
+            // Once the absolutely final word finishes its "visible" sequence, lock it
+            if (def === "visible" && i === words.length - 1) {
+              setHasAnimated(true);
+            }
+          }}
           className="inline-block mr-[0.3em] whitespace-nowrap"
         >
           {word}
@@ -86,4 +107,4 @@ const ScrollRevealText: React.FC<ScrollRevealTextProps> = ({
   );
 };
 
-export default ScrollRevealText;
+export default React.memo(ScrollRevealText);

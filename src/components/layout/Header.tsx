@@ -29,7 +29,6 @@ const PRIMARY_LINKS: NavItem[] = [
 ];
 
 const ABOUT_SUBMENU: SubMenuItem[] = [
-  { path: "/committee-2026", label: "Committee 2026" },
   { path: "/members", label: "Members" },
   { path: "/blog", label: "Blog" },
   { path: "/contact", label: "Contact" },
@@ -122,7 +121,7 @@ const Header: React.FC = memo(() => {
                 UIUPC
               </span>
               <span className="text-uiupc-orange text-[8px] font-bold uppercase tracking-[0.12em] whitespace-nowrap">
-                UIU <span className="font-serif italic normal-case text-[10px] tracking-normal px-0.5">Photography</span> Club
+                UIU PHOTOGRAPHY CLUB
               </span>
             </div>
           </Link>
