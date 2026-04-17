@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import ModernHero from '@/components/hero/ModernHero';
@@ -52,7 +52,9 @@ const Home = () => {
             </div>
             
             <div className="mb-12">
-              <UpcomingEventsSection />
+              <Suspense fallback={<div className="h-[400px] w-full bg-zinc-100 dark:bg-zinc-900/50 rounded-3xl animate-pulse" />}>
+                <UpcomingEventsSection />
+              </Suspense>
             </div>
 
             <div className="text-center">
@@ -80,7 +82,9 @@ const Home = () => {
                   A curated selection of works from our talented photography community.
                </p>
             </div>
-            <FeaturedGallerySection />
+            <Suspense fallback={<div className="h-[600px] w-full bg-zinc-100 dark:bg-zinc-900/50 rounded-3xl animate-pulse" />}>
+               <FeaturedGallerySection />
+            </Suspense>
           </div>
         </section>
         

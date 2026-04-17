@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FaTrophy, FaEye, FaArrowRight, FaCalendarAlt, FaMapMarkerAlt, FaHistory, FaStar } from 'react-icons/fa';
@@ -7,35 +7,7 @@ import { getCloudinaryUrl } from '@/components/hero/utils/constants';
 import CountdownTimer from '@/components/events/CountdownTimer';
 import ScrollRevealText from '@/components/home/ScrollRevealText';
 
-const EventsPage = async () => {
-  const allEvents = await fetchAllEvents();
-  
-  // Categorization Logic
-  const upcomingEvents = allEvents.filter(e => e.status === 'upcoming' || e.status === 'ongoing');
-  const recentlyEnded = allEvents.filter(e => e.status === 'completed').slice(0, 1);
-  const archive = allEvents.filter(e => e.status === 'completed').slice(recentlyEnded.length);
-  
-  const flagship = upcomingEvents[0] || {
-    id: "recruitment-2026",
-    title: "Member Recruitment 2026",
-    subtitle: "Join the Legacy",
-    date: "May 15, 2026",
-    location: "UIU Campus",
-    description: "Start your journey in visual storytelling with UIUPC. We are looking for passionate individuals to join our creative family.",
-    image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772526242/Artboard_1-100_u1jtvp.jpg",
-    status: 'upcoming'
-  };
-
-  const endedEvent = recentlyEnded[0] || {
-    id: "shutter-stories",
-    title: "Shutter Stories Chapter IV",
-    date: "December 17, 2025",
-    location: "UIU Multipurpose Hall",
-    description: "National Photography Exhibition concluded with grand success.",
-    image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1763223291/Blog_7_suqqrn.jpg",
-    status: 'completed'
-  };
-
+const EventsPage = () => {
   return (
     <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#121212] transition-colors duration-500 pb-20">
       {/* ── ZONE 0: INTERACTIVE MAP (ENTRY) ────────────────────────── */}
@@ -63,6 +35,48 @@ const EventsPage = async () => {
         </div>
       </section>
 
+      <Suspense fallback={
+        <div className="py-20 px-6 flex justify-center">
+           <div className="w-12 h-12 border-4 border-uiupc-orange border-t-transparent rounded-full animate-spin" />
+        </div>
+      }>
+        <EventsContent />
+      </Suspense>
+    </div>
+  );
+};
+
+const EventsContent = async () => {
+  const allEvents = await fetchAllEvents();
+  
+  // Categorization Logic
+  const upcomingEvents = allEvents.filter(e => e.status === 'upcoming' || e.status === 'ongoing');
+  const recentlyEnded = allEvents.filter(e => e.status === 'completed').slice(0, 1);
+  const archive = allEvents.filter(e => e.status === 'completed').slice(recentlyEnded.length);
+  
+  const flagship = upcomingEvents[0] || {
+    id: "recruitment-2026",
+    title: "Member Recruitment 2026",
+    subtitle: "Join the Legacy",
+    date: "May 15, 2026",
+    location: "UIU Campus",
+    description: "Start your journey in visual storytelling with UIUPC. We are looking for passionate individuals to join our creative family.",
+    status: 'upcoming',
+    image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772526242/Artboard_1-100_u1jtvp.jpg"
+  };
+
+  const endedEvent = recentlyEnded[0] || {
+    id: "shutter-stories",
+    title: "Shutter Stories Chapter IV",
+    date: "December 17, 2025",
+    location: "UIU Multipurpose Hall",
+    description: "National Photography Exhibition concluded with grand success.",
+    status: 'completed',
+    image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1763223291/Blog_7_suqqrn.jpg"
+  };
+
+  return (
+    <>
       {/* ── ZONE 1: UPCOMING EVENTS ─────────────────────────────────── */}
       <section id="upcoming" className="py-12 md:py-20 px-6">
 
@@ -83,7 +97,7 @@ const EventsPage = async () => {
                 alt={flagship.title}
                 fill
                 className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                priority
+                priority={upcomingEvents.length > 0}
               />
               <div className="absolute top-6 left-6">
                 <span className="px-4 py-2 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
@@ -201,7 +215,7 @@ const EventsPage = async () => {
           </div>
         </div>
       </section>
-    </div>
+    </>
   );
 };
 

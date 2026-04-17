@@ -37,3 +37,7 @@ firedebug.log*
 .project
 .settings/
 .classpath
+
+# Custom
+reference/
+references/

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1",
+    "year": "2025",
+    "title": "National Photography Exhibition: Gold Medal",
+    "description": "UIUPC secured the top honor at the Grand National Photo Summit for 'Excellence in Visual Storytelling', competing against 50+ regional clubs.",
+    "image": "/images/achievements/gold-medal.png",
+    "tags": ["Awards", "Recognition"]
+  },
+  {
+    "id": "2",
+    "year": "2024",
+    "title": "Best University Club of the Year",
+    "description": "Awarded by the Student Affairs Directorate for consistent contribution to campus culture through workshops, exhibitions, and professional coverage.",
+    "image": "/images/achievements/best-club.png",
+    "tags": ["Legacy", "University"]
+  },
+  {
+    "id": "3",
+    "year": "2023",
+    "title": "International Collaboration: Global Frames",
+    "description": "Hosted a cross-border virtual exhibition with photographers from 5 countries, fostering a global dialogue on documentary photography and heritage.",
+    "image": "/images/achievements/global-frames.png",
+    "tags": ["Global", "Exhibition"]
+  },
+  {
+    "id": "4",
+    "year": "2022",
+    "title": "Visual Literacy Initiative Launch",
+    "description": "Successfully trained over 500 students in foundational photography through our community-led peer mentorship program, defining the club's educational mission.",
+    "image": "/images/achievements/mentorship.png",
+    "tags": ["Education", "Impact"]
+  }
+]

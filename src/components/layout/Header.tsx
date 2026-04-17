@@ -22,46 +22,47 @@ interface SubMenuItem {
   label: string;
 }
 
-// ─── Nav Structure ────────────────────────────────────────
 const PRIMARY_LINKS: NavItem[] = [
   { path: "/events", label: "Events" },
   { path: "/gallery", label: "Gallery" },
 ];
 
-const ABOUT_SUBMENU: SubMenuItem[] = [
+const EXPLORE_SUBMENU: SubMenuItem[] = [
   { path: "/members", label: "Members" },
+  { path: "/studio", label: "Studio" },
+  { path: "/achievements", label: "Achievements" },
   { path: "/blog", label: "Blog" },
   { path: "/contact", label: "Contact" },
 ];
 
 // All navigable paths for active detection
-const ALL_ABOUT_PATHS = ABOUT_SUBMENU.map((i) => i.path);
+const ALL_EXPLORE_PATHS = EXPLORE_SUBMENU.map((i) => i.path);
 
 // ─── Component ────────────────────────────────────────────
 const Header: React.FC = memo(() => {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, isSwitching } = useTheme();
   const { isAnimationComplete } = useLoaderStore();
 
   // ── State ──
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
+  const [mobileExploreOpen, setMobileExploreOpen] = useState(false);
 
   // ── Refs ──
   const headerRef = useRef<HTMLElement>(null);
-  const aboutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const exploreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Close menus on route change ──
   useEffect(() => {
     setMobileOpen(false);
-    setAboutOpen(false);
-    setMobileAboutOpen(false);
+    setExploreOpen(false);
+    setMobileExploreOpen(false);
   }, [pathname]);
 
   const isActive = useCallback((path: string) => pathname === path, [pathname]);
-  const isAboutActive = ALL_ABOUT_PATHS.includes(pathname);
+  const isExploreActive = ALL_EXPLORE_PATHS.includes(pathname);
   const isAdminPage = pathname.startsWith('/admin');
 
 
@@ -74,13 +75,13 @@ const Header: React.FC = memo(() => {
     }
   }, []);
 
-  const openAbout = useCallback(() => {
-    if (aboutTimeoutRef.current) clearTimeout(aboutTimeoutRef.current);
-    setAboutOpen(true);
+  const openExplore = useCallback(() => {
+    if (exploreTimeoutRef.current) clearTimeout(exploreTimeoutRef.current);
+    setExploreOpen(true);
   }, []);
 
-  const closeAbout = useCallback(() => {
-    aboutTimeoutRef.current = setTimeout(() => setAboutOpen(false), 200);
+  const closeExplore = useCallback(() => {
+    exploreTimeoutRef.current = setTimeout(() => setExploreOpen(false), 200);
   }, []);
 
   // ── Staggered animation delay helper ──
@@ -148,20 +149,20 @@ const Header: React.FC = memo(() => {
 
           <div
             className="relative"
-            onMouseEnter={openAbout}
-            onMouseLeave={closeAbout}
+            onMouseEnter={openExplore}
+            onMouseLeave={closeExplore}
             style={itemDelay(PRIMARY_LINKS.length + 1)}
           >
             <button
               className={`flex items-center gap-1 px-3.5 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-colors duration-200
                 ${theme === 'light'
-                  ? (isAboutActive ? "text-uiupc-orange bg-uiupc-orange/[0.07]" : "text-black/50 hover:text-black hover:bg-black/[0.03]")
-                  : (isAboutActive ? "text-uiupc-orange bg-uiupc-orange/[0.15]" : "text-white/50 hover:text-white hover:bg-white/[0.05]")
+                  ? (isExploreActive ? "text-uiupc-orange bg-uiupc-orange/[0.07]" : "text-black/50 hover:text-black hover:bg-black/[0.03]")
+                  : (isExploreActive ? "text-uiupc-orange bg-uiupc-orange/[0.15]" : "text-white/50 hover:text-white hover:bg-white/[0.05]")
                 }`}
-              onClick={() => setAboutOpen((p) => !p)}
+              onClick={() => setExploreOpen((p) => !p)}
             >
-              About
-              <svg className={`w-3 h-3 transition-transform ${aboutOpen ? "rotate-180" : ""}`} viewBox="0 0 20 20" fill="currentColor">
+              Explore
+              <svg className={`w-3 h-3 transition-transform ${exploreOpen ? "rotate-180" : ""}`} viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
               </svg>
             </button>
@@ -169,10 +170,10 @@ const Header: React.FC = memo(() => {
             {/* Desktop Submenu */}
             <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 border rounded-xl shadow-xl transition-all origin-top
               ${theme === 'light' ? 'bg-white border-black/[0.06]' : 'bg-neutral-800 border-white/[0.06]'}
-              ${aboutOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}
+              ${exploreOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}
             >
               <div className="py-1.5">
-                {ABOUT_SUBMENU.map((sub) => (
+                {EXPLORE_SUBMENU.map((sub) => (
                   <Link
                     key={sub.path}
                     href={sub.path}
@@ -194,15 +195,21 @@ const Header: React.FC = memo(() => {
         <div className="flex-1 flex items-center justify-end gap-2" style={itemDelay(PRIMARY_LINKS.length + 3)}>
           {/* Theme Toggle Button */}
           <button
-            onClick={toggleTheme}
-            className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-300
+            onClick={(e) => toggleTheme(e)}
+            disabled={isSwitching}
+            className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-300 relative overflow-hidden
+              ${isSwitching ? 'opacity-70 scale-95 cursor-wait' : 'hover:scale-105 active:scale-95'}
               ${theme === 'light' ? 'bg-black/[0.04] hover:bg-black/[0.08]' : 'bg-white/[0.04] hover:bg-white/[0.08]'}`}
             aria-label="Toggle theme"
           >
-            {theme === "light" ? (
-              <FiMoon className="w-4 h-4 text-black" />
+            {isSwitching ? (
+               <div className="w-4 h-4 border-2 border-uiupc-orange border-t-transparent rounded-full animate-spin" />
             ) : (
-              <FiSun className="w-4 h-4 text-white" />
+               theme === "light" ? (
+                 <FiMoon className="w-4 h-4 text-black" />
+               ) : (
+                 <FiSun className="w-4 h-4 text-white" />
+               )
             )}
           </button>
 
@@ -247,7 +254,7 @@ const Header: React.FC = memo(() => {
           ${theme === 'light' ? 'bg-white border-black/[0.06]' : 'bg-neutral-800 border-white/[0.06]'}
           ${mobileOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}>
           <div className="p-4 flex flex-col gap-1">
-            {[...PRIMARY_LINKS, ...ABOUT_SUBMENU].map((item) => (
+            {[...PRIMARY_LINKS, ...EXPLORE_SUBMENU].map((item) => (
               <Link 
                 key={item.path} 
                 href={item.path} 
@@ -271,9 +278,9 @@ const Header: React.FC = memo(() => {
                     Sign Out
                   </button>
                 ) : (
-                  <Link 
-                    href="/admin" 
-                    className="block w-full text-center py-4 rounded-lg bg-uiupc-orange text-white text-xs font-black uppercase tracking-widest" 
+                  <Link
+                    href="/admin"
+                    className="block w-full text-center py-4 rounded-lg bg-uiupc-orange text-white text-xs font-black uppercase tracking-widest"
                     onClick={() => setMobileOpen(false)}
                   >
                     Admin Panel

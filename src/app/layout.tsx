@@ -30,6 +30,7 @@ import Footer from "@/components/layout/Footer";
 import GlobalLoader from "@/components/common/GlobalLoader";
 import DynamicGrid from "@/components/ui/DynamicGrid";
 import { cookies } from "next/headers";
+import PageTransition from "@/components/layout/PageTransition";
 
 export default async function RootLayout({
   children,
@@ -51,7 +52,11 @@ export default async function RootLayout({
           <AuthProvider>
             <GlobalLoader />
             <Header />
-            <main>{children}</main>
+            <main>
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </main>
             <Footer />
           </AuthProvider>
         </ThemeProvider>

@@ -2,10 +2,11 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { Photo } from '@/hooks/useFirebaseData';
 import { getCloudinaryUrl } from '@/components/hero/utils/constants';
 import ImagePreviewModal from '@/components/hero/ImagePreviewModal';
+import ScrollRevealText from '@/components/home/ScrollRevealText';
 import { FaFilter, FaExpandAlt, FaFacebook, FaThLarge, FaColumns, FaSearch, FaChevronDown } from 'react-icons/fa';
 
 interface GalleryViewProps {
@@ -31,6 +32,19 @@ const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState(true);
+  const [isToolVisible, setIsToolVisible] = useState(true);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const previous = scrollY.getPrevious() || 0;
+    if (latest > previous && latest > 300) {
+      setIsToolVisible(false);
+    } else {
+      setIsToolVisible(true);
+    }
+  });
 
   // Sync visible count when filters change
   useEffect(() => {
@@ -40,6 +54,9 @@ const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
   const filteredPhotos = useMemo(() => {
     let result = initialPhotos;
     
+    // Remove failed images
+    result = result.filter(p => !failedImages.has(p.url));
+
     // Category Filter
     if (activeFilter !== 'all') {
       result = result.filter(p => p.eventId === activeFilter);
@@ -55,7 +72,7 @@ const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
     }
     
     return result;
-  }, [activeFilter, searchQuery, initialPhotos]);
+  }, [activeFilter, searchQuery, initialPhotos, failedImages]);
 
   const sortedPhotos = useMemo(() => {
     return [...filteredPhotos].sort((a, b) => {
@@ -89,76 +106,113 @@ const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
     setVisibleCount(prev => prev + ITEMS_PER_PAGE);
   };
 
+  const handleImageError = (url: string) => {
+    setFailedImages(prev => new Set(prev).add(url));
+  };
+
   const getCategoryName = (id: string) => {
     return CATEGORIES.find(c => c.id === id)?.name || 'Photography';
   };
 
   return (
     <div className="w-full">
-      {/* Featured Controls (Search & Layout) */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8 px-4">
-        {/* Search */}
-        <div className="relative w-full md:w-80 group">
-          <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-uiupc-orange transition-colors" />
-          <input 
-            type="text"
-            placeholder="Search moments..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 rounded-xl text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-uiupc-orange/50 transition-all shadow-sm"
-          />
-        </div>
+      {/* ── UNIFIED DISCOVERY BAR (Centered & Smart Sticky) ───────────────── */}
+      <section className="pb-4 flex justify-center px-2 md:px-0">
+        <motion.div 
+          initial={{ y: 0, opacity: 1 }}
+          animate={{ 
+            y: isToolVisible ? 0 : -100, 
+            opacity: isToolVisible ? 1 : 0 
+          }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className={`
+            w-full max-w-4xl bg-white dark:bg-zinc-950 border border-black/10 dark:border-white/10 
+            rounded-2xl md:rounded-[2rem] shadow-xl md:sticky md:top-24 z-50 overflow-hidden
+            ${!isToolVisible && 'pointer-events-none'}
+          `}
+        >
+          {/* Row 1: Search */}
+          <div className="relative group border-b border-black/5 dark:border-white/5">
+            <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 transition-colors group-focus-within:text-uiupc-orange" />
+            <input 
+              type="text"
+              placeholder="Search moments..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-14 pr-6 py-4 md:py-5 bg-transparent text-[10px] md:text-sm font-black uppercase tracking-widest outline-none dark:text-white"
+            />
+          </div>
 
-        {/* Layout Switcher */}
-        <div className="flex items-center bg-white dark:bg-zinc-900 p-1.5 rounded-xl border border-black/5 dark:border-white/5 shadow-sm">
-          <button 
-            onClick={() => setLayoutMode('square')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${layoutMode === 'square' ? 'bg-[#f9f5ea] dark:bg-zinc-800 text-uiupc-orange' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'}`}
-          >
-            <FaThLarge className="text-xs" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Square</span>
-          </button>
-          <button 
-            onClick={() => setLayoutMode('masonry')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${layoutMode === 'masonry' ? 'bg-[#f9f5ea] dark:bg-zinc-800 text-uiupc-orange' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'}`}
-          >
-            <FaColumns className="text-xs" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Masonry</span>
-          </button>
-        </div>
-      </div>
+          {/* Row 2: Categories */}
+          <div className="flex items-center bg-[#f9f5ea]/30 dark:bg-white/[0.02] px-6 py-2 border-b border-black/5 dark:border-white/5">
+            <span className="shrink-0 text-[10px] font-black uppercase tracking-widest text-zinc-400 mr-4">Filters:</span>
+            <div className="flex-1 flex gap-6 overflow-x-auto no-scrollbar py-1">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveFilter(cat.id)}
+                  className="relative shrink-0 group py-1"
+                >
+                  <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${
+                    activeFilter === cat.id 
+                      ? 'text-uiupc-orange' 
+                      : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
+                  }`}>
+                    {cat.name}
+                  </span>
+                  {activeFilter === cat.id && (
+                    <motion.div 
+                      layoutId="activeFilter"
+                      className="absolute -bottom-1 left-0 right-0 h-[1px] bg-uiupc-orange rounded-full"
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
 
-      {/* Category Navigation (Sticky - Horizontal Scroll on Mobile) */}
-      <div className="sticky top-24 z-40 mb-16 p-2 bg-[#f9f5ea]/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-full border border-black/5 dark:border-white/5 shadow-md max-w-7xl mx-auto overflow-x-auto no-scrollbar">
-        <div className="flex items-center justify-start md:justify-center gap-1 md:gap-6 py-1 min-w-max md:min-w-0 px-4">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveFilter(cat.id)}
-              className={`whitespace-nowrap px-6 py-2.5 text-[9px] font-black uppercase tracking-[0.2em] rounded-full transition-all ${
-                activeFilter === cat.id
-                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-lg'
-                  : 'bg-transparent text-zinc-500 hover:text-uiupc-orange'
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
-        </div>
-      </div>
+          {/* Row 3: Layout Arrangement */}
+          <div className="flex items-center justify-between px-6 py-2 bg-zinc-50/50 dark:bg-black/20">
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Arrangement:</span>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setLayoutMode('square')}
+                className={`flex items-center gap-2 px-3 md:px-4 py-1.5 rounded-xl transition-all ${layoutMode === 'square' ? 'bg-white dark:bg-zinc-800 text-uiupc-orange shadow-sm' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'}`}
+              >
+                <FaThLarge className="text-xs" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Square</span>
+              </button>
+              <button 
+                onClick={() => setLayoutMode('masonry')}
+                className={`flex items-center gap-2 px-3 md:px-4 py-1.5 rounded-xl transition-all ${layoutMode === 'masonry' ? 'bg-white dark:bg-zinc-800 text-uiupc-orange shadow-sm' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'}`}
+              >
+                <FaColumns className="text-xs" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Masonry</span>
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </section>
 
-      {/* Main Content Area */}
-      <div className={`transition-all duration-500 ${layoutMode === 'masonry' ? 'columns-2 md:columns-3 lg:columns-4 gap-6' : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8'}`}>
+      {/* Main Content Area (Standardized Precise Gaps) */}
+      <div className={`transition-all duration-500 pb-12 ${
+        layoutMode === 'masonry' 
+          ? 'columns-2 md:columns-3 lg:columns-4 gap-3 md:gap-6' 
+          : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6'
+      }`}>
         <AnimatePresence mode="popLayout">
           {visiblePhotos.map((photo, index) => (
             <motion.div
               layout
               key={photo.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-              className={`group relative overflow-hidden rounded-2xl cursor-pointer mb-6 ${layoutMode === 'square' ? 'aspect-square mb-0' : 'break-inside-avoid shadow-lg'}`}
+              className={`
+                group relative overflow-hidden rounded-lg md:rounded-xl cursor-pointer
+                ${layoutMode === 'square' ? 'aspect-square' : 'break-inside-avoid mb-3 md:mb-6 shadow-sm hover:shadow-xl transition-shadow'}
+              `}
               onClick={() => handleOpenModal(index)}
             >
               <Image 
@@ -168,6 +222,7 @@ const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
                 height={layoutMode === 'square' ? 800 : (photo.isHorizontal ? 600 : 1000)}
                 className={`w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110 ${layoutMode === 'square' ? 'h-full' : ''}`}
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                onError={() => handleImageError(photo.url)}
               />
               
               {/* Overlay Metadata */}

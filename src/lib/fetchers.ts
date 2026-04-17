@@ -100,3 +100,20 @@ export const fetchBlogPosts = async (): Promise<any[]> => {
     return [];
   }
 };
+
+import achievementsData from "@/data/achievements.json";
+
+export interface Achievement {
+  id: string;
+  year: string;
+  title: string;
+  description: string;
+  image: string;
+  tags: string[];
+}
+
+export const fetchAchievements = async (): Promise<Achievement[]> => {
+  // Simulating server-side fetch from the local JSON
+  return achievementsData as Achievement[];
+};
+
