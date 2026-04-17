@@ -13,28 +13,49 @@ const GlobalLoader = () => {
     // Only fetch unique URLs, mapped to their low-res variant for insanely fast preloading
     const urls = Array.from(new Set(buildImagePool(IMAGE_COUNT).map(img => getCloudinaryUrl(img.url, 320, 'auto:eco'))));
     let loadedCount = 0;
+    let isCancelled = false;
+
+    // Guardian Timeout: If network drops TCP packets or DNS fails, bypass the loader.
+    const fallbackTimer = setTimeout(() => {
+      if (!isCancelled) {
+        setProgress(100);
+        setLoaded(true);
+      }
+    }, 4000); // 4 seconds max wait
 
     urls.forEach(url => {
       const img = new Image();
       img.src = url;
       img.onload = () => {
+        if (isCancelled) return;
         loadedCount++;
         setProgress((loadedCount / urls.length) * 100);
         if (loadedCount === urls.length) {
+          clearTimeout(fallbackTimer);
           setLoaded(true);
         }
       };
       img.onerror = () => {
+        if (isCancelled) return;
         failedUrls.add(url);
         loadedCount++;
         setProgress((loadedCount / urls.length) * 100);
         if (loadedCount === urls.length) {
+          clearTimeout(fallbackTimer);
           setLoaded(true);
         }
       };
     });
     
-    if (urls.length === 0) setLoaded(true);
+    if (urls.length === 0) {
+      clearTimeout(fallbackTimer);
+      setLoaded(true);
+    }
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(fallbackTimer);
+    };
   }, [setLoaded, setProgress]);
 
   useEffect(() => {

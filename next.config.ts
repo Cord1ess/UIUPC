@@ -32,6 +32,7 @@ const nextConfig: NextConfig = {
   },
   // Ensure that .css file imports in components don't throw warnings
   transpilePackages: ["react-icons"],
+  allowedDevOrigins: ["localhost", "192.168.1.8"],
 };
 
 export default nextConfig;
