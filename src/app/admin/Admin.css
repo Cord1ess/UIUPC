@@ -324,7 +324,11 @@
 .boxed-table th {
   padding: 1rem 1.5rem;
   text-align: left;
-  font-[10px] font-black uppercase tracking-[0.2em] text-zinc-400;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #a1a1aa; /* text-zinc-400 */
   background: transparent;
   border: none;
 }

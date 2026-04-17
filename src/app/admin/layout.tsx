@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/features/admin/components/AdminSidebar';
+import { AdminSidebar } from '@/features/admin/components';
 import GlobalLoader from '@/components/shared/GlobalLoader';
 
 export default function AdminLayout({
