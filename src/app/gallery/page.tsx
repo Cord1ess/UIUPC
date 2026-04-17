@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { fetchGalleryPhotos } from '@/lib/fetchers';
-import GalleryView from '@/components/gallery/GalleryView';
-import ScrollRevealText from '@/components/home/ScrollRevealText';
+import GalleryView from '@/features/discovery/components/GalleryView';
+import ScrollRevealText from '@/components/motion/ScrollRevealText';
 
 export const metadata = {
   title: 'Gallery | UIUPC',

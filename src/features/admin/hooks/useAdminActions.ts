@@ -30,7 +30,7 @@ export const useAdminActions = ({ user, scripts, dataType, onRefresh }: UseAdmin
   };
 
   const fetchPhotoSubmissionStatus = useCallback(async () => {
-    if (!scripts.photos) return;
+    if (!scripts.photos || !scripts.photos.startsWith("http")) return;
     try {
       const response = await fetch(`${scripts.photos}?action=getSubmissionStatus`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -38,14 +38,18 @@ export const useAdminActions = ({ user, scripts, dataType, onRefresh }: UseAdmin
       if (result.success) {
         setPhotoSubmissionStatus(result.enabled ? "enabled" : "disabled");
       }
-    } catch (error) {
-      console.error("Error fetching photo submission status:", error);
+    } catch (error: any) {
+      if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+        console.warn("Administrative service (Photos) is currently unreachable. Defaulting to 'enabled'.");
+      } else {
+        console.error("Error fetching photo submission status:", error);
+      }
       setPhotoSubmissionStatus("enabled");
     }
   }, [scripts.photos]);
 
   const fetchJoinPageStatus = useCallback(async () => {
-    if (!scripts.membership) return;
+    if (!scripts.membership || !scripts.membership.startsWith("http")) return;
     try {
       const response = await fetch(`${scripts.membership}?action=getJoinPageStatus`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -54,8 +58,12 @@ export const useAdminActions = ({ user, scripts, dataType, onRefresh }: UseAdmin
       if (result.status === "success") {
         setJoinPageStatus(result.data?.status || "enabled");
       }
-    } catch (error) {
-      console.error("Error fetching join page status:", error);
+    } catch (error: any) {
+      if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+        console.warn("Administrative service (Membership) is currently unreachable. Defaulting to 'enabled'.");
+      } else {
+        console.error("Error fetching join page status:", error);
+      }
       setJoinPageStatus("enabled");
     }
   }, [scripts.membership]);

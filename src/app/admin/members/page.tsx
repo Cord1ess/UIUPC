@@ -5,14 +5,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAdminData } from "@/hooks/useAdminData";
 import { useAdminActions } from "@/features/admin/hooks/useAdminActions";
 import { ADMIN_SCRIPTS } from "@/features/admin/config";
-import MembershipApplications from "@/components/MembershipApplications";
-import AdminDetailsModal from "@/components/admin/AdminDetailsModal";
-import AdminEmailModal from "@/components/admin/AdminEmailModal";
-import Loading from "@/components/Loading";
+import { MembershipApplications, AdminDetailsModal, AdminEmailModal } from "@/features/admin/components";
+import GlobalLoader from "@/components/shared/GlobalLoader";
 import { FaUsers, FaExclamationTriangle, FaCheck, FaSync, FaFileExport } from "react-icons/fa";
 import { exportToCSV } from "@/utils/adminHelpers";
-import ScrollRevealText from "@/components/home/ScrollRevealText";
-import { motion, AnimatePresence } from "framer-motion";
+import ScrollRevealText from "@/components/motion/ScrollRevealText";
+import { motion } from "framer-motion";
 
 const MembershipAdminPage = () => {
   const { user } = useAuth();
@@ -47,10 +45,9 @@ const MembershipAdminPage = () => {
     }
   }, [user, fetchJoinPageStatus, testEmailConnection]);
 
-  const handleUpdateStatus = async (item: any, newStatus: string) => {
+  const handleUpdateStatus = async (applicationId: string, newStatus: string) => {
     if (!user) return;
     try {
-      const applicationId = item.Timestamp || item.timestamp;
       const response = await fetch(ADMIN_SCRIPTS.membership, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -73,7 +70,7 @@ const MembershipAdminPage = () => {
     }
   };
 
-  if (isLoading && !data) return <Loading />;
+  if (isLoading && !data) return <GlobalLoader />;
 
   return (
     <div className="space-y-12">
@@ -96,7 +93,7 @@ const MembershipAdminPage = () => {
               <FaSync className={isLoading ? 'animate-spin' : ''} /> Refresh
             </button>
             <button 
-              onClick={() => exportToCSV("membership", data)}
+              onClick={() => exportToCSV("membership", data || [])}
               className="px-6 py-3 bg-uiupc-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-uiupc-orange/20"
             >
               <FaFileExport /> Export CSV
@@ -133,11 +130,10 @@ const MembershipAdminPage = () => {
           onSearchChange={setSearchTerm} 
           onFilterChange={setFilterStatus} 
           onRefresh={fetchData} 
-          onExport={() => exportToCSV("membership", data)} 
-          onViewDetails={(item) => { setSelectedItem(item); setShowDetailsModal(true); }} 
+          onExport={() => exportToCSV("membership", data || [])} 
+          onViewDetails={(item: Record<string, any>) => { setSelectedItem(item); setShowDetailsModal(true); }} 
           onUpdateStatus={handleUpdateStatus} 
-          onEmailReply={(item) => { setSelectedEmailItem(item); setShowEmailModal(true); }} 
-          connectionTest={connectionTest} 
+          onEmailReply={(item: Record<string, any>) => { setSelectedEmailItem(item); setShowEmailModal(true); }} 
         />
       </div>
 

@@ -1,4 +1,4 @@
-import StudioLoader from "@/components/tools/StudioLoader";
+import StudioLoader from "@/features/studio/components/StudioLoader";
 
 export default function Loading() {
   return <StudioLoader />;

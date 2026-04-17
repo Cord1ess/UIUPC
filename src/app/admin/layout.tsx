@@ -3,8 +3,8 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
-import Loading from '@/components/Loading';
+import AdminSidebar from '@/features/admin/components/AdminSidebar';
+import GlobalLoader from '@/components/shared/GlobalLoader';
 
 export default function AdminLayout({
   children,
@@ -24,7 +24,7 @@ export default function AdminLayout({
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] flex items-center justify-center">
-        <Loading />
+        <GlobalLoader />
       </div>
     );
   }

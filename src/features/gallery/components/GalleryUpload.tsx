@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaSync, FaImages, FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import Loading from "@/components/Loading";
+import GlobalLoader from "@/components/shared/GlobalLoader";
 import GalleryList from "./GalleryList";
 import GalleryModal from "./GalleryModal";
 import "./GalleryUpload.css";
@@ -203,7 +203,7 @@ const GalleryUpload: React.FC<GalleryUploadProps> = ({ user, scripts, onUploadSu
     return pageNumbers;
   };
 
-  if (loading) return <div className="gallery-upload-container"><Loading /></div>;
+  if (loading) return <div className="gallery-upload-container"><GlobalLoader /></div>;
 
   return (
     <div className="gallery-upload-container">

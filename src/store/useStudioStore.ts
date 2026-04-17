@@ -19,6 +19,9 @@ export interface StudioImage {
       sharpen: number;
       vignette: number;
       vibrance: number;
+      hueRotate: number;
+      sepia: number;
+      invert: number;
     };
     metadata?: {
       stripExif: boolean;
@@ -40,6 +43,8 @@ export interface StudioImage {
         opacity: number;
         position: "center" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
         tiled?: boolean;
+        scale: number;
+        inset: number;
       };
     };
   };
@@ -110,10 +115,11 @@ export const useStudioStore = create<StudioState>((set, get) => ({
           const ExifReader = (await import("exifreader")).default;
           const tags = await ExifReader.load(file);
           if (tags['Thumbnail'] && tags['Thumbnail'].image) {
-            const thumbnailBlob = new Blob([tags['Thumbnail'].image], { type: 'image/jpeg' });
+            const thumbnailBlob = new Blob([tags['Thumbnail'].image as any], { type: 'image/jpeg' });
             url = URL.createObjectURL(thumbnailBlob);
           } else if (isTiff) {
             // Fallback to UTIF for TIFF if no thumbnail
+            // @ts-ignore
             const UTIF = (await import("utif")).default;
             const buffer = await file.arrayBuffer();
             const ifds = UTIF.decode(buffer);
@@ -152,7 +158,15 @@ export const useStudioStore = create<StudioState>((set, get) => ({
           metadata: { stripExif: false, overrides: {} },
           transformer: {
             resizer: { mode: "none" },
-            watermark: { enabled: false, type: "text", opacity: 0.5, position: "bottom-right", tiled: false }
+            watermark: { 
+              enabled: false, 
+              type: "text", 
+              opacity: 0.5, 
+              position: "bottom-right", 
+              tiled: false,
+              scale: 0.15,
+              inset: 0.05
+            }
           }
         },
         history: [{

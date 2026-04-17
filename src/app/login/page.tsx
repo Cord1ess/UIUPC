@@ -7,7 +7,7 @@ import { FaEnvelope, FaLock, FaSpinner, FaArrowLeft, FaShieldAlt, FaArrowRight }
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import ScrollRevealText from '@/components/home/ScrollRevealText';
+import ScrollRevealText from '@/components/motion/ScrollRevealText';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');

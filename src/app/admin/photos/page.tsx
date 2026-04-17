@@ -5,13 +5,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAdminData } from "@/hooks/useAdminData";
 import { useAdminActions } from "@/features/admin/hooks/useAdminActions";
 import { ADMIN_SCRIPTS } from "@/features/admin/config";
-import PhotoSubmissions from "@/components/PhotoSubmissions";
-import AdminDetailsModal from "@/components/admin/AdminDetailsModal";
-import AdminEmailModal from "@/components/admin/AdminEmailModal";
-import Loading from "@/components/Loading";
+import { PhotoSubmissions, AdminDetailsModal, AdminEmailModal } from "@/features/admin/components";
+import GlobalLoader from "@/components/shared/GlobalLoader";
 import { FaCamera, FaSync, FaFileExport, FaExclamationTriangle, FaCheck } from "react-icons/fa";
 import { exportToCSV } from "@/utils/adminHelpers";
-import ScrollRevealText from "@/components/home/ScrollRevealText";
+import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
 const PhotosAdminPage = () => {
   const { user } = useAuth();
@@ -46,7 +44,7 @@ const PhotosAdminPage = () => {
     }
   }, [user, fetchPhotoSubmissionStatus, testEmailConnection]);
 
-  if (isLoading && !data) return <Loading />;
+  if (isLoading && !data) return <GlobalLoader />;
 
   return (
     <div className="space-y-12">
@@ -109,7 +107,6 @@ const PhotosAdminPage = () => {
           onExport={() => exportToCSV("photos", data)} 
           onViewDetails={(item) => { setSelectedItem(item); setShowDetailsModal(true); }} 
           onEmailReply={(item) => { setSelectedEmailItem(item); setShowEmailModal(true); }} 
-          connectionTest={connectionTest} 
         />
       </div>
 

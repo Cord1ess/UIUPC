@@ -1,6 +1,10 @@
 export type WorkerMessage = 
   | { type: 'PROCESS_TRANSFORM'; payload: any }
-  | { type: 'PROCESS_EDITORIAL'; payload: any };
+  | { type: 'PROCESS_EDITORIAL'; payload: any }
+  | { type: 'PROCESS_SPLIT'; payload: any }
+  | { type: 'PROCESS_STITCH'; payload: any }
+  | { type: 'PROCESS_COLLAGE'; payload: any }
+  | { type: 'PROCESS_ERASE'; payload: any };
 
 self.addEventListener('message', async (e: MessageEvent<WorkerMessage>) => {
   const { type, payload } = e.data;

@@ -4,14 +4,14 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ADMIN_SCRIPTS } from "@/features/admin/config";
 import ResultsManagement from "@/features/results/components/ResultsManagement";
-import Loading from "@/components/Loading";
+import GlobalLoader from "@/components/shared/GlobalLoader";
 import { FaChartBar } from "react-icons/fa";
-import ScrollRevealText from "@/components/home/ScrollRevealText";
+import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
 const ResultsAdminPage = () => {
   const { user } = useAuth();
 
-  if (!user) return <Loading />;
+  if (!user) return <GlobalLoader />;
 
   return (
     <div className="space-y-12">

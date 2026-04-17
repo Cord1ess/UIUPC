@@ -27,8 +27,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import GlobalLoader from "@/components/common/GlobalLoader";
-import DynamicGrid from "@/components/ui/DynamicGrid";
+import GlobalLoader from "@/components/shared/GlobalLoader";
+import DynamicGrid from "@/components/shared/DynamicGrid";
 import { cookies } from "next/headers";
 import PageTransition from "@/components/layout/PageTransition";
 

@@ -7,7 +7,7 @@ import { ADMIN_SCRIPTS } from "@/features/admin/config";
 import BlogList from "@/features/blog/components/BlogList";
 import BlogPostModal from "@/features/blog/components/BlogPostModal";
 import BlogPreviewModal from "@/features/blog/components/BlogPreviewModal";
-import Loading from "@/components/Loading";
+import GlobalLoader from "@/components/shared/GlobalLoader";
 import {
   FaSearch,
   FaSync,
@@ -16,7 +16,7 @@ import {
   FaChevronRight,
   FaNewspaper,
 } from "react-icons/fa";
-import ScrollRevealText from "@/components/home/ScrollRevealText";
+import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
 const BlogAdminPage = () => {
   const { user } = useAuth();
@@ -204,7 +204,7 @@ const BlogAdminPage = () => {
     setEditingPost(null);
   };
 
-  if (!user) return <Loading />;
+  if (!user) return <GlobalLoader />;
 
   return (
     <div className="space-y-12">
@@ -262,7 +262,7 @@ const BlogAdminPage = () => {
       {/* Content */}
       <div className="bg-[#ffffff] dark:bg-[#050505] rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden shadow-3xl shadow-black/5 p-6 md:p-10">
         {loading ? (
-          <Loading />
+          <GlobalLoader />
         ) : error ? (
           <div className="text-center py-16 space-y-4">
             <p className="text-sm text-red-500">{error}</p>

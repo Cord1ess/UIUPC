@@ -27,6 +27,10 @@ export const getProperty = (item: any, property: string): string => {
 };
 
 export const exportToCSV = (dataType: string, data: any[]) => {
+  if (!data || !Array.isArray(data)) {
+    alert("No data available to export.");
+    return;
+  }
   let headers: string[] = [];
   let csvData: string[][] = [];
 

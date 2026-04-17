@@ -5,22 +5,22 @@ import { useStudioStore } from "@/store/useStudioStore";
 import dynamic from "next/dynamic";
 import { FaImages, FaUndo, FaDownload, FaExternalLinkAlt, FaTrash, FaCopy, FaSyncAlt } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import StudioLoader from "@/components/tools/StudioLoader";
-import StudioCanvas from "@/components/tools/StudioCanvas";
+import StudioLoader from "@/features/studio/components/StudioLoader";
+import StudioCanvas from "@/features/studio/components/StudioCanvas";
 
 // Dynamic Imports (Update to Controls Only)
-const StudioHeader = dynamic(() => import("@/components/tools/StudioHeader"), { ssr: false });
-const StudioBottomBar = dynamic(() => import("@/components/tools/StudioBottomBar"), { ssr: false });
-const StudioRightPanel = dynamic(() => import("@/components/tools/StudioRightPanel"), { ssr: false });
-const OptimizerTool = dynamic(() => import("@/components/tools/OptimizerTool"), { ssr: false, loading: () => <StudioLoader /> });
-const CropperTool = dynamic(() => import("@/components/tools/CropperTool"), { ssr: false, loading: () => <StudioLoader /> });
-const EditorialTool = dynamic(() => import("@/components/tools/EditorialTool"), { ssr: false, loading: () => <StudioLoader /> });
-const MetadataTool = dynamic(() => import("@/components/tools/MetadataTool"), { ssr: false, loading: () => <StudioLoader /> });
-const TransformerTool = dynamic(() => import("@/components/tools/TransformerTool"), { ssr: false, loading: () => <StudioLoader /> });
-const ComposeTool = dynamic(() => import("@/components/tools/ComposeTool"), { ssr: false, loading: () => <StudioLoader /> });
-const PdfTool = dynamic(() => import("@/components/tools/PdfTool"), { ssr: false, loading: () => <StudioLoader /> });
-const AIRetouchTool = dynamic(() => import("@/components/tools/AIRetouchTool"), { ssr: false, loading: () => <StudioLoader /> });
-const AIEnhanceTool = dynamic(() => import("@/components/tools/AIEnhanceTool"), { ssr: false, loading: () => <StudioLoader /> });
+const StudioHeader = dynamic(() => import("@/features/studio/components/StudioHeader"), { ssr: false });
+const StudioBottomBar = dynamic(() => import("@/features/studio/components/StudioBottomBar"), { ssr: false });
+const StudioRightPanel = dynamic(() => import("@/features/studio/components/StudioRightPanel"), { ssr: false });
+const OptimizerTool = dynamic(() => import("@/features/studio/components/OptimizerTool"), { ssr: false, loading: () => <StudioLoader /> });
+const CropperTool = dynamic(() => import("@/features/studio/components/CropperTool"), { ssr: false, loading: () => <StudioLoader /> });
+const EditorialTool = dynamic(() => import("@/features/studio/components/EditorialTool"), { ssr: false, loading: () => <StudioLoader /> });
+const MetadataTool = dynamic(() => import("@/features/studio/components/MetadataTool"), { ssr: false, loading: () => <StudioLoader /> });
+const TransformerTool = dynamic(() => import("@/features/studio/components/TransformerTool"), { ssr: false, loading: () => <StudioLoader /> });
+const ComposeTool = dynamic(() => import("@/features/studio/components/ComposeTool"), { ssr: false, loading: () => <StudioLoader /> });
+const PdfTool = dynamic(() => import("@/features/studio/components/PdfTool"), { ssr: false, loading: () => <StudioLoader /> });
+const AIRetouchTool = dynamic(() => import("@/features/studio/components/AIRetouchTool"), { ssr: false, loading: () => <StudioLoader /> });
+const AIEnhanceTool = dynamic(() => import("@/features/studio/components/AIEnhanceTool"), { ssr: false, loading: () => <StudioLoader /> });
 
 export default function UIUPCStudioPage() {
   const { images, activeImageId, activeToolId, uiKey, addImages, revertToHistory } = useStudioStore();

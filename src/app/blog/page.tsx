@@ -1,4 +1,4 @@
-import BlogView from "@/components/blog/BlogView";
+import BlogView from "@/features/blog/components/BlogView";
 import { fetchBlogPosts } from "@/lib/fetchers";
 
 export const metadata = {

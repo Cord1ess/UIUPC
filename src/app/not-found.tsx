@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaArrowLeft, FaCamera, FaSearch } from 'react-icons/fa';
-import ScrollRevealText from '@/components/home/ScrollRevealText';
+import ScrollRevealText from '@/components/motion/ScrollRevealText';
 
 export default function NotFound() {
   return (

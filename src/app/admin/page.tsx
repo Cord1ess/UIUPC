@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminData } from "@/hooks/useAdminData";
 import { ADMIN_SCRIPTS } from "@/features/admin/config";
-import Loading from "@/components/Loading";
+import GlobalLoader from "@/components/shared/GlobalLoader";
 import { 
   FaUsers, 
   FaCamera, 
@@ -14,7 +14,7 @@ import {
   FaShieldAlt,
   FaArrowRight
 } from "react-icons/fa";
-import ScrollRevealText from "@/components/home/ScrollRevealText";
+import ScrollRevealText from "@/components/motion/ScrollRevealText";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -25,7 +25,7 @@ const OverviewAdminPage = () => {
   const { data: members } = useAdminData("membership", ADMIN_SCRIPTS.membership);
   const { data: photos } = useAdminData("photos", ADMIN_SCRIPTS.photos);
 
-  if (!user) return <Loading />;
+  if (!user) return <GlobalLoader />;
 
   const QUICK_STATS = [
     { label: "Active Members", count: members?.length || "...", icon: <FaUsers />, path: "/admin/members", color: "bg-blue-500" },

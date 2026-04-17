@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { FaCalendarAlt, FaMapMarkerAlt, FaMoneyBillWave, FaClock, FaTrophy, FaArrowLeft, FaPhoneAlt, FaEnvelope, FaUser } from 'react-icons/fa';
 import { fetchEventById } from '@/lib/fetchers';
-import { getCloudinaryUrl } from '@/components/hero/utils/constants';
+import { getCloudinaryUrl } from '@/features/home/components/hero/utils/constants';
 
 interface EventDetailPageProps {
   params: Promise<{ eventId: string }>;

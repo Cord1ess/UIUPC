@@ -15,7 +15,7 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 import emailjs from "emailjs-com";
-import ScrollRevealText from "@/components/home/ScrollRevealText";
+import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
 const ContactPage = () => {
   const form = useRef<HTMLFormElement>(null);

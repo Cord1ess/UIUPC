@@ -1,16 +1,16 @@
 import React, { Suspense } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import ModernHero from '@/components/hero/ModernHero';
-import ScrollRevealText from '@/components/home/ScrollRevealText';
+import ModernHero from '@/features/home/components/hero/ModernHero';
+import ScrollRevealText from '@/components/motion/ScrollRevealText';
 import { FaUserPlus, FaArrowRight } from 'react-icons/fa';
 
 // Phase 2: Dynamic Imports for Below-the-Fold components
 // This drastically reduces the initial JS parsing payload.
-const Milestones = dynamic(() => import('@/components/home/Milestones'));
-const EventAccordion = dynamic(() => import('@/components/home/EventAccordion'));
-const UpcomingEventsSection = dynamic(() => import('@/components/home/UpcomingEventsSection'));
-const FeaturedGallerySection = dynamic(() => import('@/components/home/FeaturedGallerySection'));
+const Milestones = dynamic(() => import('@/features/home/components/Milestones'));
+const EventAccordion = dynamic(() => import('@/features/home/components/EventAccordion'));
+const UpcomingEventsSection = dynamic(() => import('@/features/home/components/UpcomingEventsSection'));
+const FeaturedGallerySection = dynamic(() => import('@/features/home/components/FeaturedGallerySection'));
 
 const Home = () => {
   return (

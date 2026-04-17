@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { FaNewspaper, FaPlus, FaSync, FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import Loading from "@/components/Loading";
+import GlobalLoader from "@/components/shared/GlobalLoader";
 import BlogList from "./BlogList";
 import BlogPostModal from "./BlogPostModal";
 import BlogPreviewModal from "./BlogPreviewModal";
@@ -229,7 +229,7 @@ const BlogManagement: React.FC<BlogManagementProps> = ({ user, scripts, onUpload
   };
 
   if (loading) {
-    return <div className="blog-management"><Loading /></div>;
+    return <div className="blog-management"><GlobalLoader /></div>;
   }
 
   return (

@@ -4,12 +4,12 @@ import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
-import { auth } from "../../lib/firebase";
-import { useAuth } from "../../contexts/AuthContext";
-import { useTheme } from "../../contexts/ThemeContext";
-import { useLoaderStore } from "../../store/useLoaderStore";
+import { auth } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useLoaderStore } from "@/store/useLoaderStore";
 import { FiSun, FiMoon } from "react-icons/fi";
-import myLogo from "../../assets/UIUPC Logo.svg";
+import myLogo from "@/assets/UIUPC Logo.svg";
 
 // ─── Types ────────────────────────────────────────────────
 interface NavItem {

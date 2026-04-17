@@ -1,7 +1,7 @@
 import React from "react";
 import { fetchAchievements } from "@/lib/fetchers";
-import AchievementTimeline from "@/components/achievements/AchievementTimeline";
-import ScrollRevealText from "@/components/home/ScrollRevealText";
+import AchievementTimeline from "@/features/achievements/components/AchievementTimeline";
+import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
 export const metadata = {
   title: "Achievements | UIUPC",

@@ -1,4 +1,4 @@
-import MembersView from "@/components/members/MembersView";
+import MembersView from "@/features/discovery/components/MembersView";
 // Import JSON directly on server
 import committee2026 from "@/data/committee2026.json";
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { FaSync, FaExclamationTriangle, FaTrophy, FaMoneyBillWave, FaCheck, FaEnvelope, FaSearch } from "react-icons/fa";
-import Loading from "@/components/Loading";
+import GlobalLoader from "@/components/shared/GlobalLoader";
 import ResultsTable from "./ResultsTable";
 import PaymentsTable from "./PaymentsTable";
 import ResultModal from "./ResultModal";
@@ -187,7 +187,7 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
     link.click();
   };
 
-  if (loading && !results.length) return <Loading />;
+  if (loading && !results.length) return <GlobalLoader />;
 
   return (
     <div className="results-management">

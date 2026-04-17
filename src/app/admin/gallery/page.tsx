@@ -6,7 +6,7 @@ import { useAdminData } from "@/hooks/useAdminData";
 import { ADMIN_SCRIPTS } from "@/features/admin/config";
 import GalleryList from "@/features/gallery/components/GalleryList";
 import GalleryModal from "@/features/gallery/components/GalleryModal";
-import Loading from "@/components/Loading";
+import GlobalLoader from "@/components/shared/GlobalLoader";
 import {
   FaSearch,
   FaSync,
@@ -15,7 +15,7 @@ import {
   FaChevronRight,
   FaImages,
 } from "react-icons/fa";
-import ScrollRevealText from "@/components/home/ScrollRevealText";
+import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
 const GalleryAdminPage = () => {
   const { user } = useAuth();
@@ -60,11 +60,11 @@ const GalleryAdminPage = () => {
     const term = searchTerm.toLowerCase();
     return galleryPhotos.filter(
       (photo) =>
-        photo.title?.toLowerCase().includes(term) ||
-        photo.description?.toLowerCase().includes(term) ||
-        photo.tags?.toLowerCase().includes(term) ||
-        photo.uploadedBy?.toLowerCase().includes(term) ||
-        getEventName(photo.eventId).toLowerCase().includes(term)
+        String(photo.title || "").toLowerCase().includes(term) ||
+        String(photo.description || "").toLowerCase().includes(term) ||
+        String(photo.tags || "").toLowerCase().includes(term) ||
+        String(photo.uploadedBy || "").toLowerCase().includes(term) ||
+        getEventName(String(photo.eventId)).toLowerCase().includes(term)
     );
   }, [galleryPhotos, searchTerm]);
 
@@ -179,7 +179,7 @@ const GalleryAdminPage = () => {
     setEditingPhoto(null);
   };
 
-  if (!user) return <Loading />;
+  if (!user) return <GlobalLoader />;
 
   return (
     <div className="space-y-12">
@@ -237,7 +237,7 @@ const GalleryAdminPage = () => {
       {/* Content */}
       <div className="bg-[#ffffff] dark:bg-[#050505] rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden shadow-3xl shadow-black/5 p-6 md:p-10">
         {loading ? (
-          <Loading />
+          <GlobalLoader />
         ) : error ? (
           <div className="text-center py-16 space-y-4">
             <p className="text-sm text-red-500">{error}</p>

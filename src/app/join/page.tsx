@@ -28,7 +28,7 @@ import {
 } from "react-icons/fa";
 import { useSubmissionStatus } from "@/hooks/useSubmissionStatus";
 import { useRegistrationForm } from "@/hooks/useRegistrationForm";
-import ScrollRevealText from "@/components/home/ScrollRevealText";
+import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
 const departments = [
   "Computer Science & Engineering", "Electrical & Electronic Engineering", "BBA", "BBA in AIS", "Economics", "Data Science", "English", "Pharmacy", "Civil", "EDS", "MSJ", "Others",

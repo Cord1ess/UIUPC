@@ -3,9 +3,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaTrophy, FaEye, FaArrowRight, FaCalendarAlt, FaMapMarkerAlt, FaHistory, FaStar } from 'react-icons/fa';
 import { fetchAllEvents } from '@/lib/fetchers';
-import { getCloudinaryUrl } from '@/components/hero/utils/constants';
-import CountdownTimer from '@/components/events/CountdownTimer';
-import ScrollRevealText from '@/components/home/ScrollRevealText';
+import { getCloudinaryUrl } from '@/features/home/components/hero/utils/constants';
+import CountdownTimer from '@/components/shared/CountdownTimer';
+import ScrollRevealText from '@/components/motion/ScrollRevealText';
 
 const EventsPage = () => {
   return (

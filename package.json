@@ -1,6 +1,7 @@
 {
-  "name": "uiupc-website",
-  "version": "0.1.0",
+  "name": "uiupc-website-v2",
+  "version": "2.0.0",
+  "description": "United International University Photography Club Official Website",
   "private": true,
   "scripts": {
     "dev": "next dev",
