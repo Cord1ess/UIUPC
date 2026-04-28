@@ -16,6 +16,7 @@
     "@fontsource-variable/playfair-display": "^5.2.8",
     "@huggingface/transformers": "^4.1.0",
     "@imgly/background-removal": "^1.7.0",
+    "@supabase/supabase-js": "^2.105.0",
     "@types/omggif": "^1.0.5",
     "browser-image-compression": "^2.0.2",
     "emailjs-com": "^3.2.0",

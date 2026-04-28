@@ -1,5 +1,3 @@
-import React from "react";
-import { fetchAchievements } from "@/lib/fetchers";
 import AchievementTimeline from "@/features/achievements/components/AchievementTimeline";
 import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
@@ -8,9 +6,7 @@ export const metadata = {
   description: "A chronological journey through the awards, recognition, and milestones of the UIU Photography Club.",
 };
 
-export default async function AchievementsPage() {
-  const achievements = await fetchAchievements();
-
+export default function AchievementsPage() {
   return (
     <main className="min-h-screen bg-[#f9f5ea] dark:bg-[#121212] transition-colors duration-500 pt-32 pb-20 px-6 overflow-x-hidden relative">
       {/* Background Decor (Architecture Rule 3) */}
@@ -38,7 +34,7 @@ export default async function AchievementsPage() {
         </div>
 
         {/* Timeline Visualization */}
-        <AchievementTimeline achievements={achievements} />
+        <AchievementTimeline />
       </div>
     </main>
   );

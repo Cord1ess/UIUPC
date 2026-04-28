@@ -57,7 +57,7 @@ export default function NotFound() {
              href="/" 
              className="px-10 py-5 bg-zinc-900 dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-[0.3em] rounded-full hover:bg-uiupc-orange hover:text-white dark:hover:bg-uiupc-orange transition-all transform hover:scale-110 active:scale-95 shadow-2xl"
            >
-             Return to Base
+             Go Home
            </Link>
            <Link 
              href="/events" 
@@ -69,7 +69,7 @@ export default function NotFound() {
       </div>
 
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-20 flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">
-        <FaCamera /> UIUPC Editorial Standard
+        <FaCamera /> UIUPC Photography Club
       </div>
     </div>
   );

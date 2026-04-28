@@ -103,9 +103,15 @@ const Footer: React.FC = () => {
 
         {/* Footer Bottom */}
         <div className="pt-10 border-t border-black/5 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-zinc-400 dark:text-zinc-500 text-[9px] font-black uppercase tracking-[0.3em]">
-            &copy; {currentYear} UIUPC • Est. 2005
-          </p>
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <p className="text-zinc-400 dark:text-zinc-500 text-[9px] font-black uppercase tracking-[0.3em]">
+              &copy; {currentYear} UIUPC • Est. 2005
+            </p>
+            <span className="hidden md:block w-1 h-1 rounded-full bg-uiupc-orange/30" />
+            <p className="text-zinc-400 dark:text-zinc-500 text-[9px] font-black uppercase tracking-[0.3em]">
+              Made by Orange Marketers
+            </p>
+          </div>
 
           <button
             className="w-10 h-10 bg-zinc-100 dark:bg-zinc-900 text-zinc-400 dark:text-zinc-600 rounded-full flex items-center justify-center hover:bg-uiupc-orange hover:text-white transition-all active:scale-90"

@@ -73,7 +73,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
       <div className="w-full md:w-[45%] flex flex-col justify-center space-y-8">
         <div className="flex items-center gap-6">
           <span className="px-4 py-1.5 rounded-full bg-uiupc-orange/10 border border-uiupc-orange/20 text-[9px] font-black uppercase tracking-[0.3em] text-uiupc-orange">
-            {post.category || "Official Press"}
+            {post.category || "Update"}
           </span>
           <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
         </div>
@@ -101,7 +101,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
               className="mt-8 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-zinc-900 dark:text-white hover:text-uiupc-orange transition-all group/btn"
             >
               <div className="w-8 h-[2px] bg-uiupc-orange transition-all group-hover/btn:w-16" />
-              <span>{isExpanded ? "Collapse" : "Explore Case Study"}</span>
+              <span>{isExpanded ? "Show Less" : "Read More"}</span>
               <FaArrowRight className={`text-[8px] transition-transform ${isExpanded ? '-rotate-90' : 'group-hover/btn:translate-x-2'}`} />
             </button>
           )}
@@ -118,7 +118,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
               className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] text-zinc-900 dark:text-white hover:text-uiupc-orange transition-all"
             >
               <FaFacebook className="text-lg" />
-              <span>Broadcast</span>
+              <span>Facebook</span>
             </motion.a>
           )}
           
@@ -128,7 +128,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
             className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
           >
             <FaShareAlt className="text-lg" />
-            <span>Syndicate</span>
+            <span>Share</span>
           </motion.button>
         </div>
       </div>

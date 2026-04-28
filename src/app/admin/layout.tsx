@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter } from 'next/navigation';
-import { AdminSidebar } from '@/features/admin/components';
 import GlobalLoader from '@/components/shared/GlobalLoader';
 
 export default function AdminLayout({
@@ -11,7 +10,8 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
+  const { user, loading } = useSupabaseAuth();
+
   const router = useRouter();
 
   // Unified Auth Guard for all admin pages
@@ -31,12 +31,7 @@ export default function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] transition-colors duration-500 pt-0">
-      <AdminSidebar />
-      <main className="flex-1 overflow-x-hidden min-h-screen">
-        <div className="max-w-[1440px] mx-auto p-6 md:p-12 lg:p-24">
-          {children}
-        </div>
-      </main>
+      {children}
     </div>
   );
 }

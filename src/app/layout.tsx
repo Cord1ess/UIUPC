@@ -16,14 +16,42 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "UIU Photography Club",
-  description: "Official website of United International University Photography Club (UIUPC)",
+  title: {
+    default: "UIUPC | UIU Photography Club",
+    template: "%s | UIUPC"
+  },
+  description: "Official portal of United International University Photography Club. Explore our gallery, join the community, and participate in premier photography events.",
+  keywords: ["UIU", "Photography", "Club", "United International University", "Photo Exhibition", "Shutter Stories"],
+  authors: [{ name: "UIUPC Core Team" }],
+  openGraph: {
+    type: "website",
+    locale: "en_IE",
+    url: "https://uiupc.com",
+    siteName: "UIUPC",
+    title: "UIU Photography Club",
+    description: "The most active photography community at United International University.",
+    images: [
+      {
+        url: "https://uiupc.com/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "UIUPC Official"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "UIU Photography Club",
+    description: "Capturing perspectives since 2019.",
+    images: ["https://uiupc.com/og-image.jpg"],
+  },
   icons: {
     icon: "/favicon.svg",
   },
 };
 
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -50,14 +78,16 @@ export default async function RootLayout({
         <ThemeProvider>
           <DynamicGrid />
           <AuthProvider>
-            <GlobalLoader />
-            <Header />
-            <main>
-              <PageTransition>
-                {children}
-              </PageTransition>
-            </main>
-            <Footer />
+            <SupabaseAuthProvider>
+              <GlobalLoader />
+              <Header />
+              <main>
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </main>
+              <Footer />
+            </SupabaseAuthProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

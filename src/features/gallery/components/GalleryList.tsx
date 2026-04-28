@@ -2,19 +2,25 @@
 
 import React from "react";
 import Image from "next/image";
-import { FaImages, FaCalendar, FaUser, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { motion } from "framer-motion";
+import { FaCalendar, FaEye, FaEdit, FaTrash, FaFacebook, FaCamera } from "react-icons/fa";
 
 interface GalleryPhoto {
   id: string;
   title: string;
   description: string;
   eventId: string;
+  event_id?: string;
   facebookPost?: string;
+  facebook_post?: string;
   url?: string;
   imageUrl?: string;
+  image_url?: string;
   uploadedBy?: string;
+  uploaded_by?: string;
   uploadedAt?: string;
   timestamp?: string;
+  created_at?: string;
 }
 
 interface GalleryListProps {
@@ -30,110 +36,103 @@ const GalleryList: React.FC<GalleryListProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const getEventName = (eventId: string) => {
-    const events: Record<string, string> = {
-      "1": "Friday Exposure",
-      "2": "Photo Adda",
-      "3": "Photo Walk",
-      "4": "Exhibitions Visit",
-      "5": "Workshops & Talks",
-      "6": "Shutter Stories"
-    };
-    return events[eventId] || "Unknown Event";
+  const EVENT_MAP: Record<string, string> = {
+    "1": "Friday Exposure",
+    "2": "Photo Adda",
+    "3": "Photo Walk",
+    "4": "Exhibitions Visit",
+    "5": "Workshops & Talks",
+    "6": "Shutter Stories"
   };
 
-  const truncateDescription = (description: string, maxLength = 100) => {
-    if (!description) return "No description";
-    if (description.length <= maxLength) return description;
-    return description.substring(0, maxLength) + "...";
-  };
+  const getEventName = (eventId: string) => EVENT_MAP[eventId] || "General Collection";
 
   return (
-    <div className="gallery-photos-container">
-      <div className="gallery-photos-grid">
-        {photos.map((photo) => (
-          <div key={photo.id} className="gallery-photo-card">
-            <div className="photo-preview" style={{ position: "relative", width: "100%", height: "200px" }}>
-              <Image
-                src={photo.url || photo.imageUrl || ""}
-                alt={photo.title}
-                fill
-                style={{ objectFit: 'cover' }}
-                unoptimized={true}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = "none";
-                  if (target.nextSibling) {
-                    (target.nextSibling as HTMLElement).style.display = "flex";
-                  }
-                }}
-              />
-              <div className="image-error" style={{ display: 'none' }}>
-                <FaImages size={24} />
-                <span>Image not available</span>
-              </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+      {photos.map((photo, index) => (
+        <motion.div 
+          key={photo.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.05 }}
+          className="group bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/5 rounded-[2.5rem] overflow-hidden flex flex-col transition-all duration-500 hover:shadow-2xl hover:shadow-black/5"
+        >
+          {/* Image Container */}
+          <div className="relative w-full h-64 overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+            <Image
+              src={photo.image_url || photo.url || photo.imageUrl || ""}
+              alt={photo.title}
+              fill
+              className="object-cover transition-transform duration-1000 group-hover:scale-110 ease-out"
+              unoptimized={true}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-90 transition-opacity" />
+            
+            <div className="absolute top-6 left-6 z-10">
+              <span className="px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-white/10 backdrop-blur-md text-white border border-white/20">
+                {getEventName(photo.event_id || photo.eventId)}
+              </span>
             </div>
 
-            <div className="photo-content">
-              <h3 className="photo-title">{photo.title}</h3>
-              <p className="photo-description">
-                {truncateDescription(photo.description)}
-              </p>
-
-              <div className="photo-meta">
-                <span className="photo-event">
-                  <FaCalendar /> {getEventName(photo.eventId)}
-                </span>
-                <span className="photo-date">
-                  {new Date(photo.uploadedAt || photo.timestamp || Date.now()).toLocaleDateString()}
-                </span>
-              </div>
-
-              <div className="photo-footer">
-                <span className="photo-author">
-                  <FaUser /> by {photo.uploadedBy || userEmail}
-                </span>
-                <span className="photo-id">
-                  ID: {photo.id}
-                </span>
-              </div>
-            </div>
-
-            <div className="photo-actions">
-              <button
-                onClick={() => window.open(photo.url || photo.imageUrl, '_blank')}
-                className="btn-view"
-                title="View Image"
-              >
-                <FaEye />
-              </button>
-              <button
-                onClick={() => onEdit(photo)}
-                className="btn-edit"
-                title="Edit Photo"
-              >
-                <FaEdit />
-              </button>
-              {photo.facebookPost && (
-                <button
-                  onClick={() => window.open(photo.facebookPost, '_blank')}
-                  className="btn-facebook"
-                  title="View Facebook Post"
-                >
-                  FB
-                </button>
-              )}
-              <button
-                onClick={() => onDelete(photo.id)}
-                className="btn-delete"
-                title="Delete Photo"
-              >
-                <FaTrash />
-              </button>
+            <div className="absolute bottom-6 left-6 right-6 z-10">
+               <div className="flex items-center gap-2 text-white/70 mb-1">
+                 <FaCamera className="text-[10px] text-uiupc-orange" />
+                 <span className="text-[9px] font-black uppercase tracking-widest">{photo.uploaded_by || photo.uploadedBy || "Staff Member"}</span>
+               </div>
+               <h3 className="text-xl font-black uppercase tracking-tighter text-white line-clamp-1 group-hover:text-uiupc-orange transition-colors">{photo.title}</h3>
             </div>
           </div>
-        ))}
-      </div>
+
+          {/* Content */}
+          <div className="p-8 flex flex-col flex-1">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-8 line-clamp-2 leading-relaxed font-medium">
+              {photo.description || "No description provided."}
+            </p>
+
+            <div className="mt-auto flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-black/5 dark:border-white/5">
+                <FaCalendar className="text-[10px] text-zinc-400" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                  {new Date(photo.created_at || photo.uploadedAt || photo.timestamp || Date.now()).toLocaleDateString()}
+                </span>
+              </div>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={() => window.open(photo.image_url || photo.url || photo.imageUrl, '_blank')}
+                  className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-uiupc-orange hover:text-white flex items-center justify-center transition-all shadow-sm"
+                  title="View Photo"
+                >
+                  <FaEye className="text-xs" />
+                </button>
+                <button
+                  onClick={() => onEdit(photo)}
+                  className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black flex items-center justify-center transition-all shadow-sm"
+                  title="Edit"
+                >
+                  <FaEdit className="text-xs" />
+                </button>
+                {(photo.facebook_post || photo.facebookPost) && (
+                  <button
+                    onClick={() => window.open(photo.facebook_post || photo.facebookPost, '_blank')}
+                    className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all shadow-sm"
+                    title="Facebook Post"
+                  >
+                    <FaFacebook className="text-xs" />
+                  </button>
+                )}
+                <button
+                  onClick={() => onDelete(photo.id)}
+                  className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all shadow-sm"
+                  title="Delete"
+                >
+                  <FaTrash className="text-xs" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      ))}
     </div>
   );
 };

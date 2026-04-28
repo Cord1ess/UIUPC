@@ -1,6 +1,5 @@
 import MembersView from "@/features/discovery/components/MembersView";
-// Import JSON directly on server
-import committee2026 from "@/data/committee2026.json";
+// Dynamic data fetching is now handled internally by MembersView
 
 export const metadata = {
   title: "The Community | UIUPC",
@@ -8,5 +7,5 @@ export const metadata = {
 };
 
 export default function MembersPage() {
-  return <MembersView committee2026={committee2026} />;
+  return <MembersView />;
 }

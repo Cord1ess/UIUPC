@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { FaEnvelope, FaLock, FaSpinner, FaArrowLeft, FaShieldAlt, FaArrowRight } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,6 +14,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { signIn } = useSupabaseAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,11 +22,15 @@ const LoginPage = () => {
     setError('');
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/admin'); 
+      const { error } = await signIn(email, password);
+      if (error) {
+        setError(error);
+      } else {
+        router.push('/admin'); 
+      }
     } catch (error: any) {
       console.error('Login error:', error);
-      setError('Invalid email or password. Please check your credentials.');
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -56,7 +60,7 @@ const LoginPage = () => {
               className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none text-zinc-900 dark:text-white"
             />
             <p className="mt-8 text-zinc-500 dark:text-zinc-400 font-medium text-sm uppercase tracking-widest">
-              Authorized Personnel Only
+              Admin access only
             </p>
         </div>
 
@@ -120,7 +124,7 @@ const LoginPage = () => {
             >
               <div className="relative z-10 flex items-center gap-4">
                 <span className="text-[11px] font-black uppercase tracking-[0.4em]">
-                  {loading ? 'Authenticating...' : 'Enter Panel'}
+                  {loading ? 'Signing in...' : 'Sign In'}
                 </span>
                 {loading ? <FaSpinner className="animate-spin" /> : <FaArrowRight className="text-xs group-hover:translate-x-2 transition-transform" /> }
               </div>
@@ -130,7 +134,7 @@ const LoginPage = () => {
 
         <div className="mt-12 text-center">
             <Link href="/" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-uiupc-orange transition-colors">
-              <FaArrowLeft className="text-xs" /> Return to Base
+              <FaArrowLeft className="text-xs" /> Go Home
             </Link>
         </div>
       </div>

@@ -8,14 +8,32 @@ export const safeToString = (value: any): string => {
 };
 
 export const getProperty = (item: any, property: string): string => {
+  if (!item) return "N/A";
+  
   const possibleKeys = [
     property,
     property.toLowerCase(),
-    property.toUpperCase(),
     property.replace(/\s+/g, ""),
     property.replace(/\s+/g, "").toLowerCase(),
-    property.replace(/\s+/g, "").toUpperCase(),
+    property.replace(/\s+/g, "_").toLowerCase(), // snake_case: "Student ID" -> "student_id"
   ];
+
+  // Specific mappings for V2 schema
+  if (property.toLowerCase() === "full name" || property.toLowerCase() === "name") {
+    possibleKeys.push("name", "fullname");
+  }
+  if (property.toLowerCase().includes("id")) {
+    possibleKeys.push("student_id", "studentid", "id");
+  }
+  if (property.toLowerCase().includes("facebook")) {
+    possibleKeys.push("facebook_link", "facebooklink", "fb_link");
+  }
+  if (property.toLowerCase().includes("method")) {
+    possibleKeys.push("payment_method", "paymentmethod");
+  }
+  if (property.toLowerCase().includes("experience")) {
+    possibleKeys.push("experience", "experience_level");
+  }
 
   for (const key of possibleKeys) {
     if (item[key] !== undefined && item[key] !== null && item[key] !== "") {
@@ -106,4 +124,17 @@ export const exportToCSV = (dataType: string, data: any[]) => {
   }.csv`;
   a.click();
   window.URL.revokeObjectURL(url);
+};
+
+export const generateBccMailto = (emails: string[], senderEmail?: string) => {
+  if (!emails || emails.length === 0) return;
+  const bcc = emails.join(',');
+  
+  // By using /u/email@example.com/, Gmail attempts to switch to that specific account session
+  const baseUrl = senderEmail 
+    ? `https://mail.google.com/mail/u/${senderEmail}/` 
+    : `https://mail.google.com/mail/`;
+    
+  const gmailUrl = `${baseUrl}?view=cm&fs=1&bcc=${encodeURIComponent(bcc)}`;
+  window.open(gmailUrl, '_blank');
 };

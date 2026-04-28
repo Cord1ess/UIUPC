@@ -3,8 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { db } from "@/lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { supabase } from "@/lib/supabase";
 import {
   FaUpload,
   FaUser,
@@ -264,13 +263,20 @@ const PhotoSubmissionForm = () => {
 
       setUploadProgress(100);
       try {
-        await addDoc(collection(db, "photoSubmissions"), {
-          eventId, name: formData.name, email: formData.email, phone: formData.phone,
-          institution: formData.institution, category: formData.category,
-          photoCount: formData.photos.length, storyPhotoCount: formData.photoStory.length,
-          folderUrl: folderResult.folderUrl, timestamp: new Date().toISOString(), type: "photos"
-        });
-      } catch (e) {}
+        await supabase.from('exhibition_submissions').insert([{
+          event_id: eventId,
+          participant_name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          institute: formData.institution,
+          category: formData.category,
+          photo_count: formData.photos.length + formData.photoStory.length,
+          photo_url: folderResult.folderUrl, // Using photo_url as folder reference
+          status: 'submitted'
+        }]);
+      } catch (sbError) {
+        console.error("Supabase sync error:", sbError);
+      }
 
       setSubmissionDetails({
         success: true, message: "All files uploaded successfully!",

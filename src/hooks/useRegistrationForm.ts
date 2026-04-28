@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { db } from "@/lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { supabase } from "@/lib/supabase";
 
 interface FormData {
   name: string;
@@ -141,20 +140,22 @@ export const useRegistrationForm = (initialData: FormData, endpointUrl: string) 
       });
 
       try {
-        const firestoreDoc: any = {
-          ...formData,
-          agreementAccepted: true,
-          timestamp: new Date().toISOString(),
-          type: "membership",
-        };
-        if (photoData) {
-          firestoreDoc.photoData = photoData;
-          firestoreDoc.photoName = photoName;
-          firestoreDoc.photoType = photoType;
-        }
-        await addDoc(collection(db, "membershipApplications"), firestoreDoc);
-      } catch (fbError) {
-        console.error("Firestore sync error:", fbError);
+        await supabase.from('members').insert([{
+          full_name: formData.name,
+          student_id: formData.studentId,
+          email: formData.email,
+          department: formData.department,
+          phone: formData.phone,
+          blood_group: formData.bloodGroup,
+          facebook_link: formData.facebookLink,
+          payment_method: formData.paymentMethod,
+          transaction_id: formData.transactionId || formData.receiverName,
+          amount: "500", // Default membership fee
+          notes: formData.message,
+          session: "Fall 25" // Current session
+        }]);
+      } catch (sbError) {
+        console.error("Supabase sync error:", sbError);
       }
 
       const result = await response.json();

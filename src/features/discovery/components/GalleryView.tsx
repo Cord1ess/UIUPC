@@ -3,29 +3,24 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { Photo } from '@/hooks/useFirebaseData';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { getCloudinaryUrl } from '@/features/home/components/hero/utils/constants';
 import ImagePreviewModal from '@/features/home/components/hero/ImagePreviewModal';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
 import { FaFilter, FaExpandAlt, FaFacebook, FaThLarge, FaColumns, FaSearch, FaChevronDown } from 'react-icons/fa';
 
-interface GalleryViewProps {
-  initialPhotos: Photo[];
-}
-
 const CATEGORIES = [
   { id: 'all', name: 'All Photos' },
-  { id: '1', name: 'Friday Exposure' },
-  { id: '2', name: 'Photo Adda' },
-  { id: '3', name: 'Photo Walk' },
-  { id: '4', name: 'Exhibitions Visit' },
-  { id: '5', name: 'Workshops & Talks' },
-  { id: '6', name: 'Shutter Stories' },
+  { id: 'friday_exposure', name: 'Friday Exposure' },
+  { id: 'photo_adda', name: 'Photo Adda' },
+  { id: 'photo_walk', name: 'Photo Walk' },
+  { id: 'exhibition', name: 'Exhibitions' },
+  { id: 'workshop', name: 'Workshops' },
 ];
 
 const ITEMS_PER_PAGE = 12;
 
-const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
+const GalleryView: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [layoutMode, setLayoutMode] = useState<'square' | 'masonry'>('square');
@@ -36,6 +31,39 @@ const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   
   const { scrollY } = useScroll();
+
+  // Fetch standard gallery photos
+  const { data: galleryPhotos, isLoading: galleryLoading } = useSupabaseData('gallery');
+  // Fetch exhibition archives
+  const { data: exhibitionPhotos, isLoading: exhibitionLoading } = useSupabaseData('exhibition_submissions');
+
+  const allPhotos = useMemo(() => {
+    const formattedGallery = (galleryPhotos || []).map((p: any) => ({
+      id: p.id,
+      url: p.image_url,
+      title: p.title,
+      description: p.description,
+      category: p.category, // e.g., 'friday_exposure'
+      facebookPost: p.facebook_url,
+      type: 'gallery',
+      timestamp: p.created_at
+    }));
+
+    const formattedExhibition = (exhibitionPhotos || []).map((p: any) => ({
+      id: p.id,
+      url: p.photo_url,
+      title: p.photo_title,
+      description: `By ${p.photographer_name}`,
+      category: 'exhibition',
+      facebookPost: null,
+      type: 'exhibition',
+      timestamp: p.created_at
+    }));
+
+    return [...formattedGallery, ...formattedExhibition].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  }, [galleryPhotos, exhibitionPhotos]);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() || 0;
@@ -52,14 +80,14 @@ const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
   }, [activeFilter, searchQuery]);
 
   const filteredPhotos = useMemo(() => {
-    let result = initialPhotos;
+    let result = allPhotos;
     
     // Remove failed images
     result = result.filter(p => !failedImages.has(p.url));
 
     // Category Filter
     if (activeFilter !== 'all') {
-      result = result.filter(p => p.eventId === activeFilter);
+      result = result.filter(p => p.category === activeFilter);
     }
     
     // Search Filter
@@ -72,19 +100,22 @@ const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
     }
     
     return result;
-  }, [activeFilter, searchQuery, initialPhotos, failedImages]);
-
-  const sortedPhotos = useMemo(() => {
-    return [...filteredPhotos].sort((a, b) => {
-      const idA = parseInt(a.id) || 0;
-      const idB = parseInt(b.id) || 0;
-      return idB - idA;
-    });
-  }, [filteredPhotos]);
+  }, [activeFilter, searchQuery, allPhotos, failedImages]);
 
   const visiblePhotos = useMemo(() => {
-    return sortedPhotos.slice(0, visibleCount);
-  }, [sortedPhotos, visibleCount]);
+    return filteredPhotos.slice(0, visibleCount);
+  }, [filteredPhotos, visibleCount]);
+
+  if (galleryLoading || exhibitionLoading) {
+    return (
+      <div className="py-40 flex flex-col items-center gap-6">
+        <div className="w-12 h-12 border-4 border-uiupc-orange border-t-transparent rounded-full animate-spin" />
+        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Loading moments...</p>
+      </div>
+    );
+  }
+
+  const sortedPhotos = filteredPhotos; // Alias for consistency in handlers
 
   const handleOpenModal = (index: number) => {
     setSelectedPhotoIndex(index);
@@ -110,8 +141,8 @@ const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
     setFailedImages(prev => new Set(prev).add(url));
   };
 
-  const getCategoryName = (id: string) => {
-    return CATEGORIES.find(c => c.id === id)?.name || 'Photography';
+  const getCategoryName = (categoryId: string) => {
+    return CATEGORIES.find(c => c.id === categoryId)?.name || 'Photography';
   };
 
   return (
@@ -228,7 +259,7 @@ const GalleryView: React.FC<GalleryViewProps> = ({ initialPhotos }) => {
               {/* Overlay Metadata */}
               <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <span className="inline-block px-3 py-1 bg-uiupc-orange/80 backdrop-blur-md rounded-full text-[8px] font-black uppercase tracking-widest text-white mb-3">
-                  {getCategoryName(photo.eventId)}
+                  {getCategoryName(photo.category)}
                 </span>
                 <h4 className="text-white text-xs font-black uppercase tracking-widest leading-tight">
                   {photo.title || 'Perspective'}

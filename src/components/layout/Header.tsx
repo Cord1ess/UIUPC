@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useLoaderStore } from "@/store/useLoaderStore";
 import { FiSun, FiMoon } from "react-icons/fi";
@@ -30,10 +31,12 @@ const PRIMARY_LINKS: NavItem[] = [
 const EXPLORE_SUBMENU: SubMenuItem[] = [
   { path: "/members", label: "Members" },
   { path: "/studio", label: "Studio" },
+  { path: "/archive", label: "Archive" },
   { path: "/achievements", label: "Achievements" },
   { path: "/blog", label: "Blog" },
   { path: "/contact", label: "Contact" },
 ];
+
 
 // All navigable paths for active detection
 const ALL_EXPLORE_PATHS = EXPLORE_SUBMENU.map((i) => i.path);
@@ -41,7 +44,8 @@ const ALL_EXPLORE_PATHS = EXPLORE_SUBMENU.map((i) => i.path);
 // ─── Component ────────────────────────────────────────────
 const Header: React.FC = memo(() => {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user: firebaseUser } = useAuth();
+  const { user: supabaseUser, signOut: supabaseSignOut } = useSupabaseAuth();
   const { theme, toggleTheme, isSwitching } = useTheme();
   const { isAnimationComplete } = useLoaderStore();
 
@@ -214,14 +218,14 @@ const Header: React.FC = memo(() => {
           </button>
 
           <div className="hidden lg:block">
-            {user ? (
+            {supabaseUser ? (
               isAdminPage ? (
                 <button
-                  onClick={handleSignOut}
+                  onClick={() => supabaseSignOut()}
                   className={`h-9 px-5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all
                     ${theme === 'light' ? 'bg-black text-white' : 'bg-white text-black'}`}
                 >
-                  Sign Out
+                  Log out
                 </button>
               ) : (
                 <Link
@@ -236,7 +240,7 @@ const Header: React.FC = memo(() => {
                 href="/join"
                 className="h-9 px-5 flex items-center justify-center rounded-lg bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all"
               >
-                Join Us
+                Join us
               </Link>
             )}
           </div>
@@ -268,14 +272,14 @@ const Header: React.FC = memo(() => {
               </Link>
             ))}
             <div className="mt-2 pt-2 border-t border-black/5 dark:border-white/5 flex flex-col gap-2">
-              {user ? (
+              {supabaseUser ? (
                 isAdminPage ? (
                   <button 
-                    onClick={handleSignOut} 
+                    onClick={() => { supabaseSignOut(); setMobileOpen(false); }} 
                     className={`w-full py-4 px-4 rounded-lg text-xs font-black uppercase tracking-widest text-left
                       ${theme === 'light' ? 'bg-black text-white' : 'bg-white text-black'}`}
                   >
-                    Sign Out
+                    Log out
                   </button>
                 ) : (
                   <Link
@@ -292,7 +296,7 @@ const Header: React.FC = memo(() => {
                   className="block w-full text-center py-4 rounded-lg bg-uiupc-orange text-white text-xs font-black uppercase tracking-widest" 
                   onClick={() => setMobileOpen(false)}
                 >
-                  Join Us
+                  Join us
                 </Link>
               )}
             </div>

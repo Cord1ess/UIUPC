@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaSync, FaExclamationTriangle, FaTrophy, FaMoneyBillWave, FaCheck, FaEnvelope, FaSearch } from "react-icons/fa";
-import GlobalLoader from "@/components/shared/GlobalLoader";
+import { FaSync, FaExclamationTriangle, FaTrophy, FaMoneyBillWave, FaCheck, FaEnvelope, FaSearch, FaSpinner } from "react-icons/fa";
+
 import ResultsTable from "./ResultsTable";
 import PaymentsTable from "./PaymentsTable";
 import ResultModal from "./ResultModal";
 import PaymentModal from "./PaymentModal";
-import "./ResultsManagement.css";
+
 
 interface ResultsManagementProps {
   scripts: Record<string, string>;
@@ -46,8 +46,6 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
 
   const events = [
     { id: "shutter-stories", name: "Shutter Stories Chapter IV" },
-    { id: "event-2", name: "Photo Exhibition 2024" },
-    { id: "event-3", name: "Annual Competition" },
   ];
 
   useEffect(() => {
@@ -187,42 +185,76 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
     link.click();
   };
 
-  if (loading && !results.length) return <GlobalLoader />;
+  if (loading && !results.length) {
+    return (
+      <div className="w-full py-32 flex items-center justify-center">
+        <FaSpinner className="animate-spin text-4xl text-uiupc-orange" />
+      </div>
+    );
+  }
 
   return (
-    <div className="results-management">
-      <div className="control-panel-header">
-        <h2>Results & Payment Management</h2>
-        <div className="stats-summary">
-          <div className="stat-card">
-            <FaTrophy />
-            <div className="stat-content"><h3>{results.length}</h3><p>Results</p></div>
-          </div>
-          <div className="stat-card">
-            <FaMoneyBillWave />
-            <div className="stat-content"><h3>{payments.length}</h3><p>Payments</p></div>
-          </div>
+    <div className="w-full space-y-8 min-w-0">
+      {/* Search & Actions Header */}
+      <div className="w-full bg-zinc-100 dark:bg-[#050505] p-4 md:p-6 rounded-3xl border border-black/5 dark:border-white/5">
+        <div className="flex flex-col lg:flex-row gap-6 items-stretch lg:items-center justify-between">
+        <div className="relative flex-1">
+          <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+          <input 
+            type="text" 
+            placeholder="Search..." 
+            value={searchQuery} 
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full py-4 pl-12 pr-6 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-2xl text-sm outline-none focus:border-uiupc-orange transition-all" 
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery("")} className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
+              ×
+            </button>
+          )}
         </div>
-      </div>
-
-      <div className="filters-container">
-        <div className="filter-group">
-          <select value={selectedEvent} onChange={(e) => setSelectedEvent(e.target.value)}>
+        <div className="flex items-center gap-3">
+          <select 
+            value={selectedEvent} 
+            onChange={(e) => setSelectedEvent(e.target.value)}
+            className="h-10 px-4 rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-xs outline-none focus:border-uiupc-orange"
+          >
             {events.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>
-        </div>
-        <div className="filter-group">
-          <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+          <select 
+            value={selectedCategory} 
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="h-10 px-4 rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-xs outline-none focus:border-uiupc-orange"
+          >
             <option value="all">All Categories</option>
             <option value="single">Single Photo</option>
             <option value="story">Photo Story</option>
           </select>
+          <button 
+            onClick={() => setRefreshTrigger(p => p + 1)} 
+            className="h-10 px-4 rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-600 dark:text-zinc-300 hover:text-uiupc-orange dark:hover:text-uiupc-orange transition-all flex items-center gap-2 text-xs font-bold"
+          >
+            <FaSync /> Refresh
+          </button>
         </div>
-        <div className="search-group">
-          <FaSearch />
-          <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
         </div>
-        <button className="btn-secondary" onClick={() => setRefreshTrigger(p => p + 1)}><FaSync /> Refresh</button>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-6 bg-zinc-100 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-2xl flex flex-col justify-center">
+          <div className="flex items-center gap-3 mb-2">
+            <FaTrophy className="text-uiupc-orange text-xl" />
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Total Results</h3>
+          </div>
+          <p className="text-3xl font-black">{results.length}</p>
+        </div>
+        <div className="p-6 bg-zinc-100 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-2xl flex flex-col justify-center">
+          <div className="flex items-center gap-3 mb-2">
+            <FaMoneyBillWave className="text-green-500 text-xl" />
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Total Payments</h3>
+          </div>
+          <p className="text-3xl font-black">{payments.length}</p>
+        </div>
       </div>
 
       <ResultsTable 

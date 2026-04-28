@@ -39,9 +39,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setIsSwitching(true);
 
     const newTheme = theme === "light" ? "dark" : "light";
-    
-    // Give browser a moment to render the loader icon first
-    await new Promise(r => setTimeout(r, 150));
 
     const performSwap = () => {
       setTheme(newTheme);

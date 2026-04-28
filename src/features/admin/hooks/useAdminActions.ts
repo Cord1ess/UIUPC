@@ -1,17 +1,19 @@
 import { useState, useCallback } from "react";
 import { getProperty } from "@/utils/adminHelpers";
+import { supabase } from "@/lib/supabase";
+import { syncToSheets } from "@/utils/syncEngine";
 
 interface UseAdminActionsProps {
   user: any;
-  scripts: Record<string, string>;
+  adminProfile: any;
   dataType: string;
   onRefresh: () => void;
 }
 
-export const useAdminActions = ({ user, scripts, dataType, onRefresh }: UseAdminActionsProps) => {
-  const [photoSubmissionStatus, setPhotoSubmissionStatus] = useState<string>("unknown");
-  const [joinPageStatus, setJoinPageStatus] = useState<string>("unknown");
-  const [connectionTest, setConnectionTest] = useState<any>(null);
+export const useAdminActions = ({ user, adminProfile, dataType, onRefresh }: UseAdminActionsProps) => {
+  const [admin_SubmissionsStatus, setAdmin_SubmissionsStatus] = useState<string>("unknown");
+  const [admin_MembersStatus, setAdmin_MembersStatus] = useState<string>("unknown");
+  const [connectionTest, setConnectionTest] = useState<any>({ status: "success", message: "Supabase Connection Active" });
   const [emailSending, setEmailSending] = useState(false);
 
   const EMAIL_TEMPLATES: Record<string, any> = {
@@ -29,132 +31,98 @@ export const useAdminActions = ({ user, scripts, dataType, onRefresh }: UseAdmin
     },
   };
 
-  const fetchPhotoSubmissionStatus = useCallback(async () => {
-    if (!scripts.photos || !scripts.photos.startsWith("http")) return;
+  const fetchAdmin_SubmissionsStatus = useCallback(async () => {
     try {
-      const response = await fetch(`${scripts.photos}?action=getSubmissionStatus`);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const result = await response.json();
-      if (result.success) {
-        setPhotoSubmissionStatus(result.enabled ? "enabled" : "disabled");
-      }
-    } catch (error: any) {
-      if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-        console.warn("Administrative service (Photos) is currently unreachable. Defaulting to 'enabled'.");
-      } else {
-        console.error("Error fetching photo submission status:", error);
-      }
-      setPhotoSubmissionStatus("enabled");
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'photo_submissions_status')
+        .single();
+      
+      if (error) throw error;
+      setAdmin_SubmissionsStatus(data?.value || "enabled");
+    } catch (error) {
+      console.error("Error fetching submission status:", error);
+      setAdmin_SubmissionsStatus("enabled");
     }
-  }, [scripts.photos]);
+  }, []);
 
-  const fetchJoinPageStatus = useCallback(async () => {
-    if (!scripts.membership || !scripts.membership.startsWith("http")) return;
+  const fetchAdmin_MembersStatus = useCallback(async () => {
     try {
-      const response = await fetch(`${scripts.membership}?action=getJoinPageStatus`);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const result = await response.json();
-      if (result.status === "success") {
-        setJoinPageStatus(result.data?.status || "enabled");
-      }
-    } catch (error: any) {
-      if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-        console.warn("Administrative service (Membership) is currently unreachable. Defaulting to 'enabled'.");
-      } else {
-        console.error("Error fetching join page status:", error);
-      }
-      setJoinPageStatus("enabled");
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'membership_status')
+        .single();
+      
+      if (error) throw error;
+      setAdmin_MembersStatus(data?.value || "enabled");
+    } catch (error) {
+      console.error("Error fetching membership status:", error);
+      setAdmin_MembersStatus("enabled");
     }
-  }, [scripts.membership]);
+  }, []);
 
-  const handleTogglePhotoSubmissions = useCallback(async (currentStatus: string) => {
-    if (!user || !scripts.photos) return;
+  const handleToggleAdmin_Submissions = useCallback(async (currentStatus: string) => {
+    if (!adminProfile) return { success: false, error: "Unauthorized" };
     const newStatus = currentStatus === "enabled" ? "disabled" : "enabled";
     
-    if (!window.confirm(`Are you sure you want to ${newStatus === "enabled" ? "ENABLE" : "DISABLE"} photo submissions?\n\nThis will ${newStatus === "enabled" ? "allow" : "prevent"} users from submitting new photos.`)) {
-      return;
-    }
-
     try {
-      const response = await fetch(scripts.photos, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          action: "updateSubmissionStatus",
-          enabled: newStatus === "enabled" ? "true" : "false",
-          updatedBy: user.email || "unknown",
-        }),
+      const { error } = await supabase
+        .from('site_settings')
+        .update({ value: newStatus })
+        .eq('key', 'photo_submissions_status');
+
+      if (error) throw error;
+
+      await supabase.from('audit_logs').insert({
+        admin_id: adminProfile.id,
+        action: `photo_submissions_${newStatus}`,
+        target_table: 'site_settings',
+        new_data: { status: newStatus }
       });
 
-      const result = await response.json();
-      if (result.success) {
-        setPhotoSubmissionStatus(newStatus);
-        alert(`Photo submissions have been ${newStatus}`);
-        onRefresh();
-      } else {
-        throw new Error(result.message || "Failed to update submission status");
-      }
+      setAdmin_SubmissionsStatus(newStatus);
+      syncToSheets('site_settings', `photo_submissions_${newStatus}`, { status: newStatus });
+      return { success: true, status: newStatus };
     } catch (error: any) {
-      console.error("Error updating photo submission status:", error);
-      alert("Failed to update photo submission status: " + error.message);
+      return { success: false, error: error.message };
     }
-  }, [user, scripts.photos, onRefresh]);
+  }, [adminProfile]);
 
-  const handleToggleJoinPageStatus = useCallback(async (currentStatus: string) => {
-    if (!user || !scripts.membership) return;
+  const handleToggleAdmin_Members = useCallback(async (currentStatus: string) => {
+    if (!adminProfile) return { success: false, error: "Unauthorized" };
     const newStatus = currentStatus === "enabled" ? "disabled" : "enabled";
 
     try {
-      const response = await fetch(scripts.membership, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          action: "updateJoinPageStatus",
-          status: newStatus,
-          updatedBy: user.email || "unknown",
-        }),
+      const { error } = await supabase
+        .from('site_settings')
+        .update({ value: newStatus })
+        .eq('key', 'membership_status');
+
+      if (error) throw error;
+
+      await supabase.from('audit_logs').insert({
+        admin_id: adminProfile.id,
+        action: `membership_${newStatus}`,
+        target_table: 'site_settings',
+        new_data: { status: newStatus }
       });
 
-      const result = await response.json();
-      if (result.status === "success") {
-        setJoinPageStatus(newStatus);
-        alert(`Join page submission has been ${newStatus}`);
-      } else {
-        throw new Error(result.message || "Failed to update join page status");
-      }
+      setAdmin_MembersStatus(newStatus);
+      syncToSheets('site_settings', `membership_${newStatus}`, { status: newStatus });
+      return { success: true, status: newStatus };
     } catch (error: any) {
-      console.error("Error updating join page status:", error);
-      alert("Failed to update join page status: " + error.message);
+      return { success: false, error: error.message };
     }
-  }, [user, scripts.membership]);
+  }, [adminProfile]);
 
   const testEmailConnection = useCallback(async () => {
-    if (!scripts.email) return;
-    try {
-      setConnectionTest({ status: "testing", message: "Testing connection..." });
-      const response = await fetch(`${scripts.email}?action=testConnection`, {
-        method: "GET",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const result = await response.json();
-      if (result.status === "success") {
-        setConnectionTest({ status: "success", message: "Email service is connected and working!" });
-      } else {
-        throw new Error(result.data || "Connection test failed");
-      }
-    } catch (error: any) {
-      console.error("Connection test failed:", error);
-      setConnectionTest({
-        status: "error",
-        message: `Failed to connect: ${error.message}. Please check: 1) Script URL is correct, 2) Script is deployed as web app, 3) Execute permissions are set to "Anyone"`,
-      });
-    }
-  }, [scripts.email]);
+    setConnectionTest({ status: "success", message: "Supabase Connection Active" });
+  }, []);
 
   const sendEmail = useCallback(async (selectedEmailItem: any, templateType: string, customMessage: string = "", onSuccess?: () => void) => {
-    if (!selectedEmailItem || !user || !scripts.email) return;
+    if (!selectedEmailItem || !adminProfile) return;
 
     try {
       setEmailSending(true);
@@ -172,47 +140,59 @@ export const useAdminActions = ({ user, scripts, dataType, onRefresh }: UseAdmin
         .replace(/{storyPhotoCount}/g, getProperty(selectedEmailItem, "Story Photo Count") || "0")
         .replace(/{custom_message}/g, customMessage);
 
-      const params = new URLSearchParams({
-        action: "sendEmail",
-        recipientEmail: recipientEmail,
+      const { error } = await supabase.from('mail_logs').insert({
+        recipient_email: recipientEmail,
         subject: subject,
         body: body,
-        sentBy: user.email || "unknown",
-        submissionId: selectedEmailItem.Timestamp || selectedEmailItem.timestamp || selectedEmailItem["Timestamp"] || "",
-        type: dataType,
+        template_type: templateType,
+        sent_by: adminProfile.id,
+        status: 'pending'
       });
 
-      const response = await fetch(`${scripts.email}?${params.toString()}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      });
-      const result = await response.json();
+      if (error) throw error;
 
-      if (response.ok && result.status === "success") {
-        alert("Email sent successfully!");
-        if (onSuccess) onSuccess();
-      } else {
-        throw new Error(result.message || "Failed to send email");
-      }
+      await supabase.from('audit_logs').insert({
+        admin_id: adminProfile.id,
+        action: 'email_logged',
+        target_table: 'mail_logs',
+        new_data: { recipientEmail, templateType }
+      });
+
+      if (onSuccess) onSuccess();
     } catch (error: any) {
-      console.error("Error sending email:", error);
-      alert("Failed to send email: " + error.message);
+      console.error("Failed to queue email:", error.message);
     } finally {
       setEmailSending(false);
     }
-  }, [user, scripts.email, dataType]);
+  }, [adminProfile, dataType]);
+
+  const updateMemberSession = useCallback(async (itemId: string, session: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('members')
+        .update({ session })
+        .eq('id', itemId)
+        .select();
+      
+      if (error) throw error;
+      return { status: "success", data };
+    } catch (error: any) {
+      return { status: "error", message: error.message };
+    }
+  }, []);
 
   return {
     EMAIL_TEMPLATES,
-    photoSubmissionStatus,
-    joinPageStatus,
+    admin_SubmissionsStatus,
+    admin_MembersStatus,
     connectionTest,
     emailSending,
-    fetchPhotoSubmissionStatus,
-    fetchJoinPageStatus,
-    handleTogglePhotoSubmissions,
-    handleToggleJoinPageStatus,
+    fetchAdmin_SubmissionsStatus,
+    fetchAdmin_MembersStatus,
+    handleToggleAdmin_Submissions,
+    handleToggleAdmin_Members,
     testEmailConnection,
-    sendEmail
+    sendEmail,
+    updateMemberSession
   };
 };

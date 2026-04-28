@@ -1,119 +1,182 @@
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "./firebase";
-import { Photo, UIUPCEvent } from "@/hooks/useFirebaseData";
+import { supabase } from './supabase';
 
-export const fetchFeaturedPhotos = async (): Promise<Photo[]> => {
-  const querySnapshot = await getDocs(collection(db, "featuredPhotos"));
-  return querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Photo[];
-};
+/**
+ * Server-side data fetchers powered by Supabase.
+ * These functions are designed to be used in Next.js Server Components.
+ */
 
-export const fetchUpcomingEvents = async (): Promise<UIUPCEvent[]> => {
-  const querySnapshot = await getDocs(collection(db, "events"));
-  const eventsData = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as UIUPCEvent[];
-  
-  return eventsData
-    .filter((event) => new Date(event.date) >= new Date())
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-};
+// ─── PHOTOS & EXHIBITIONS ──────────────────────────────────────────────────
 
-export const fetchAllEvents = async (): Promise<UIUPCEvent[]> => {
-  const querySnapshot = await getDocs(collection(db, "events"));
-  return querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as UIUPCEvent[];
-};
+export async function fetchFeaturedPhotos() {
+  const { data, error } = await supabase
+    .from('exhibition_submissions')
+    .select('*')
+    .eq('status', 'selected')
+    .limit(12);
 
-export const fetchEventById = async (id: string): Promise<UIUPCEvent | null> => {
-  const allEvents = await fetchAllEvents();
-  return allEvents.find(e => e.id === id) || null;
-};
-
-export const fetchGalleryPhotos = async (): Promise<Photo[]> => {
-  const SCRIPT_URL = process.env.NEXT_PUBLIC_GAS_GALLERY_PUBLIC;
-  
-  const mockEvents = [
-    { id: "1", name: "Friday Exposure" },
-    { id: "2", name: "Photo Adda" },
-    { id: "3", name: "Photo Walk" },
-    { id: "4", name: "Exhibitions Visit" },
-    { id: "5", name: "Workshops & Talks" },
-    { id: "6", name: "Shutter Stories" },
-  ];
-
-  try {
-    if (!SCRIPT_URL) return [];
-    
-    const response = await fetch(`${SCRIPT_URL}?action=getGallery`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
-    });
-
-    if (!response.ok) return [];
-
-    const result = await response.json();
-    if (result.status === "success" && result.data) {
-      return result.data.map((photo: any) => ({
-        id: photo.id ? photo.id.toString() : Math.random().toString(),
-        url: photo.url || photo.imageUrl,
-        title: photo.title || "Untitled",
-        description: photo.description || "",
-        eventId: photo.eventId ? photo.eventId.toString() : "1",
-        uploadedAt: photo.uploadedAt || photo.timestamp || Date.now(),
-        facebookPost: photo.facebookPost || "",
-      }));
-    }
-    return [];
-  } catch (error) {
-    console.error("Error fetching gallery:", error);
+  if (error) {
+    console.error('Error fetching featured photos:', error);
     return [];
   }
-};
 
-export const fetchBlogPosts = async (): Promise<any[]> => {
-  const BLOG_SCRIPT_URL = process.env.NEXT_PUBLIC_GAS_BLOG;
-
-  try {
-    if (!BLOG_SCRIPT_URL) return [];
-
-    const response = await fetch(`${BLOG_SCRIPT_URL}?action=getBlogPosts`, {
-      next: { revalidate: 3600 } // Revalidate every hour
-    });
-
-    if (!response.ok) throw new Error("Failed to fetch blog posts");
-
-    const result = await response.json();
-
-    if (result.status === "success" && result.data) {
-      return (result.data || []).sort((a: any, b: any) => 
-        new Date(b.date || b.timestamp).getTime() - new Date(a.date || a.timestamp).getTime()
-      );
+  // Resilient mapping for different schema versions
+  return data.map(photo => {
+    // If photo_url is a full URL, use it; if it's a Drive ID, proxy it
+    let finalUrl = photo.photo_url || '';
+    if (finalUrl && !finalUrl.startsWith('http') && !finalUrl.includes('/')) {
+      finalUrl = `/api/image/${finalUrl}`;
+    } else if (!finalUrl && photo.drive_file_ids && photo.drive_file_ids.length > 0) {
+      finalUrl = `/api/image/${photo.drive_file_ids[0]}`;
     }
-    return [];
-  } catch (error) {
-    console.error("Error fetching blog posts:", error);
+
+    return {
+      id: photo.id,
+      title: photo.photo_title || photo.participant_name || 'Untitled',
+      url: finalUrl,
+      photographer: photo.photographer_name || photo.participant_name,
+      category: photo.category
+    };
+  });
+}
+
+export async function fetchGalleryPhotos() {
+  const { data, error } = await supabase
+    .from('exhibition_submissions')
+    .select('*')
+    .eq('status', 'selected')
+    .order('submitted_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching gallery photos:', error);
     return [];
   }
-};
 
-import achievementsData from "@/data/achievements.json";
+  return data.map(photo => {
+    let finalUrl = photo.photo_url || '';
+    if (finalUrl && !finalUrl.startsWith('http') && !finalUrl.includes('/')) {
+      finalUrl = `/api/image/${finalUrl}`;
+    } else if (!finalUrl && photo.drive_file_ids && photo.drive_file_ids.length > 0) {
+      finalUrl = `/api/image/${photo.drive_file_ids[0]}`;
+    }
+
+    return {
+      id: photo.id,
+      title: photo.photo_title || photo.participant_name || 'Untitled',
+      url: finalUrl,
+      photographer: photo.participant_name || 'Member',
+      category: photo.category || 'General'
+    };
+  });
+}
+
+
+
+export async function fetchAllSubmissions() {
+  const { data, error } = await supabase
+    .from('exhibition_submissions')
+    .select('*')
+    .eq('status', 'selected')
+    .order('submitted_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching all submissions:', error);
+    return [];
+  }
+  return data;
+}
+
+// ─── EVENTS ────────────────────────────────────────────────────────────────
+
+export async function fetchUpcomingEvents() {
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .gte('date', now)
+    .order('date', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching upcoming events:', error);
+    return [];
+  }
+  return data;
+}
+
+export async function fetchAllEvents() {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .order('date', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching all events:', error);
+    return [];
+  }
+  return data;
+}
+
+export async function fetchEventById(id: string) {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error(`Error fetching event ${id}:`, error);
+    return null;
+  }
+  return data;
+}
+
+// ─── TYPES ────────────────────────────────────────────────────────────────
 
 export interface Achievement {
   id: string;
-  year: string;
   title: string;
   description: string;
+  year: string;
   image: string;
   tags: string[];
 }
 
-export const fetchAchievements = async (): Promise<Achievement[]> => {
-  // Simulating server-side fetch from the local JSON
-  return achievementsData as Achievement[];
-};
+// ─── ACHIEVEMENTS ─────────────────────────────────────────────────────────
 
+export async function fetchAchievements(): Promise<Achievement[]> {
+  const { data, error } = await supabase
+    .from('achievements')
+    .select('*')
+    .order('year', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching achievements:', error);
+    return [];
+  }
+
+  return data.map(item => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    year: item.year,
+    image: item.image_url ? 
+      (item.image_url.startsWith('http') ? item.image_url : `/api/image/${item.image_url}`) : 
+      '',
+    tags: item.tags || []
+  }));
+}
+
+
+// ─── BLOG ─────────────────────────────────────────────────────────────────
+
+export async function fetchBlogPosts() {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching blog posts:', error);
+    return [];
+  }
+  return data;
+}

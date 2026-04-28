@@ -2,15 +2,13 @@
 
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { Achievement } from "@/lib/fetchers";
+import { useSupabaseData } from "@/hooks/useSupabaseData";
 import AchievementCard from "./AchievementCard";
+import GlobalLoader from "@/components/shared/GlobalLoader";
 
-interface AchievementTimelineProps {
-  achievements: Achievement[];
-}
-
-const AchievementTimeline: React.FC<AchievementTimelineProps> = ({ achievements }) => {
+const AchievementTimeline: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { data: achievements, isLoading } = useSupabaseData("achievements", { orderBy: 'year', orderDesc: true });
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -24,6 +22,8 @@ const AchievementTimeline: React.FC<AchievementTimelineProps> = ({ achievements 
   });
 
   const lineHeight = useTransform(scrollSpring, [0, 1], ["0%", "100%"]);
+
+  if (isLoading) return <GlobalLoader />;
 
   return (
     <div ref={containerRef} className="relative max-w-7xl mx-auto px-6 py-20">
