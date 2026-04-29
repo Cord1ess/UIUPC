@@ -13,6 +13,7 @@ export * from './core/Admin_Sidebar';
 export * from './core/Admin_Dropdown';
 export * from './core/Admin_DetailsModal';
 export * from './core/Admin_EmailModal';
+export * from './Admin_DrivePicker';
 
 // Governance Hub
 export * from './governance/Admin_Finance';

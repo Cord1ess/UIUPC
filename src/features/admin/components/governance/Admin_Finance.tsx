@@ -150,7 +150,7 @@ export const Admin_Finance: React.FC = () => {
               </div>
               <div className="flex items-center gap-4">
                 <button 
-                  onClick={refetch}
+                  onClick={() => refetch()}
                   className="w-14 h-14 bg-uiupc-orange/10 rounded-2xl flex items-center justify-center text-uiupc-orange/40 hover:text-uiupc-orange transition-all border border-uiupc-orange/20"
                 >
                   <FaSync className={isLoading ? 'animate-spin' : ''} />

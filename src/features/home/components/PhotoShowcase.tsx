@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { getCloudinaryUrl } from '@/features/home/components/hero/utils/constants';
+import { getImageUrl } from '@/utils/imageUrl';
 
 interface PhotoShowcaseProps {
   photos: any[];
@@ -28,7 +28,7 @@ const PhotoShowcase: React.FC<PhotoShowcaseProps> = ({ photos }) => {
           className="group relative aspect-[4/5] overflow-hidden rounded-3xl bg-zinc-100 dark:bg-zinc-900 border border-black/5 dark:border-white/5"
         >
           <Image
-            src={getCloudinaryUrl(photo.url, 800, 'auto:best')}
+            src={getImageUrl(photo.url, 800, 80)}
             alt={photo.title || "Featured Photo"}
             fill
             className="object-cover transition-transform duration-1000 group-hover:scale-110"

@@ -14,7 +14,7 @@ import React, { useEffect, useCallback, useMemo, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { IoPause, IoPlay, IoChevronBack, IoChevronForward, IoShareOutline, IoDownloadOutline } from "react-icons/io5";
-import { getCloudinaryUrl } from "./utils/constants";
+import { getImageUrl } from "@/utils/imageUrl";
 import type { HeroImage } from "./utils/constants";
 
 interface ImagePreviewModalProps {
@@ -204,7 +204,7 @@ const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
               </button>
 
               <img
-                src={image.url ? getCloudinaryUrl(image.url, 1600, "auto:best") : ''}
+                src={image.url ? getImageUrl(image.url, 1600, 90) : ''}
                 alt={image.title}
                 className="max-w-full max-h-[60vh] w-auto h-auto object-contain select-none shadow-inner"
               />

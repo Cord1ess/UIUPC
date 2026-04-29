@@ -71,8 +71,9 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${theme === "dark" ? "dark" : ""} ${dmSans.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://res.cloudinary.com" />
-        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://wsrv.nl" />
+        <link rel="dns-prefetch" href="https://wsrv.nl" />
+        <link rel="dns-prefetch" href="https://drive.google.com" />
       </head>
       <body className="font-sans antialiased transition-colors duration-300 relative min-h-screen">
         <ThemeProvider>

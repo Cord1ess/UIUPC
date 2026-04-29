@@ -18,9 +18,10 @@ import {
   FaLayerGroup
 } from 'react-icons/fa';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { Admin_Dropdown } from "@/features/admin/components";
+import { Admin_Dropdown, Admin_DrivePicker } from "@/features/admin/components";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { supabase } from "@/lib/supabase";
+import { getImageUrl } from "@/utils/imageUrl";
 
 interface ClubEvent {
   id: string;
@@ -240,6 +241,7 @@ export const Admin_Events: React.FC = () => {
 
 const EventForm: React.FC<{ initialData?: ClubEvent; onSuccess: () => void; onCancel: () => void; onSave: (id: string | null, data: any) => Promise<any> }> = ({ initialData, onSuccess, onCancel, onSave }) => {
   const [loading, setLoading] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -264,6 +266,19 @@ const EventForm: React.FC<{ initialData?: ClubEvent; onSuccess: () => void; onCa
       <div className="space-y-3">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Event Title</label>
         <input type="text" required value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full bg-transparent border-b-2 border-black/5 dark:border-white/5 py-5 outline-none focus:border-uiupc-orange dark:text-white text-3xl font-black transition-colors" placeholder="e.g. Shutter Stories V" />
+      </div>
+      
+      <div className="space-y-3">
+        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Cover Image</label>
+        <div className="flex items-center gap-4">
+          {formData.cover_image && (
+            <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-black/5 dark:border-white/5 bg-zinc-100 dark:bg-zinc-800">
+               <img src={getImageUrl(formData.cover_image, 150, 70)} className="w-full h-full object-cover" alt="Preview" />
+            </div>
+          )}
+          <input type="text" value={formData.cover_image} onChange={(e) => setFormData({...formData, cover_image: e.target.value})} className="flex-1 bg-zinc-50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 p-5 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold text-sm" placeholder="Paste Drive ID or click Browse..." />
+          <button type="button" onClick={() => setIsPickerOpen(true)} className="px-6 py-5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-uiupc-orange hover:bg-uiupc-orange/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Browse Drive</button>
+        </div>
       </div>
       <div className="space-y-3">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Description</label>
@@ -301,6 +316,15 @@ const EventForm: React.FC<{ initialData?: ClubEvent; onSuccess: () => void; onCa
         <button type="button" onClick={onCancel} className="flex-1 py-6 bg-zinc-100 dark:bg-zinc-900 text-zinc-500 text-[10px] font-black uppercase tracking-widest rounded-3xl hover:bg-zinc-200 transition-all">Cancel</button>
         <button type="submit" disabled={loading} className="flex-[2] py-6 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-3xl shadow-2xl hover:translate-y-[-2px] transition-all disabled:opacity-50">{loading ? <FaSpinner className="animate-spin mx-auto" /> : (initialData ? 'Update Event' : 'Create Event')}</button>
       </div>
+
+      <Admin_DrivePicker
+        isOpen={isPickerOpen}
+        onClose={() => setIsPickerOpen(false)}
+        onSelect={(fileId, fileUrl) => {
+          setFormData({ ...formData, cover_image: fileId });
+        }}
+        title="Select Event Cover"
+      />
     </form>
   );
 };

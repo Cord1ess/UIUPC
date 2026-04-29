@@ -6,7 +6,7 @@ export interface Photo {
   id: string;
   url: string;
   title: string;
-  photographerName: string;
+  photographer: string;
   [key: string]: any;
 }
 

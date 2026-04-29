@@ -18,7 +18,7 @@ import ScrollRevealText from "@/components/motion/ScrollRevealText";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import GlobalLoader from "@/components/shared/GlobalLoader";
 import AchievementTimeline from "@/features/achievements/components/AchievementTimeline";
-import { getCloudinaryUrl } from "@/features/home/components/hero/utils/constants";
+import { getImageUrl } from "@/utils/imageUrl";
 
 // ============================================================
 // Main Page Component
@@ -140,7 +140,7 @@ const HistoricArchivePage = () => {
                     className="break-inside-avoid group relative bg-white dark:bg-zinc-950 rounded-[2.5rem] overflow-hidden cursor-pointer shadow-2xl shadow-black/5 border border-black/5 dark:border-white/5"
                   >
                     <Image 
-                      src={getCloudinaryUrl(sub.photo_url, 800, 'auto')}
+                      src={getImageUrl(sub.photo_url, 800, 80)}
                       alt={sub.participant_name}
                       width={800}
                       height={1000}
@@ -226,7 +226,7 @@ const HistoricArchivePage = () => {
             >
               <div className="flex-[2] bg-black flex items-center justify-center p-4">
                 <Image 
-                  src={getCloudinaryUrl(viewingPhoto.photo_url, 1600, 'auto:best')}
+                  src={getImageUrl(viewingPhoto.photo_url, 1600, 90)}
                   alt={viewingPhoto.participant_name}
                   width={1600}
                   height={1200}

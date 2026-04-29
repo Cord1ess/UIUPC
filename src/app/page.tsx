@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import ModernHero from '@/features/home/components/hero/ModernHero';
+import HomeCarousel from '@/features/home/components/hero/HomeCarousel';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
 import { FaUserPlus, FaArrowRight } from 'react-icons/fa';
 
@@ -15,12 +15,13 @@ const FeaturedGallerySection = dynamic(() => import('@/features/home/components/
 const Home = () => {
   return (
     <div className="relative min-h-screen overflow-x-hidden font-sans transition-colors duration-300">
-      <div className="relative z-10 flex flex-col gap-16 md:gap-24">
-        {/* Section 1: Hero */}
-        <ModernHero />
+      <div className="relative z-10 flex flex-col">
+        {/* Section 1: Hero Carousel */}
+        <HomeCarousel />
 
-        {/* Section 2: Milestones */}
-        <Milestones />
+        <div className="flex flex-col gap-16 md:gap-24 mt-8 md:mt-24">
+          {/* Section 2: Milestones */}
+          <Milestones />
 
         {/* Section 3: Event Strips (Horizontal Accordion) */}
         <section className="px-6">
@@ -112,7 +113,8 @@ const Home = () => {
               </Link>
             </div>
           </div>
-        </section>
+          </section>
+        </div>
       </div>
     </div>
   );

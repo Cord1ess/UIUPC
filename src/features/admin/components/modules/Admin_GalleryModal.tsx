@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaTimes, FaSync, FaUpload, FaCamera, FaLink, FaFacebook } from "react-icons/fa";
+import { Admin_DrivePicker } from "@/features/admin/components";
+import { getImageUrl } from "@/utils/imageUrl";
 
 interface UploadForm {
   title: string;
@@ -31,6 +33,8 @@ const Admin_GalleryModal: React.FC<Admin_GalleryModalProps> = ({
   onSubmit,
   onInputChange,
 }) => {
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+
   const EVENT_OPTIONS = [
     { value: "1", label: "Friday Exposure" },
     { value: "2", label: "Photo Adda" },
@@ -63,7 +67,7 @@ const Admin_GalleryModal: React.FC<Admin_GalleryModalProps> = ({
                 className="w-full h-full relative flex items-center justify-center"
               >
                 <img 
-                  src={imagePreview} 
+                  src={getImageUrl(imagePreview, 800, 80)} 
                   alt="Preview" 
                   className="w-full h-full object-cover rounded-[2rem] shadow-2xl"
                   onError={(e) => (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800'}
@@ -138,17 +142,26 @@ const Admin_GalleryModal: React.FC<Admin_GalleryModalProps> = ({
             </div>
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Link</label>
-              <div className="relative">
-                <FaLink className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
-                <input 
-                  type="url" required value={uploadForm.imageUrl}
-                  onChange={(e) => onInputChange("imageUrl", e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 py-4 pl-12 pr-4 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold transition-all text-sm"
-                  placeholder="Direct link to image..."
-                />
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Image Source</label>
+              <div className="flex gap-4">
+                <div className="relative flex-1">
+                  <FaLink className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input 
+                    type="text" required value={uploadForm.imageUrl}
+                    onChange={(e) => onInputChange("imageUrl", e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 py-4 pl-12 pr-4 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold transition-all text-sm"
+                    placeholder="Drive ID or direct link..."
+                  />
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => setIsPickerOpen(true)}
+                  className="px-6 py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-uiupc-orange hover:bg-uiupc-orange/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
+                >
+                  Browse Drive
+                </button>
               </div>
-              <p className="text-[9px] font-medium text-zinc-500 italic mt-2">Use Cloudinary, Imgur, or any direct image URL.</p>
+              <p className="text-[9px] font-medium text-zinc-500 italic mt-2">Paste a Google Drive ID, direct URL, or browse from your Drive.</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-10 border-t border-black/5 dark:border-white/5">
@@ -166,6 +179,15 @@ const Admin_GalleryModal: React.FC<Admin_GalleryModalProps> = ({
                 {uploading ? 'Uploading...' : (editingPhoto ? 'Save Changes' : 'Upload Photo')}
               </button>
             </div>
+
+            <Admin_DrivePicker
+              isOpen={isPickerOpen}
+              onClose={() => setIsPickerOpen(false)}
+              onSelect={(fileId) => {
+                onInputChange("imageUrl", fileId);
+              }}
+              title="Select Gallery Photo"
+            />
           </form>
         </div>
       </motion.div>

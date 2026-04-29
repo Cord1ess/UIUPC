@@ -25,7 +25,8 @@ import { useLoaderStore } from "@/store/useLoaderStore";
 import { useTimelineEngine } from "./hooks/useTimelineEngine";
 import { useInteractionSystem } from "./hooks/useInteractionSystem";
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
-import { IMAGE_WIDTH, IMAGE_HEIGHT, getCloudinaryUrl, failedUrls, type HeroImage } from "./utils/constants";
+import { IMAGE_WIDTH, IMAGE_HEIGHT, failedUrls, type HeroImage } from "./utils/constants";
+import { getImageUrl } from "@/utils/imageUrl";
 
 const ModernHero: React.FC = () => {
   // ── Modal & Playback State ──────────────────────────────
@@ -122,7 +123,7 @@ const ModernHero: React.FC = () => {
         // Double-Buffered LOD Swapping (Zero-Flicker)
         if (entry.focusFactor > 0.4) {
           const baseUrl = imagePool[entry.imageIndex]?.url;
-          const highResUrl = baseUrl ? getCloudinaryUrl(baseUrl, 1200, "auto:best") : null;
+          const highResUrl = baseUrl ? getImageUrl(baseUrl, 1200, 85) : null;
           if (highResUrl && !failedUrls.has(highResUrl)) {
             const highResImg = el.querySelector(".high-res") as HTMLImageElement;
             if (highResImg && highResImg.dataset.lod !== "high" && highResImg.dataset.fetching !== "true") {
@@ -220,7 +221,7 @@ const ModernHero: React.FC = () => {
         className={`absolute inset-0 z-10 pointer-events-none transition-opacity duration-700 py-20`}
       >
         {imagePool.map((image, index) => {
-          const initUrl = getCloudinaryUrl(image.url, 320, "auto:eco");
+          const initUrl = getImageUrl(image.url, 320, 70);
           // LCP Hero Preload Injection
           if (index === 0 && typeof window !== "undefined") {
             const link = document.createElement("link");
@@ -273,84 +274,11 @@ const ModernHero: React.FC = () => {
         })}
       </div>
 
-      {/* Bottom-Left Text Overlay — REFINED */}
-      <div className="absolute bottom-12 left-8 md:bottom-20 md:left-14 z-30 max-w-4xl pointer-events-auto">
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 1.2 }}
-          className="flex items-center gap-2 mb-2"
-        >
-          <div className="w-6 h-[1px] bg-uiupc-orange" />
-          <span className="text-[8px] font-black text-zinc-900 dark:text-zinc-400 uppercase tracking-[0.4em]">
-            Established 2005
-          </span>
-          <div className="w-6 h-[1px] bg-uiupc-orange" />
-        </motion.div>
-
-        <div className="mb-3">
-          <div className="overflow-visible">
-            <ScrollRevealText 
-              text="Welcome to"
-              delayOffset={1.6}
-              className="text-2xl md:text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-tight"
-            />
-          </div>
-          <div className="overflow-visible">
-            <ScrollRevealText 
-              text="UIU Photography Club"
-              delayOffset={2.0}
-              className="text-2xl md:text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-tight"
-            />
-          </div>
-        </div>
-
-        <motion.p 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 3.2, duration: 1 }}
-          className="text-zinc-700 dark:text-zinc-400 text-[10px] md:text-xs font-medium leading-relaxed mb-6 max-w-sm"
-        >
-          We are a community of passionate photographers at United International University dedicated to exploring the art of photography, sharing knowledge, and capturing campus life.
-        </motion.p>
-
-        <div className="flex items-center gap-5">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 3.2, duration: 0.5 }}
-          >
-            <Link
-              href="/join"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-black dark:bg-zinc-800 text-white text-[9px] font-black uppercase tracking-widest hover:bg-uiupc-orange dark:hover:bg-uiupc-orange transition-all rounded-sm shadow-md hover:-translate-y-0.5"
-            >
-              Join Club
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </Link>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 3.5 }}
-          >
-            <Link
-              href="/gallery"
-              className="text-[9px] font-black text-zinc-900 dark:text-zinc-500 uppercase tracking-widest hover:text-uiupc-orange dark:hover:text-white transition-colors"
-            >
-              Gallery
-            </Link>
-          </motion.div>
-        </div>
-      </div>
-
       {/* Preview Modal */}
       <ImagePreviewModal
         image={selectedImageIndex >= 0 ? imagePool[selectedImageIndex] : null}
-        nextImageUrl={selectedImageIndex >= 0 ? getCloudinaryUrl(imagePool[(selectedImageIndex + 1) % imagePool.length].url, 1600, "auto:best") : undefined}
-        prevImageUrl={selectedImageIndex >= 0 ? getCloudinaryUrl(imagePool[(selectedImageIndex - 1 + imagePool.length) % imagePool.length].url, 1600, "auto:best") : undefined}
+        nextImageUrl={selectedImageIndex >= 0 ? getImageUrl(imagePool[(selectedImageIndex + 1) % imagePool.length].url, 1600, 90) : undefined}
+        prevImageUrl={selectedImageIndex >= 0 ? getImageUrl(imagePool[(selectedImageIndex - 1 + imagePool.length) % imagePool.length].url, 1600, 90) : undefined}
         isOpen={isModalOpen}
         onClose={closeModal}
         originRect={originRect}

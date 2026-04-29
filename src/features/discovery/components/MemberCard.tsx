@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { FaLinkedin, FaInstagram, FaGlobe, FaFacebook } from 'react-icons/fa';
-import { getCloudinaryUrl } from '@/features/home/components/hero/utils/constants';
+import { getImageUrl } from '@/utils/imageUrl';
 
 interface MemberCardProps {
   member: {
@@ -35,11 +35,12 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, priority = false }) => 
       {/* 1:1 Image Holder - High Fidelity Reveal */}
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[20px] mb-10 bg-zinc-100 dark:bg-zinc-900 border border-black/5 dark:border-white/5 transition-all duration-1000 ease-[0.16, 1, 0.3, 1] group-hover:rounded-[40px] group-hover:shadow-[0_40px_100px_rgba(0,0,0,0.1)] dark:group-hover:shadow-[0_40px_100px_rgba(0,0,0,0.4)]">
         <Image
-          src={getCloudinaryUrl(imageUrl, 800, 'auto:best')}
+          src={getImageUrl(imageUrl, 400, 80)}
           alt={member.name}
           fill
+          unoptimized
           className="object-cover transition-all duration-1000 ease-[0.16, 1, 0.3, 1] group-hover:scale-110"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
           priority={priority}
         />
         

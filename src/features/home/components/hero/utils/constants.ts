@@ -12,12 +12,12 @@ export interface HeroImage {
   facebookPost?: string;
 }
 
-/** Utility to generate Cloudinary LOD variants dynamically */
-export const getCloudinaryUrl = (baseUrl: string, width: number, quality: 'auto:eco' | 'auto:best' | 'auto' = 'auto:eco') => {
-  if (!baseUrl.includes('/upload/')) return baseUrl;
-  const parts = baseUrl.split('/upload/');
-  return `${parts[0]}/upload/c_scale,w_${width},q_${quality},f_auto/${parts[1]}`;
-};
+/**
+ * Re-export the universal image utility.
+ * getCloudinaryUrl is kept as a compatibility alias during migration.
+ * All image optimization now goes through wsrv.nl CDN.
+ */
+export { getImageUrl, getImageUrl as getCloudinaryUrl, ImageSize, getRawImageUrl } from '@/utils/imageUrl';
 
 /** Global registry of URLs that failed to load — never retry these */
 export const failedUrls = new Set<string>();

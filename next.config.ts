@@ -5,17 +5,17 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
+        hostname: 'wsrv.nl',
         pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'drive.google.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
         pathname: '/**',
       },
       {
@@ -26,6 +26,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '*.fbcdn.net',
+        pathname: '/**',
+      },
+      {
+        // Legacy — keep temporarily for transition
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
         pathname: '/**',
       }
     ],

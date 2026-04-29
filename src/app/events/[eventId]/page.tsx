@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { FaCalendarAlt, FaMapMarkerAlt, FaMoneyBillWave, FaClock, FaTrophy, FaArrowLeft, FaPhoneAlt, FaEnvelope, FaUser } from 'react-icons/fa';
 import { fetchEventById } from '@/lib/fetchers';
-import { getCloudinaryUrl } from '@/features/home/components/hero/utils/constants';
+import { getImageUrl } from '@/utils/imageUrl';
 
 interface EventDetailPageProps {
   params: Promise<{ eventId: string }>;
@@ -63,7 +63,7 @@ const EventDetailPage = async ({ params }: EventDetailPageProps) => {
       {/* --- HERO BANNER --- */}
       <section className="relative h-[70vh] min-h-[600px] w-full overflow-hidden">
         <Image 
-          src={data.image ? getCloudinaryUrl(data.image, 1920, 'auto:best') : ''}
+          src={data.image ? getImageUrl(data.image, 1920, 85) : ''}
           alt={data.title}
           fill
           className="object-cover"

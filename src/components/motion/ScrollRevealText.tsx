@@ -10,6 +10,7 @@ interface ScrollRevealTextProps {
   as?: React.ElementType;
   delayOffset?: number;
   useOrange?: boolean;
+  forceWhite?: boolean;
 }
 
 /**
@@ -23,6 +24,7 @@ const ScrollRevealText: React.FC<ScrollRevealTextProps> = ({
   as: Tag = "h2",
   delayOffset = 0,
   useOrange = false,
+  forceWhite = false,
 }) => {
   const words = text.split(" ");
   const { theme } = useTheme();
@@ -34,7 +36,7 @@ const ScrollRevealText: React.FC<ScrollRevealTextProps> = ({
   }, []);
 
   // Use hex values for reliability in Framer Motion animations
-  const finalThemeColor = theme === "dark" ? "#FFFFFF" : "#1A1A1A";
+  const finalThemeColor = forceWhite ? "#FFFFFF" : (theme === "dark" ? "#FFFFFF" : "#1A1A1A");
   const finalColor = useOrange ? "#f58920" : finalThemeColor;
 
   if (!mounted) {

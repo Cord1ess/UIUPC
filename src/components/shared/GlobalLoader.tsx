@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLoaderStore } from "@/store/useLoaderStore";
-import { buildImagePool, IMAGE_COUNT, getCloudinaryUrl, failedUrls } from "@/features/home/components/hero/utils/constants";
+import { buildImagePool, IMAGE_COUNT, failedUrls } from "@/features/home/components/hero/utils/constants";
+import { getImageUrl } from "@/utils/imageUrl";
 
 const GlobalLoader = () => {
   const { isLoaded, progress, setLoaded, setProgress, setAnimationComplete } = useLoaderStore();
@@ -11,7 +12,7 @@ const GlobalLoader = () => {
 
   useEffect(() => {
     // Only fetch unique URLs, mapped to their low-res variant for insanely fast preloading
-    const urls = Array.from(new Set(buildImagePool(IMAGE_COUNT).map(img => getCloudinaryUrl(img.url, 320, 'auto:eco'))));
+    const urls = Array.from(new Set(buildImagePool(IMAGE_COUNT).map(img => getImageUrl(img.url, 320, 70))));
     let loadedCount = 0;
     let isCancelled = false;
 

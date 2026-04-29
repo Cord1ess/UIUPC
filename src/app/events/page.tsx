@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaTrophy, FaEye, FaArrowRight, FaCalendarAlt, FaMapMarkerAlt, FaHistory, FaStar } from 'react-icons/fa';
 import { fetchAllEvents } from '@/lib/fetchers';
-import { getCloudinaryUrl } from '@/features/home/components/hero/utils/constants';
+import { getImageUrl } from '@/utils/imageUrl';
 import CountdownTimer from '@/components/shared/CountdownTimer';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
 
@@ -93,7 +93,7 @@ const EventsContent = async () => {
           <div className="relative flex flex-col md:flex-row items-center gap-12 md:gap-20 transition-all">
             <div className="w-full md:w-[600px] aspect-square relative rounded-2xl overflow-hidden shadow-2xl">
               <Image 
-                src={flagship.image ? getCloudinaryUrl(flagship.image, 1000, 'auto:best') : ''}
+                src={flagship.image ? getImageUrl(flagship.image, 1000, 85) : ''}
                 alt={flagship.title}
                 fill
                 className="object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -153,7 +153,7 @@ const EventsContent = async () => {
           <div className="flex flex-col lg:flex-row items-center gap-16 group">
              <div className="w-full lg:w-[600px] aspect-square relative rounded-2xl overflow-hidden shadow-2xl">
                <Image 
-                src={endedEvent.image ? getCloudinaryUrl(endedEvent.image, 1000, 'auto:best') : ''}
+                src={endedEvent.image ? getImageUrl(endedEvent.image, 1000, 85) : ''}
                 alt={endedEvent.title}
                 fill
                 className="object-cover transition-transform duration-1000 group-hover:scale-105"
@@ -224,7 +224,7 @@ const EventCard = ({ event }: { event: any }) => (
     {/* 1:1 Image Header */}
     <div className="relative aspect-square overflow-hidden shadow-sm">
       <Image 
-        src={event.image ? getCloudinaryUrl(event.image, 800, 'auto:best') : ''}
+        src={event.image ? getImageUrl(event.image, 800, 80) : ''}
         alt={event.title}
         fill
         className="object-cover transition-transform duration-1000 group-hover:scale-110"

@@ -15,6 +15,8 @@ import {
   FaGraduationCap,
   FaEdit
 } from 'react-icons/fa';
+import { Admin_DrivePicker } from "@/features/admin/components";
+import { getImageUrl } from "@/utils/imageUrl";
 
 interface Admin_CommitteeModalProps {
   isOpen: boolean;
@@ -25,6 +27,7 @@ interface Admin_CommitteeModalProps {
 
 export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOpen, onClose, item, onSave }) => {
   const [loading, setLoading] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [formData, setFormData] = useState({
     full_name: '',
     designation: '',
@@ -87,6 +90,7 @@ export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOp
   };
 
   return (
+    <>
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10">
@@ -114,7 +118,7 @@ export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOp
                 >
                   <div className="w-48 h-48 rounded-[2.5rem] bg-white dark:bg-zinc-800 shadow-2xl border-4 border-white dark:border-zinc-800 overflow-hidden mb-6 group/img">
                     {formData.image_url ? (
-                      <img src={formData.image_url} alt="Profile" className="w-full h-full object-cover" />
+                      <img src={getImageUrl(formData.image_url, 300, 80)} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-zinc-200 dark:text-zinc-700">
                         <FaUserTie className="text-6xl" />
@@ -185,13 +189,22 @@ export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOp
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2"><FaImage className="text-zinc-400" /> Link</label>
-                  <input 
-                    type="url" value={formData.image_url}
-                    onChange={e => setFormData({ ...formData, image_url: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 p-4 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold transition-all"
-                    placeholder="Direct link to profile image..."
-                  />
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2"><FaImage className="text-zinc-400" /> Image Source</label>
+                  <div className="flex gap-4">
+                    <input 
+                      type="text" value={formData.image_url}
+                      onChange={e => setFormData({ ...formData, image_url: e.target.value })}
+                      className="flex-1 bg-zinc-50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 p-4 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold transition-all min-w-0"
+                      placeholder="Drive ID or direct link..."
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setIsPickerOpen(true)}
+                      className="px-6 py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-uiupc-orange hover:bg-uiupc-orange/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
+                    >
+                      Browse Drive
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -246,5 +259,15 @@ export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOp
         </div>
       )}
     </AnimatePresence>
+    
+    <Admin_DrivePicker
+      isOpen={isPickerOpen}
+      onClose={() => setIsPickerOpen(false)}
+      onSelect={(fileId) => {
+        setFormData({ ...formData, image_url: fileId });
+      }}
+      title="Select Profile Picture"
+    />
+    </>
   );
 };

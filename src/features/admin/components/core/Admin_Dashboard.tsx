@@ -243,7 +243,7 @@ export const Admin_Dashboard = ({ forcedTab }: { forcedTab?: string }) => {
       </div>
 
       <Admin_DetailsModal isOpen={showDetailsModal} onClose={() => setShowDetailsModal(false)} item={selectedItem} dataType={dataType} />
-      <Admin_EmailModal isOpen={showEmailModal} onClose={() => setShowEmailModal(false)} item={selectedEmailItem} onSendEmail={async () => {}} />
+      <Admin_EmailModal isOpen={showEmailModal} onClose={() => setShowEmailModal(false)} item={selectedEmailItem} onSend={async () => {}} sending={false} />
     </div>
   );
 };

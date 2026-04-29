@@ -16,7 +16,7 @@ import {
   FaExternalLinkAlt
 } from 'react-icons/fa';
 import Image from 'next/image';
-import { getCloudinaryUrl } from '@/features/home/components/hero/utils/constants';
+import { getImageUrl } from '@/utils/imageUrl';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { Admin_Dropdown } from "@/features/admin/components";
 
@@ -110,7 +110,7 @@ export const Admin_Archive: React.FC = () => {
                     <td className="px-8 py-6 whitespace-nowrap">
                       <div className="flex items-center gap-4">
                         <div className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden shrink-0 border border-black/5 dark:border-white/5 group-hover:scale-105 transition-transform shadow-inner">
-                          {item.photo_url ? <img src={getCloudinaryUrl(item.photo_url, 100, 'auto')} alt="" className="w-full h-full object-cover" /> : <FaFileImage className="text-zinc-300 mx-auto mt-4" />}
+                          {item.photo_url ? <img src={getImageUrl(item.photo_url, 100, 60)} alt="" className="w-full h-full object-cover" /> : <FaFileImage className="text-zinc-300 mx-auto mt-4" />}
                         </div>
                         <div className="flex flex-col min-w-[200px]">
                           <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tight truncate">{item.photo_title}</span>
@@ -165,7 +165,7 @@ export const Admin_Archive: React.FC = () => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/95 backdrop-blur-2xl" onClick={() => setViewingPhoto(null)} />
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-6xl bg-zinc-950 rounded-[3rem] overflow-hidden flex flex-col lg:flex-row shadow-3xl border border-white/10">
               <div className="flex-[2] bg-black flex items-center justify-center p-4">
-                <img src={getCloudinaryUrl(viewingPhoto.photo_url, 1600, 'auto')} alt={viewingPhoto.photo_title} className="max-w-full max-h-[80vh] object-contain rounded-2xl" />
+                <img src={getImageUrl(viewingPhoto.photo_url, 1600, 90)} alt={viewingPhoto.photo_title} className="max-w-full max-h-[80vh] object-contain rounded-2xl" />
               </div>
               <div className="flex-1 p-12 flex flex-col justify-between border-l border-white/10">
                 <div className="space-y-12">

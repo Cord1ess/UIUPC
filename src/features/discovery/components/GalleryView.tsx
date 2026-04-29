@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
-import { getCloudinaryUrl } from '@/features/home/components/hero/utils/constants';
+import { getImageUrl } from '@/utils/imageUrl';
 import ImagePreviewModal from '@/features/home/components/hero/ImagePreviewModal';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
 import { FaFilter, FaExpandAlt, FaFacebook, FaThLarge, FaColumns, FaSearch, FaChevronDown } from 'react-icons/fa';
@@ -247,10 +247,10 @@ const GalleryView: React.FC = () => {
               onClick={() => handleOpenModal(index)}
             >
               <Image 
-                src={getCloudinaryUrl(photo.url, 800, 'auto:best')}
+                src={getImageUrl(photo.url, 800, 80)}
                 alt={photo.title || 'Gallery image'}
                 width={800}
-                height={layoutMode === 'square' ? 800 : (photo.isHorizontal ? 600 : 1000)}
+                height={layoutMode === 'square' ? 800 : ((photo as any).isHorizontal ? 600 : 1000)}
                 className={`w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110 ${layoutMode === 'square' ? 'h-full' : ''}`}
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                 onError={() => handleImageError(photo.url)}
@@ -324,11 +324,11 @@ const GalleryView: React.FC = () => {
           url: sortedPhotos[selectedPhotoIndex].url,
           title: sortedPhotos[selectedPhotoIndex].title || '',
           photographer: 'UIUPC',
-          isHorizontal: sortedPhotos[selectedPhotoIndex].isHorizontal || false,
+          isHorizontal: (sortedPhotos[selectedPhotoIndex] as any).isHorizontal || false,
           facebookPost: sortedPhotos[selectedPhotoIndex].facebookPost
         } as any : null}
-        nextImageUrl={selectedPhotoIndex !== null && selectedPhotoIndex < sortedPhotos.length - 1 ? getCloudinaryUrl(sortedPhotos[selectedPhotoIndex + 1].url, 1600, 'auto:best') : undefined}
-        prevImageUrl={selectedPhotoIndex !== null && selectedPhotoIndex > 0 ? getCloudinaryUrl(sortedPhotos[selectedPhotoIndex - 1].url, 1600, 'auto:best') : undefined}
+        nextImageUrl={selectedPhotoIndex !== null && selectedPhotoIndex < sortedPhotos.length - 1 ? getImageUrl(sortedPhotos[selectedPhotoIndex + 1].url, 1600, 90) : undefined}
+        prevImageUrl={selectedPhotoIndex !== null && selectedPhotoIndex > 0 ? getImageUrl(sortedPhotos[selectedPhotoIndex - 1].url, 1600, 90) : undefined}
         isOpen={selectedPhotoIndex !== null}
         onClose={handleCloseModal}
         onNext={nextImage}

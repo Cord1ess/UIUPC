@@ -1,7 +1,9 @@
 "use client";
 
-import React from "react";
-import { FaSync, FaPlus } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaSync, FaPlus, FaImage } from "react-icons/fa";
+import { Admin_DrivePicker } from "@/features/admin/components";
+import { getImageUrl } from "@/utils/imageUrl";
 
 interface Media {
   type: string;
@@ -40,6 +42,8 @@ const Admin_BlogPostModal: React.FC<Admin_BlogPostModalProps> = ({
   onAddMedia,
   onRemoveMedia,
 }) => {
+  const [pickerIndex, setPickerIndex] = useState<number | null>(null);
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
@@ -132,13 +136,27 @@ const Admin_BlogPostModal: React.FC<Admin_BlogPostModalProps> = ({
                       <option value="video">Video</option>
                     </select>
 
-                    <input
-                      type="url"
-                      placeholder="Enter media URL"
-                      value={media.url}
-                      onChange={(e) => onMediaChange(index, "url", e.target.value)}
-                      className="w-full p-3 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-xl text-sm outline-none focus:border-uiupc-orange transition-all"
-                    />
+                    <div className="flex gap-3 items-center">
+                      {media.type === 'image' && media.url && (
+                        <div className="w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-zinc-100 dark:bg-white/5 border border-black/5 dark:border-white/5">
+                          <img src={getImageUrl(media.url, 100, 60)} alt="Preview" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <input
+                        type="url"
+                        placeholder="Enter media URL or Drive ID"
+                        value={media.url}
+                        onChange={(e) => onMediaChange(index, "url", e.target.value)}
+                        className="flex-1 p-3 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-xl text-sm outline-none focus:border-uiupc-orange transition-all min-w-0"
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => setPickerIndex(index)}
+                        className="px-4 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-uiupc-orange hover:bg-uiupc-orange/10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0"
+                      >
+                        Browse
+                      </button>
+                    </div>
 
                     <input
                       type="text"
@@ -186,6 +204,18 @@ const Admin_BlogPostModal: React.FC<Admin_BlogPostModalProps> = ({
           </div>
         </form>
       </div>
+      
+      <Admin_DrivePicker
+        isOpen={pickerIndex !== null}
+        onClose={() => setPickerIndex(null)}
+        onSelect={(fileId) => {
+          if (pickerIndex !== null) {
+            onMediaChange(pickerIndex, "url", fileId);
+            setPickerIndex(null);
+          }
+        }}
+        title="Select Blog Image"
+      />
     </div>
   );
 };

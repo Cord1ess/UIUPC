@@ -81,7 +81,7 @@ const MembersView: React.FC = () => {
 
   const currentYearData = useMemo(() => {
     if (!activeYear) return { core: [], othersByTag: {}, sortedTags: [] };
-    const members = committeeData.filter(m => (m.Session || m.session) === activeYear);
+    const members = committeeData.filter(m => String(m.session) === activeYear);
     return groupMembers(members);
   }, [committeeData, activeYear]);
 
@@ -89,7 +89,7 @@ const MembersView: React.FC = () => {
     const query = searchQuery.toLowerCase().trim();
     if (!query || !activeYear) return null;
 
-    const source = committeeData.filter(m => (m.Session || m.session) === activeYear);
+    const source = committeeData.filter(m => String(m.session) === activeYear);
 
     return source.filter(m => 
       (m.name || "").toLowerCase().includes(query) || 
