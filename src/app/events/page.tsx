@@ -1,47 +1,24 @@
 import React, { Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { FaTrophy, FaEye, FaArrowRight, FaCalendarAlt, FaMapMarkerAlt, FaHistory, FaStar } from 'react-icons/fa';
 import { fetchAllEvents } from '@/lib/fetchers';
 import { getImageUrl } from '@/utils/imageUrl';
 import CountdownTimer from '@/components/shared/CountdownTimer';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
 
+import EventsSkeleton from '@/features/events/components/EventsSkeleton';
+import EventMapWrapper from '@/features/events/components/EventMapWrapper';
+
+import EventSuspense from '@/features/events/components/EventSuspense';
+
 const EventsPage = () => {
   return (
     <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#121212] transition-colors duration-500 pb-20">
-      {/* ── ZONE 0: INTERACTIVE MAP (ENTRY) ────────────────────────── */}
-      <section id="map" className="w-full pt-32 md:pt-24 px-6 md:pb-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="w-full h-[320px] md:h-[450px] bg-white dark:bg-zinc-900 rounded-3xl border border-black/5 dark:border-white/5 shadow-inner flex flex-col items-center justify-center text-center p-6 md:p-8 relative overflow-hidden">
-             {/* Abstract Grid Decor */}
-             <div className="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none bg-grid-giant" />
-             
-             <div className="relative z-10">
-               <div className="w-16 h-16 rounded-full bg-uiupc-orange/10 flex items-center justify-center mx-auto mb-6 ring-8 ring-uiupc-orange/5">
-                 <FaMapMarkerAlt className="text-2xl text-uiupc-orange" />
-               </div>
-               <ScrollRevealText 
-                text="Interactive Event Map"
-                as="h2"
-                className="text-3xl md:text-5xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-4"
-               />
-               <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 dark:text-zinc-500">
-                 Explore the location of our upcoming and past chapters. <br />
-                 <span className="text-uiupc-orange/60">Module undergoing maintenance.</span>
-               </p>
-             </div>
-          </div>
-        </div>
-      </section>
-
-      <Suspense fallback={
-        <div className="py-20 px-6 flex justify-center">
-           <div className="w-12 h-12 border-4 border-uiupc-orange border-t-transparent rounded-full animate-spin" />
-        </div>
-      }>
+      <EventSuspense>
         <EventsContent />
-      </Suspense>
+      </EventSuspense>
     </div>
   );
 };
@@ -77,6 +54,15 @@ const EventsContent = async () => {
 
   return (
     <>
+      {/* ── ZONE 0: INTERACTIVE MAP (ENTRY) ────────────────────────── */}
+      <section id="map" className="w-full pt-32 md:pt-24 px-6 md:pb-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="w-full h-[75vh] md:h-[600px] relative">
+             <EventMapWrapper events={allEvents} />
+          </div>
+        </div>
+      </section>
+
       {/* ── ZONE 1: UPCOMING EVENTS ─────────────────────────────────── */}
       <section id="upcoming" className="py-12 md:py-20 px-6">
 

@@ -3,42 +3,27 @@
  */
 
 // ─── Image Pool ───────────────────────────────────────────────
-export interface HeroImage {
-  id: number;
-  url: string;
-  title: string;
-  photographer: string;
-  isHorizontal: boolean;
-  facebookPost?: string;
-}
+import { HeroImage, getImageUrl, ImageSize, getRawImageUrl } from "@/types";
 
-/**
- * Re-export the universal image utility.
- * getCloudinaryUrl is kept as a compatibility alias during migration.
- * All image optimization now goes through wsrv.nl CDN.
- */
-export { getImageUrl, getImageUrl as getCloudinaryUrl, ImageSize, getRawImageUrl } from '@/utils/imageUrl';
+export { getImageUrl, getImageUrl as getCloudinaryUrl, ImageSize, getRawImageUrl };
+export type { HeroImage };
 
 /** Global registry of URLs that failed to load — never retry these */
 export const failedUrls = new Set<string>();
 
-const RAW_IMAGES: Omit<HeroImage, "id">[] = [
-  { url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg", title: "Campus Golden Hour", photographer: "UIUPC", isHorizontal: false },
-  { url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1762121158/uiupc_HeroSlider2_cyl1xw.jpg", title: "Community Gathering", photographer: "UIUPC", isHorizontal: true },
-  { url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg", title: "Behind the Lens", photographer: "UIUPC", isHorizontal: false },
-  { url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772526245/Artboard_2-100_woyw8v.jpg", title: "Club Portrait", photographer: "UIUPC", isHorizontal: false },
-  { url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772527954/Cover_mhro7f.jpg", title: "Event Cover", photographer: "UIUPC", isHorizontal: true },
-  { url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1762799836/Blog5_lbkrue.png", title: "Creative Exploration", photographer: "UIUPC", isHorizontal: true },
-  { url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772527923/Post_air114.jpg", title: "Iftar Memories", photographer: "UIUPC", isHorizontal: true },
-  { url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772526242/Artboard_1-100_u1jtvp.jpg", title: "Member Spotlight", photographer: "UIUPC", isHorizontal: false },
-];
+const FALLBACK_IMAGE: Omit<HeroImage, "id"> = { 
+  url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg", 
+  title: "UIUPC Campus", 
+  photographer: "UIUPC", 
+  isHorizontal: true 
+};
 
 export function buildImagePool(count: number): HeroImage[] {
   const pool: HeroImage[] = [];
   for (let i = 0; i < count; i++) {
     pool.push({
       id: i,
-      ...RAW_IMAGES[i % RAW_IMAGES.length]
+      ...FALLBACK_IMAGE
     });
   }
   return pool;

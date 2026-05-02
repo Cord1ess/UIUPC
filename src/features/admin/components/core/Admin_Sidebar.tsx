@@ -12,7 +12,10 @@ import {
   FaHistory,
   FaUserCircle,
   FaNewspaper,
-  FaCamera
+  FaCamera,
+  FaMapMarkedAlt,
+  FaLayerGroup,
+  FaAward
 } from 'react-icons/fa';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import myLogo from '@/assets/UIUPC Logo.svg';
@@ -26,18 +29,21 @@ interface Admin_SidebarProps {
 }
 
 const ADMIN_TABS = [
-  { id: 'overview', label: 'Dashboard', icon: <FaThLarge /> },
-  { id: 'membership', label: 'Members', icon: <FaUsers /> },
-  { id: 'committee', label: 'Committees', icon: <FaUserCircle /> },
-  { id: 'events', label: 'Events', icon: <FaCalendarAlt /> },
-  { id: 'photos', label: 'Entries', icon: <FaCamera /> },
-  { id: 'archives', label: 'Archives', icon: <FaArchive /> },
-  { id: 'gallery', label: 'Gallery', icon: <FaImages /> },
-  { id: 'blog', label: 'Blog', icon: <FaNewspaper /> },
+  { id: 'overview', label: 'Overview', icon: <FaThLarge /> },
+  { id: 'membership', label: 'Member List', icon: <FaUsers /> },
+  { id: 'committee', label: 'Committee', icon: <FaUserCircle /> },
+  { id: 'events', label: 'Events List', icon: <FaCalendarAlt /> },
+  { id: 'event_map', label: 'Event Map', icon: <FaMapMarkedAlt /> },
+  { id: 'photos', label: 'Photo Entries', icon: <FaCamera /> },
+  { id: 'archives', label: 'Previous Years', icon: <FaArchive /> },
+  { id: 'gallery', label: 'Public Gallery', icon: <FaImages /> },
+  { id: 'blog', label: 'Blog Posts', icon: <FaNewspaper /> },
+  { id: 'departments', label: 'Departments', icon: <FaLayerGroup /> },
+  { id: 'achievements', label: 'Hall of Fame', icon: <FaAward /> },
   // CORE only tabs
-  { id: 'finance', label: 'Finances', icon: <FaWallet />, coreOnly: true },
-  { id: 'admins', label: 'Admins', icon: <FaShieldAlt />, coreOnly: true },
-  { id: 'audit', label: 'Audit', icon: <FaHistory />, coreOnly: true },
+  { id: 'finance', label: 'Payment Logs', icon: <FaWallet />, coreOnly: true },
+  { id: 'admins', label: 'Panel Access', icon: <FaShieldAlt />, coreOnly: true },
+  { id: 'audit', label: 'Activity History', icon: <FaHistory />, coreOnly: true },
 ];
 
 export const Admin_Sidebar = memo(({ activeTab, setActiveTab }: Admin_SidebarProps) => {

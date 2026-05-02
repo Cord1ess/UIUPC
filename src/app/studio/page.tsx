@@ -26,8 +26,17 @@ export default function UIUPCStudioPage() {
   const { images, activeImageId, activeToolId, uiKey, addImages, revertToHistory } = useStudioStore();
   const [isDragging, setIsDragging] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  
+  // Mobile UI State
+  const [isMobileControlsOpen, setIsMobileControlsOpen] = useState(false);
+  const [isMobileHistoryOpen, setIsMobileHistoryOpen] = useState(false);
 
   const activeImage = images.find(img => img.id === activeImageId);
+
+  // Auto-close mobile controls when tool changes
+  useEffect(() => {
+    setIsMobileControlsOpen(false);
+  }, [activeToolId]);
 
   // Prevent accidental reloads when working
   useEffect(() => {
@@ -217,7 +226,7 @@ export default function UIUPCStudioPage() {
 
       <StudioHeader />
 
-      <main key={uiKey} className="flex-1 relative z-10 px-[320px] pt-10 pb-4 flex items-center justify-center">
+      <main key={uiKey} className="flex-1 relative z-10 lg:px-[320px] pt-10 pb-4 flex items-center justify-center">
         <div className="w-full h-full flex items-center justify-center">
           
           <AnimatePresence mode="wait">
@@ -227,7 +236,7 @@ export default function UIUPCStudioPage() {
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
-                className="w-full h-full flex flex-col items-center justify-center text-center space-y-6"
+                className="w-full h-full flex flex-col items-center justify-center text-center space-y-6 px-6"
               >
                   <FaImages className="text-6xl text-zinc-300 dark:text-zinc-700 mb-2" />
                   <div className="space-y-4">
@@ -252,13 +261,33 @@ export default function UIUPCStudioPage() {
               <div
                 className="w-full h-full flex items-center justify-center relative"
               >
-                {/* Left: Tool Controls Panel (Symmetric at 320px) */}
-                <aside className="fixed left-0 top-20 bottom-0 w-[320px] border-r border-black/5 dark:border-white/5 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md overflow-y-auto no-scrollbar p-10">
+                {/* Left Sidebars: Desktop vs Mobile */}
+                <aside className="hidden lg:block fixed left-0 top-20 bottom-0 w-[320px] border-r border-black/5 dark:border-white/5 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md overflow-y-auto no-scrollbar p-10">
                    {renderToolControls()}
                 </aside>
 
+                <AnimatePresence>
+                  {isMobileControlsOpen && (
+                    <motion.aside 
+                      initial={{ x: "-100%" }}
+                      animate={{ x: 0 }}
+                      exit={{ x: "-100%" }}
+                      transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                      className="lg:hidden fixed inset-0 top-20 z-[60] bg-white dark:bg-zinc-900 overflow-y-auto p-10"
+                    >
+                      <div className="flex items-center justify-between mb-8">
+                         <h3 className="text-xs font-black uppercase tracking-widest text-uiupc-orange">Tool Controls</h3>
+                         <button onClick={() => setIsMobileControlsOpen(false)} className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center">
+                            <FaTrash className="text-[10px]" />
+                         </button>
+                      </div>
+                      {renderToolControls()}
+                    </motion.aside>
+                  )}
+                </AnimatePresence>
+
                 {/* Center Stage: Unified Canvas */}
-                <div className="flex-1 flex items-center justify-center h-full max-w-6xl mx-auto overflow-hidden">
+                <div className="flex-1 flex items-center justify-center h-full w-full max-w-6xl mx-auto overflow-hidden px-4 lg:px-0">
                    <StudioCanvas />
                 </div>
               </div>
@@ -267,8 +296,53 @@ export default function UIUPCStudioPage() {
         </div>
       </main>
 
-      <StudioRightPanel />
+      {/* Desktop Right Sidebar */}
+      <div className="hidden lg:block">
+        <StudioRightPanel />
+      </div>
+
+      {/* Mobile History Panel */}
+      <AnimatePresence>
+        {isMobileHistoryOpen && (
+          <motion.div 
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="lg:hidden fixed inset-0 top-20 z-[60] bg-white dark:bg-zinc-900 overflow-hidden flex flex-col"
+          >
+             <div className="p-4 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
+                <h3 className="text-xs font-black uppercase tracking-widest">History & Bin</h3>
+                <button onClick={() => setIsMobileHistoryOpen(false)} className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center">
+                    <FaTrash className="text-[10px]" />
+                </button>
+             </div>
+             <div className="flex-1 overflow-y-auto">
+                <StudioRightPanel />
+             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <StudioBottomBar />
+
+      {/* Mobile Toggle FABs */}
+      {images.length > 0 && (
+        <div className="lg:hidden fixed bottom-24 left-0 right-0 px-6 flex justify-between items-center z-40 pointer-events-none">
+           <button 
+             onClick={() => setIsMobileControlsOpen(!isMobileControlsOpen)}
+             className="w-12 h-12 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black shadow-2xl flex items-center justify-center pointer-events-auto active:scale-90 transition-transform"
+           >
+              <FaSyncAlt className={`text-sm transition-transform ${isMobileControlsOpen ? 'rotate-180' : ''}`} />
+           </button>
+           <button 
+             onClick={() => setIsMobileHistoryOpen(!isMobileHistoryOpen)}
+             className="w-12 h-12 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black shadow-2xl flex items-center justify-center pointer-events-auto active:scale-90 transition-transform"
+           >
+              <FaImages className="text-sm" />
+           </button>
+        </div>
+      )}
     </div>
   );
 }

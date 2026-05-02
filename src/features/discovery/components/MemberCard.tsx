@@ -22,7 +22,9 @@ interface MemberCardProps {
 }
 
 const MemberCard: React.FC<MemberCardProps> = ({ member, priority = false }) => {
-  const imageUrl = member.profileImage || 'https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg';
+  const isPlaceholder = !member.profileImage || member.profileImage === 'PLACEHOLDER';
+  const imageUrl = isPlaceholder ? '' : (member.profileImage || '');
+  const initials = (member.name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 
   return (
     <motion.div
@@ -34,15 +36,23 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, priority = false }) => 
     >
       {/* 1:1 Image Holder - High Fidelity Reveal */}
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[20px] mb-10 bg-zinc-100 dark:bg-zinc-900 border border-black/5 dark:border-white/5 transition-all duration-1000 ease-[0.16, 1, 0.3, 1] group-hover:rounded-[40px] group-hover:shadow-[0_40px_100px_rgba(0,0,0,0.1)] dark:group-hover:shadow-[0_40px_100px_rgba(0,0,0,0.4)]">
-        <Image
-          src={getImageUrl(imageUrl, 400, 80)}
-          alt={member.name}
-          fill
-          unoptimized
-          className="object-cover transition-all duration-1000 ease-[0.16, 1, 0.3, 1] group-hover:scale-110"
-          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-          priority={priority}
-        />
+        {isPlaceholder ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-900 dark:to-zinc-800">
+            <span className="text-5xl md:text-6xl font-black text-uiupc-orange/30 uppercase tracking-tighter select-none">
+              {initials}
+            </span>
+          </div>
+        ) : (
+          <Image
+            src={getImageUrl(imageUrl, 400, 80)}
+            alt={member.name}
+            fill
+            unoptimized
+            className="object-cover transition-all duration-1000 ease-[0.16, 1, 0.3, 1] group-hover:scale-110"
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+            priority={priority}
+          />
+        )}
         
         {/* Cinematic Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />

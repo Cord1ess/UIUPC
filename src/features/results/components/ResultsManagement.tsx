@@ -3,21 +3,27 @@
 import React, { useState, useEffect } from "react";
 import { FaSync, FaExclamationTriangle, FaTrophy, FaMoneyBillWave, FaCheck, FaEnvelope, FaSearch, FaSpinner } from "react-icons/fa";
 
+import { Result, Payment } from "@/types";
 import ResultsTable from "./ResultsTable";
 import PaymentsTable from "./PaymentsTable";
 import ResultModal from "./ResultModal";
 import PaymentModal from "./PaymentModal";
 
-
 interface ResultsManagementProps {
   scripts: Record<string, string>;
-  user: any;
+  user: {
+    email?: string;
+    id?: string;
+    [key: string]: any;
+  } | null;
   onUpdate?: () => void;
 }
 
+import { supabase } from "@/lib/supabase";
+
 const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, onUpdate }) => {
-  const [results, setResults] = useState<any[]>([]);
-  const [payments, setPayments] = useState<any[]>([]);
+  const [results, setResults] = useState<Result[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState("shutter-stories");
@@ -26,16 +32,15 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
   const [searchQuery, setSearchQuery] = useState("");
   const [showResultsModal, setShowResultsModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedResult, setSelectedResult] = useState<any>(null);
-  const [selectedPayment, setSelectedPayment] = useState<any>(null);
+  const [selectedResult, setSelectedResult] = useState<Result | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [currentResultsPage, setCurrentResultsPage] = useState(1);
   const [currentPaymentsPage, setCurrentPaymentsPage] = useState(1);
   const itemsPerPage = 10;
 
-  const [newResult, setNewResult] = useState<any>({
-    eventId: "shutter-stories",
+  const [newResult, setNewResult] = useState<Partial<Result>>({
     name: "",
     institute: "",
     category: "single",
@@ -56,19 +61,30 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
   const fetchResults = async () => {
     try {
       setLoading(true);
-      const url = `${scripts.results}?action=getAllResults&eventId=${selectedEvent}&t=${Date.now()}`;
-      const response = await fetch(url);
-      const result = await response.json();
-      if (result.success) {
-        setResults(Array.isArray(result.data) ? result.data : []);
-        setError(null);
-      } else {
-        throw new Error(result.error);
-      }
-    } catch (err: any) {
+      const { data, error } = await supabase
+        .from('results')
+        .select('*')
+        .eq('event_id', selectedEvent)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      const mapped = (data || []).map(r => ({
+        id: r.id,
+        name: r.participant_name,
+        institute: r.institute,
+        category: r.category,
+        photos: r.photo_count,
+        status: r.status,
+        selected: r.selected
+      }));
+
+      setResults(mapped);
+      setError(null);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       console.error("Error fetching results:", err);
-      setError(`Failed to load results: ${err.message}`);
-      setResults([]);
+      setError(`Failed to load results: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -76,107 +92,124 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
 
   const fetchPayments = async () => {
     try {
-      const url = `${scripts.results}?action=getAllPayments&eventId=${selectedEvent}&t=${Date.now()}`;
-      const response = await fetch(url);
-      const result = await response.json();
-      if (result.success) {
-        setPayments(Array.isArray(result.data) ? result.data : []);
-      }
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('event_id', selectedEvent)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const mapped = (data || []).map(p => ({
+        id: p.id,
+        name: p.name,
+        email: p.email,
+        phone: p.phone,
+        institute: p.institute,
+        category: p.category,
+        photoCount: p.photo_count,
+        tshirtSize: p.tshirt_size,
+        address: p.address,
+        paymentMethod: p.payment_method,
+        transactionId: p.transaction_id,
+        amount: p.amount,
+        status: p.status,
+        timestamp: p.timestamp || p.created_at,
+        eventId: p.event_id
+      }));
+
+      setPayments(mapped);
     } catch (err) {
       console.error("Error fetching payments:", err);
-      setPayments([]);
     }
   };
 
-  const handleAddResult = async (data: any) => {
+  const handleAddResult = async (data: Partial<Result>) => {
     try {
-      const queryParams = new URLSearchParams({
-        action: "addResult",
-        ...data,
-        eventId: selectedEvent,
-        t: Date.now().toString(),
-      }).toString();
+      const { error } = await supabase.from('results').insert([{
+        event_id: selectedEvent,
+        participant_name: data.name,
+        institute: data.institute,
+        category: data.category,
+        photo_count: data.photos,
+        status: data.status,
+        selected: data.selected
+      }]);
 
-      const response = await fetch(`${scripts.results}?${queryParams}`);
-      const result = await response.json();
-      if (result.success) {
-        alert("Result added successfully!");
-        setRefreshTrigger(p => p + 1);
-        setShowResultsModal(false);
-      } else {
-        alert("Failed: " + result.error);
-      }
-    } catch (err: any) {
-      alert("Error: " + err.message);
-    }
-  };
-
-  const handleUpdateResult = async (resultId: string, updatedData: any) => {
-    try {
-      const formData = new FormData();
-      formData.append("action", "updateResult");
-      formData.append("resultId", resultId);
-      formData.append("data", JSON.stringify(updatedData));
-      await fetch(scripts.results, { method: "POST", mode: "no-cors", body: formData });
-      alert("Update submitted!");
+      if (error) throw error;
+      alert("Result added successfully!");
       setRefreshTrigger(p => p + 1);
+      setShowResultsModal(false);
     } catch (err: any) {
       alert("Error: " + err.message);
+    }
+  };
+
+  const handleUpdateResult = async (resultId: string, updatedData: Partial<Result>) => {
+    try {
+      const { error } = await supabase.from('results').update({
+        participant_name: updatedData.name,
+        institute: updatedData.institute,
+        category: updatedData.category,
+        photo_count: updatedData.photos,
+        status: updatedData.status,
+        selected: updatedData.selected
+      }).eq('id', resultId);
+
+      if (error) throw error;
+      alert("Result updated!");
+      setRefreshTrigger(p => p + 1);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      alert("Error: " + errorMessage);
     }
   };
 
   const handleDeleteResult = async (resultId: string) => {
     if (!window.confirm("Delete this result?")) return;
     try {
-      const formData = new FormData();
-      formData.append("action", "deleteResult");
-      formData.append("resultId", resultId);
-      await fetch(scripts.results, { method: "POST", mode: "no-cors", body: formData });
-      alert("Delete submitted!");
+      const { error } = await supabase.from('results').delete().eq('id', resultId);
+      if (error) throw error;
+      alert("Result deleted!");
       setRefreshTrigger(p => p + 1);
-    } catch (err: any) {
-      alert("Error: " + err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      alert("Error: " + errorMessage);
     }
   };
 
   const handleUpdatePaymentStatus = async (paymentId: string, status: string) => {
     try {
-      const queryParams = new URLSearchParams({
-        action: "updatePaymentStatus",
-        paymentId,
-        status,
-        t: Date.now().toString(),
-      }).toString();
-      const response = await fetch(`${scripts.results}?${queryParams}`);
-      const result = await response.json();
-      if (result.success) {
-        alert("Payment status updated!");
-        fetchPayments();
-      } else {
-        alert("Failed: " + result.error);
-      }
-    } catch (err: any) {
-      alert("Error: " + err.message);
+      const { error } = await supabase.from('payments').update({ status }).eq('id', paymentId);
+      if (error) throw error;
+      alert(`Payment ${status}!`);
+      fetchPayments();
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      alert("Error: " + errorMessage);
     }
   };
 
-  const handleSendEmail = async (paymentId: string, paymentData: any) => {
+  const handleSendEmail = async (paymentId: string, paymentData: Payment) => {
     if (!window.confirm(`Send confirmation email to ${paymentData.email}?`)) return;
     try {
+      // NOTE: Email sending still requires a server-side trigger (like a GAS or Edge Function)
+      // For now, we'll keep the GAS call for emails OR suggest an Edge Function
       const url = `${scripts.results}?action=sendPaymentEmail&paymentId=${paymentId}&t=${Date.now()}`;
       const response = await fetch(url);
       const result = await response.json();
       if (result.success) alert("✅ Email sent!");
       else alert("❌ Failed: " + result.error);
-    } catch (err: any) {
-      alert("❌ Error: " + err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      alert("❌ Error: " + errorMessage);
     }
   };
 
-  const exportCSV = (data: any[], filename: string) => {
+  const exportCSV = (data: (Result | Payment)[], filename: string) => {
     if (!data.length) return alert("No data to export");
-    const headers = Object.keys(data[0]);
-    const csvContent = [headers.join(","), ...data.map(r => headers.map(h => `"${r[h]}"`).join(","))].join("\n");
+    const headers = Object.keys(data[0]) as (keyof (Result | Payment))[];
+    const csvContent = [headers.join(","), ...data.map(r => headers.map(h => `"${(r as any)[h]}"`).join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -226,15 +259,15 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="h-10 px-4 rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-xs outline-none focus:border-uiupc-orange"
           >
-            <option value="all">All Categories</option>
-            <option value="single">Single Photo</option>
-            <option value="story">Photo Story</option>
+            <option value="all">All Submission Types</option>
+            <option value="single">Single Photos</option>
+            <option value="story">Photo Stories</option>
           </select>
           <button 
             onClick={() => setRefreshTrigger(p => p + 1)} 
             className="h-10 px-4 rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-600 dark:text-zinc-300 hover:text-uiupc-orange dark:hover:text-uiupc-orange transition-all flex items-center gap-2 text-xs font-bold"
           >
-            <FaSync /> Refresh
+            <FaSync /> Update Data
           </button>
         </div>
         </div>
@@ -244,14 +277,14 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
         <div className="p-6 bg-zinc-100 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-2xl flex flex-col justify-center">
           <div className="flex items-center gap-3 mb-2">
             <FaTrophy className="text-uiupc-orange text-xl" />
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Total Results</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Total Entries</h3>
           </div>
           <p className="text-3xl font-black">{results.length}</p>
         </div>
         <div className="p-6 bg-zinc-100 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-2xl flex flex-col justify-center">
           <div className="flex items-center gap-3 mb-2">
             <FaMoneyBillWave className="text-green-500 text-xl" />
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Total Payments</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Paid Accounts</h3>
           </div>
           <p className="text-3xl font-black">{payments.length}</p>
         </div>

@@ -20,19 +20,18 @@ import {
 import ScrollRevealText from "@/components/motion/ScrollRevealText";
 import { motion, AnimatePresence } from "framer-motion";
 import { Admin_Sidebar, Admin_Dashboard } from "@/features/admin/components";
+import { useAdminData } from "@/contexts/AdminDataContext";
 
 const OverviewTab = () => {
   const { user, adminProfile, loading: authLoading } = useSupabaseAuth();
-
-  // Fetch actual records
-  const { data: members, isLoading: memLoading, refetch: refetchMem } = useSupabaseData("members", { limit: 5000 });
-  const { data: photos, isLoading: photosLoading, refetch: refetchPhotos } = useSupabaseData("exhibition_submissions", { limit: 5000 });
-  const { data: events, isLoading: eventsLoading } = useSupabaseData("events");
-  const { data: audit, isLoading: auditLoading } = useSupabaseData("audit_logs", { 
-    limit: 10,
-    orderBy: 'created_at',
-    orderDesc: true
-  });
+  const { 
+    members, 
+    submissions: photos, 
+    events, 
+    auditLogs: audit, 
+    isLoading: contextLoading,
+    refreshAll 
+  } = useAdminData();
 
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -52,11 +51,11 @@ const OverviewTab = () => {
     }
 
     (members || []).forEach(m => {
-      const date = m.created_at.split('T')[0];
+      const date = (m.created_at || "").split('T')[0];
       if (timeline[date]) timeline[date].members++;
     });
     (photos || []).forEach(p => {
-      const date = p.created_at.split('T')[0];
+      const date = (p.created_at || "").split('T')[0];
       if (timeline[date]) timeline[date].photos++;
     });
 
@@ -71,13 +70,17 @@ const OverviewTab = () => {
 
   const handleRefresh = async () => {
     setIsSyncing(true);
-    await Promise.all([refetchMem(), refetchPhotos()]);
+    await refreshAll();
     setTimeout(() => setIsSyncing(false), 1000);
   };
 
-  const isLoading = authLoading || memLoading || photosLoading || eventsLoading || auditLoading;
+  const isLoading = authLoading || contextLoading;
 
-  if (isLoading && !analytics) return <GlobalLoader />;
+  if (isLoading && !analytics) return (
+    <div className="flex w-full min-h-[60vh] items-center justify-center">
+      <div className="w-12 h-12 border-[3px] border-black/10 dark:border-white/10 border-t-uiupc-orange rounded-full animate-spin" />
+    </div>
+  );
   if (!user || !adminProfile) return null;
 
   return (

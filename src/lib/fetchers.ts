@@ -88,18 +88,18 @@ export async function fetchAllSubmissions() {
 // ─── EVENTS ────────────────────────────────────────────────────────────────
 
 export async function fetchUpcomingEvents() {
-  const now = new Date().toISOString();
   const { data, error } = await supabase
     .from('events')
     .select('*')
-    .gte('date', now)
     .order('date', { ascending: true });
 
   if (error) {
     console.error('Error fetching upcoming events:', error);
     return [];
   }
-  return data;
+
+  // Filter in-memory for maximum resilience and consistency with the Events page
+  return data.filter(event => event.status === 'upcoming' || event.status === 'ongoing');
 }
 
 export async function fetchAllEvents() {
@@ -179,4 +179,44 @@ export async function fetchBlogPosts() {
     return [];
   }
   return data;
+}
+
+export async function fetchHeroImages() {
+  // 1. Try to fetch featured images from Gallery
+  const { data: galleryFeatured } = await supabase
+    .from('gallery')
+    .select('*')
+    .eq('featured_on_hero', true)
+    .order('hero_priority', { ascending: false });
+
+  // 2. Try to fetch featured images from Submissions
+  const { data: subFeatured } = await supabase
+    .from('exhibition_submissions')
+    .select('*')
+    .eq('featured_on_hero', true)
+    .order('hero_priority', { ascending: false });
+
+  // 3. Fallback if no featured images: latest selected submissions
+  let fallbackData: any[] = [];
+  if ((!galleryFeatured || galleryFeatured.length === 0) && (!subFeatured || subFeatured.length === 0)) {
+     const { data: latestSub } = await supabase
+      .from('exhibition_submissions')
+      .select('*')
+      .eq('status', 'selected')
+      .order('submitted_at', { ascending: false })
+      .limit(10);
+     fallbackData = latestSub || [];
+  }
+
+  // Combine and Map
+  const combined = [...(galleryFeatured || []), ...(subFeatured || []), ...fallbackData];
+  
+  return combined.map((item, index) => ({
+    id: index,
+    url: item.image_url || item.photo_url || (item.drive_file_ids?.[0] ? `/api/image/${item.drive_file_ids[0]}` : ''),
+    title: item.title || item.photo_title || 'Untitled',
+    photographer: (item.uploaded_by ? item.uploaded_by.split('@')[0] : (item.participant_name || 'Member')),
+    isHorizontal: true,
+    facebookPost: item.facebook_post || item.facebook_url
+  }));
 }

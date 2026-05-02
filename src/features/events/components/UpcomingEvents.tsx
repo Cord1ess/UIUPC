@@ -5,107 +5,79 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa';
-import { UIUPCEvent } from '@/hooks/useFirebaseData';
-import ScrollRevealText from '@/components/motion/ScrollRevealText';
+import { getImageUrl } from '@/utils/imageUrl';
+import CountdownTimer from '@/components/shared/CountdownTimer';
 
 interface UpcomingEventsProps {
-  events: UIUPCEvent[];
+  events: any[];
 }
 
 const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
   if (!events || events.length === 0) {
-    return null;
+    return (
+      <div className="text-center py-20 border-2 border-dashed border-zinc-200 dark:border-white/10 rounded-[2.5rem]">
+        <p className="text-zinc-400 dark:text-zinc-500 font-black uppercase text-[10px] tracking-[0.3em]">
+          No events currently scheduled.
+        </p>
+      </div>
+    );
   }
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return {
-      day: date.getDate().toString().padStart(2, '0'),
-      month: date.toLocaleString('en-US', { month: 'short' }).toUpperCase(),
-      year: date.getFullYear().toString(),
-    };
-  };
+  const flagship = events[0];
 
   return (
-    <section className="px-6 py-24">
-      <div className="max-w-7xl mx-auto space-y-16">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-          <div className="space-y-4">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-uiupc-orange">What&apos;s Next</span>
-            <ScrollRevealText
-              text="Upcoming Events"
-              className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.85] text-zinc-900 dark:text-white"
-            />
+    <div className="w-full">
+      {/* ── Spotlight Design (Matches Events Page) ── */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="relative flex flex-col lg:flex-row items-center gap-10 lg:gap-16 transition-all"
+      >
+        {/* Image Card */}
+        <div className="w-full lg:w-1/2 aspect-square md:aspect-[16/10] lg:aspect-square relative rounded-[2rem] overflow-hidden shadow-2xl group">
+          <Image 
+            src={flagship.image_url ? getImageUrl(flagship.image_url, 1000, 85) : ''}
+            alt={flagship.title}
+            fill
+            className="object-cover transition-transform duration-1000 group-hover:scale-110"
+          />
+          <div className="absolute top-6 left-6">
+            <span className="px-4 py-2 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
+              Next Up
+            </span>
           </div>
-          <Link
-            href="/events"
-            className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-uiupc-orange transition-colors group"
+        </div>
+
+        {/* Content Section */}
+        <div className="flex-1 flex flex-col justify-center text-center lg:text-left">
+          <h3 className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-6 leading-none">
+            {flagship.title}
+          </h3>
+          
+          <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-8">
+            <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+              <FaCalendarAlt className="text-uiupc-orange" /> {new Date(flagship.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </div>
+            <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+              <FaMapMarkerAlt className="text-uiupc-orange" /> {flagship.location || 'UIU Campus'}
+            </div>
+          </div>
+          
+          <div className="mb-10 flex justify-center lg:justify-start">
+            <CountdownTimer targetDate={flagship.date} />
+          </div>
+
+          <Link 
+            href={`/events/${flagship.id}`} 
+            className="inline-flex items-center gap-4 px-10 py-5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-uiupc-orange dark:hover:bg-uiupc-orange hover:text-white dark:hover:text-white transition-all shadow-xl group/btn active:scale-95 w-max mx-auto lg:mx-0"
           >
-            <span>View All Events</span>
-            <FaArrowRight className="text-[8px] group-hover:translate-x-1 transition-transform" />
+            <span>Register for Event</span>
+            <FaArrowRight className="group-hover/btn:translate-x-2 transition-transform" />
           </Link>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {events.slice(0, 3).map((event, index) => {
-            const date = formatDate(event.date);
-            return (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="group"
-              >
-                <Link href={`/events/${event.id}`} className="block space-y-6">
-                  {/* Image */}
-                  <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-black/5 dark:border-white/5">
-                    {event.image && (
-                      <Image
-                        src={event.image}
-                        alt={event.title}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    )}
-                    <div className="absolute top-4 left-4 p-3 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-xl border border-black/5 dark:border-white/5 text-center min-w-[60px]">
-                      <span className="block text-2xl font-black text-zinc-900 dark:text-white leading-none">{date.day}</span>
-                      <span className="block text-[9px] font-black uppercase tracking-widest text-uiupc-orange">{date.month}</span>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="space-y-3">
-                    <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white leading-tight group-hover:text-uiupc-orange transition-colors">
-                      {event.title}
-                    </h3>
-                    <div className="flex items-center gap-4 text-[10px] font-bold text-zinc-400">
-                      <span className="flex items-center gap-1.5">
-                        <FaCalendarAlt className="text-[8px] text-uiupc-orange" />
-                        {new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                      </span>
-                      {event.location && (
-                        <span className="flex items-center gap-1.5">
-                          <FaMapMarkerAlt className="text-[8px] text-uiupc-orange" />
-                          {event.location}
-                        </span>
-                      )}
-                    </div>
-                    {event.description && (
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                        {event.description}
-                      </p>
-                    )}
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
+      </motion.div>
+    </div>
   );
 };
 

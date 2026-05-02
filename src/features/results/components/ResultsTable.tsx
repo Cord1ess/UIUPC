@@ -2,16 +2,7 @@
 
 import React from "react";
 import { FaTrophy, FaEdit, FaTrash, FaChevronLeft, FaChevronRight, FaDownload } from "react-icons/fa";
-
-interface Result {
-  id: string;
-  name: string;
-  institute: string;
-  photos: number;
-  status: string;
-  selected: boolean;
-  category: string;
-}
+import { Result } from "@/types";
 
 interface ResultsTableProps {
   results: Result[];
@@ -71,14 +62,14 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-black uppercase tracking-tighter dark:text-white flex items-center gap-2">
-          <FaTrophy className="text-uiupc-orange" /> Results <span className="text-zinc-400 text-sm">({filteredResults.length})</span>
+          <FaTrophy className="text-uiupc-orange" /> Entry Records <span className="text-zinc-400 text-sm">({filteredResults.length})</span>
         </h3>
         <div className="flex items-center gap-3">
           <button onClick={onAddResult} className="px-6 h-10 flex items-center gap-2 bg-uiupc-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all">
             Add Result
           </button>
           <button onClick={onExport} disabled={results.length === 0} className="px-6 h-10 flex items-center gap-2 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-600 dark:text-zinc-300 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-uiupc-orange disabled:opacity-50 transition-all">
-            <FaDownload /> Export CSV
+            <FaDownload /> Download List
           </button>
         </div>
       </div>
@@ -88,11 +79,11 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
         <table className="w-full border-separate border-spacing-y-3">
           <thead>
             <tr className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
-              <th className="px-6 pb-2 text-left">ID</th>
+              <th className="px-6 pb-2 text-left">Ref ID</th>
               <th className="px-6 pb-2 text-left">Name</th>
-              <th className="px-6 pb-2 text-left">Institute</th>
-              <th className="px-6 pb-2 text-left">Photos</th>
-              <th className="px-6 pb-2 text-left">Status</th>
+              <th className="px-6 pb-2 text-left">University / School</th>
+              <th className="px-6 pb-2 text-left">Photo Count</th>
+              <th className="px-6 pb-2 text-left">Selection Status</th>
               <th className="px-6 pb-2 text-right">Actions</th>
             </tr>
           </thead>

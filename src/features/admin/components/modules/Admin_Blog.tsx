@@ -131,7 +131,7 @@ export const Admin_Blog: React.FC = () => {
   };
 
   const handleDelete = async (postId: string) => {
-    if (!window.confirm("Archive article?")) return;
+    if (!window.confirm("Delete this blog post?")) return;
     try {
       const { error } = await supabase.from("blog_posts").delete().eq('id', postId);
       if (error) throw error;
@@ -183,7 +183,7 @@ export const Admin_Blog: React.FC = () => {
               onClick={() => { resetForm(); setShowPostModal(true); }} 
               className="px-8 h-14 mt-auto flex items-center gap-3 bg-uiupc-orange text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-uiupc-orange/20 hover:brightness-110 transition-all"
             >
-              <FaPlus /> Compose Post
+              <FaPlus /> Write New Post
             </button>
           </div>
         </div>
@@ -195,10 +195,10 @@ export const Admin_Blog: React.FC = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-zinc-50 dark:bg-zinc-900/50">
-                <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Article Title</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Attribution</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Timeline</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Metadata</th>
+                <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Blog Title</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Written By</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Date Published</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Tags / Category</th>
                 <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actions</th>
               </tr>
             </thead>
@@ -252,7 +252,7 @@ export const Admin_Blog: React.FC = () => {
       {/* ── PAGINATION ─────────────────────────────────────────── */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-10 border-t border-black/5 dark:border-white/5">
-          <div className="flex flex-col"><p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Content Ledger</p><p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Page {page + 1} of {totalPages} | Total {count} Articles</p></div>
+          <div className="flex flex-col"><p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Blog Summary</p><p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Page {page + 1} of {totalPages} | Total {count} Articles</p></div>
           <div className="flex items-center gap-3">
             <button disabled={page === 0} onClick={() => { setPage(p => Math.max(0, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange shadow-sm transition-all"><FaChevronLeft className="text-xs" /></button>
             <button disabled={page >= totalPages - 1} onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange shadow-sm transition-all"><FaChevronRight className="text-xs" /></button>

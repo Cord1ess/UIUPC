@@ -1,15 +1,6 @@
 "use client";
 import React from "react";
-
-interface Result {
-  id: string;
-  name: string;
-  institute: string;
-  category: string;
-  photos: number;
-  status: string;
-  selected: boolean;
-}
+import { Result } from "@/types";
 
 interface ResultModalProps {
   selectedResult: Result | null;

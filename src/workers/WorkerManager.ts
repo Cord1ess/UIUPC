@@ -20,11 +20,21 @@ class WorkerManager {
     return this.imageWorker!;
   }
 
+  /**
+   * Process a request in a worker thread.
+   * Uses a unique messageId to ensure responses are matched correctly even if 
+   * multiple processes run concurrently on the same worker instance.
+   */
   static async process(workerType: 'ai' | 'image', payload: any, onStatus?: (msg: string) => void): Promise<Blob> {
+    const messageId = crypto.randomUUID();
+    
     return new Promise((resolve, reject) => {
       const worker = workerType === 'ai' ? this.getAIWorker() : this.getImageWorker();
       
       const messageHandler = (e: MessageEvent) => {
+        // Only handle messages matching this request's ID
+        if (e.data.id !== messageId) return;
+
         if (e.data.type === 'SUCCESS') {
           worker.removeEventListener('message', messageHandler);
           resolve(e.data.resultBlob);
@@ -37,7 +47,7 @@ class WorkerManager {
       };
 
       worker.addEventListener('message', messageHandler);
-      worker.postMessage(payload);
+      worker.postMessage({ ...payload, id: messageId });
     });
   }
 }

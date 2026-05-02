@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaSearch, 
@@ -13,10 +13,13 @@ import {
   FaEnvelope, 
   FaUserGraduate, 
   FaIdBadge,
-  FaSpinner
+  FaSpinner,
+  FaCrown,
+  FaHistory
 } from 'react-icons/fa';
 import { Admin_Dropdown } from "@/features/admin/components";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
+import { useAdminData } from "@/contexts/AdminDataContext";
 import { supabase } from "@/lib/supabase";
 import { exportToCSV, generateBccMailto } from "@/utils/adminHelpers";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
@@ -24,6 +27,8 @@ import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 interface Admin_MembersProps {
   onViewDetails: (item: Record<string, any>) => void;
   onEmailReply: (item: Record<string, any>) => void;
+  onPromoteToCommittee?: (item: Record<string, any>) => void;
+  onViewTrajectory?: (item: Record<string, any>) => void;
   forcedSession?: string;
 }
 
@@ -42,7 +47,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export const Admin_Members: React.FC<Admin_MembersProps> = ({
-  onViewDetails, onEmailReply, forcedSession = "all"
+  onViewDetails, onEmailReply, onPromoteToCommittee, onViewTrajectory, forcedSession = "all"
 }) => {
   const { adminProfile } = useSupabaseAuth();
   const [page, setPage] = useState(0);
@@ -55,9 +60,21 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
   const pageSize = 12;
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   // Reset page when global filters change
   useEffect(() => { setPage(0); }, [forcedSession, filterDept, filterStatus]);
+
+  // Debounce search input (300ms)
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => {
+      setDebouncedSearch(value);
+      setPage(0);
+    }, 300);
+  }, []);
 
   const filters = useMemo(() => {
     const f: Record<string, any> = {};
@@ -67,15 +84,18 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
     return f;
   }, [filterStatus, filterDept, forcedSession]);
 
-  const { data, count, isLoading, refetch } = useSupabaseData("members", {
+  const memberOptions = useMemo(() => ({
     page,
     pageSize,
     filters,
     orderBy: sortBy,
     orderDesc,
-  });
+    search: debouncedSearch ? { columns: ['full_name', 'student_id', 'email'], term: debouncedSearch } : undefined,
+  }), [page, pageSize, filters, sortBy, orderDesc, debouncedSearch]);
 
-  const { data: allMembers } = useSupabaseData("members", { limit: 1000 });
+  const { data, count, isLoading, refetch } = useSupabaseData("members", memberOptions);
+
+  const { members: allMembers } = useAdminData();
   
   const departments = useMemo(() => {
     const d = new Set<string>();
@@ -148,7 +168,7 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
               type="text" 
               placeholder="Search by name or ID..." 
               value={searchTerm} 
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full py-5 pl-14 pr-8 bg-zinc-50 dark:bg-zinc-900/50 border border-transparent focus:border-uiupc-orange/30 rounded-2xl text-sm outline-none transition-all placeholder:text-zinc-400 font-medium" 
             />
           </div>
@@ -175,7 +195,7 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
               onClick={() => exportToCSV("membership", data || [])} 
               className="px-8 h-14 mt-auto flex items-center gap-3 bg-uiupc-orange text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-uiupc-orange/20 hover:brightness-110 transition-all"
             >
-              <FaFileExport /> Export
+              <FaFileExport /> Download List
             </button>
           </div>
         </div>
@@ -214,18 +234,34 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
                 <th className="px-8 py-6 text-left w-20">
                   <input type="checkbox" className="w-5 h-5 rounded-lg border-zinc-300 text-uiupc-orange focus:ring-uiupc-orange transition-all cursor-pointer" checked={Array.isArray(data) && data.length > 0 && selectedIds.size === data.length} onChange={(e) => e.target.checked ? setSelectedIds(new Set((data || []).map(i => i.id))) : setSelectedIds(new Set())} />
                 </th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Member Identity</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Academic Details</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Batch</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Status</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Basic Info</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Student Info</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Academic Batch</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Membership Status</th>
                 <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
               {isLoading ? (
                 [...Array(6)].map((_, i) => <tr key={i} className="animate-pulse"><td colSpan={6} className="px-8 py-8"><div className="h-8 bg-zinc-50 dark:bg-zinc-900 rounded-xl" /></td></tr>)
+              ) : !data || data.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-8 py-20 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="w-16 h-16 rounded-[2rem] bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-zinc-300 dark:text-zinc-600">
+                        <FaSearch size={20} />
+                      </div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                        No records found
+                      </p>
+                      <p className="text-[9px] text-zinc-500 max-w-xs">
+                        Try adjusting your filters or search term.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
               ) : (
-                (data || []).filter(item => (item.full_name || "").toLowerCase().includes(searchTerm.toLowerCase()) || (item.student_id || "").toLowerCase().includes(searchTerm.toLowerCase())).map((item) => (
+                (data || []).map((item) => (
                   <motion.tr key={item.id} className={`group hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition-all ${selectedIds.has(item.id) ? 'bg-uiupc-orange/[0.03]' : ''}`}>
                     <td className="px-8 py-6"><input type="checkbox" className="w-5 h-5 rounded-lg border-zinc-300 text-uiupc-orange transition-all cursor-pointer" checked={selectedIds.has(item.id)} onChange={() => { const s = new Set(selectedIds); if (s.has(item.id)) s.delete(item.id); else s.add(item.id); setSelectedIds(s); }} /></td>
                     <td className="px-6 py-6 whitespace-nowrap">
@@ -248,12 +284,18 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
                     </td>
                     <td className="px-6 py-6 whitespace-nowrap"><StatusBadge status={item.status || "pending"} /></td>
                     <td className="px-8 py-6 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                         {item.status === 'pending' && (
                           <><button onClick={() => handleUpdateStatus(item.id, 'approved')} className="w-10 h-10 flex items-center justify-center rounded-xl bg-green-500 text-white shadow-lg hover:scale-110 transition-all"><FaCheck className="text-xs" /></button><button onClick={() => handleUpdateStatus(item.id, 'rejected')} className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500 text-white shadow-lg hover:scale-110 transition-all"><FaTimes className="text-xs" /></button></>
                         )}
                         <button onClick={() => onViewDetails(item)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-uiupc-orange hover:text-white transition-all"><FaEye className="text-xs" /></button>
                         <button onClick={() => onEmailReply(item)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"><FaEnvelope className="text-xs" /></button>
+                        {onViewTrajectory && (
+                          <button onClick={() => onViewTrajectory(item)} title="View Committee History" className="w-10 h-10 flex items-center justify-center rounded-xl bg-purple-500/10 text-purple-500 hover:bg-purple-500 hover:text-white transition-all"><FaHistory className="text-xs" /></button>
+                        )}
+                        {onPromoteToCommittee && (
+                          <button onClick={() => onPromoteToCommittee(item)} title="Add to Committee" className="w-10 h-10 flex items-center justify-center rounded-xl bg-uiupc-orange/10 text-uiupc-orange hover:bg-uiupc-orange hover:text-white transition-all"><FaCrown className="text-xs" /></button>
+                        )}
                         <button onClick={() => handleDelete(item.id)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:bg-red-500 hover:text-white transition-all"><FaTimes className="text-xs" /></button>
                       </div>
                     </td>
@@ -268,7 +310,7 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
       {/* ── PAGINATION ────────────────────────────────────────── */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-10 border-t border-black/5 dark:border-white/5">
-          <div className="flex flex-col"><p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Inventory Status</p><p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Page {page + 1} of {totalPages} | Total {count} Records</p></div>
+          <div className="flex flex-col"><p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Member Summary</p><p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Page {page + 1} of {totalPages} | Total {count} Records</p></div>
           <div className="flex items-center gap-3">
             <button disabled={page === 0} onClick={() => { setPage(p => Math.max(0, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange transition-all shadow-sm"><FaChevronLeft className="text-xs" /></button>
             <button disabled={page >= totalPages - 1} onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange transition-all shadow-sm"><FaChevronRight className="text-xs" /></button>

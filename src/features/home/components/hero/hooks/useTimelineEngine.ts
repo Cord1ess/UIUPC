@@ -62,7 +62,7 @@ function lerp(a: number, b: number, t: number): number {
 
 // ─── Hook ─────────────────────────────────────────────────────
 
-export function useTimelineEngine(isPaused: boolean = false) {
+export function useTimelineEngine(isPaused: boolean = false, initialPool?: HeroImage[]) {
   const [phase, setPhase] = useState<AnimationPhase>("transition");
   const phaseRef = useRef<AnimationPhase>("transition");
   const phaseStartRef = useRef(0);
@@ -92,7 +92,20 @@ export function useTimelineEngine(isPaused: boolean = false) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const imagePool = useMemo(() => buildImagePool(activeImageCount), [activeImageCount]);
+  const imagePool = useMemo(() => {
+    if (initialPool && initialPool.length > 0) {
+      // Repeat the dynamic pool to fill IMAGE_COUNT if needed
+      const pool: HeroImage[] = [];
+      for (let i = 0; i < activeImageCount; i++) {
+        pool.push({
+          ...initialPool[i % initialPool.length],
+          id: i
+        });
+      }
+      return pool;
+    }
+    return buildImagePool(activeImageCount);
+  }, [activeImageCount, initialPool]);
 
   // ─── Initialization Logic ──────────────────────────────────
   useEffect(() => {

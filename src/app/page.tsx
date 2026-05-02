@@ -19,7 +19,7 @@ const Home = () => {
         {/* Section 1: Hero Carousel */}
         <HomeCarousel />
 
-        <div className="flex flex-col gap-16 md:gap-24 mt-8 md:mt-24">
+        <div className="flex flex-col gap-6 md:gap-12 mt-6 md:mt-12">
           {/* Section 2: Milestones */}
           <Milestones />
 
@@ -43,7 +43,7 @@ const Home = () => {
           <div className="max-w-7xl mx-auto">
             <div className="mb-10">
               <ScrollRevealText 
-                text="UPCOMING EXPERIENCES" 
+                text="UPCOMING EVENTS" 
                 className="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4 text-zinc-900 dark:text-white"
               />
               <div className="w-16 h-1 bg-uiupc-orange mb-6"></div>
@@ -61,10 +61,10 @@ const Home = () => {
             <div className="text-center">
               <Link 
                 href="/events" 
-                className="group relative inline-flex items-center gap-3 px-10 py-4 font-black uppercase tracking-widest border-2 rounded-full transition-all bg-transparent text-zinc-900 border-zinc-900 hover:bg-zinc-900 hover:text-white dark:text-white dark:border-white dark:hover:bg-white dark:hover:text-black"
+                className="inline-flex items-center gap-4 px-12 py-5 bg-uiupc-orange text-white font-black uppercase tracking-widest rounded-full transition-all hover:scale-105 shadow-xl hover:shadow-uiupc-orange/20 relative z-10"
               >
-                View Event Calendar
-                <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+                <span>VIEW ALL EVENTS</span>
+                <FaArrowRight className="text-xl" />
               </Link>
             </div>
           </div>
@@ -97,10 +97,10 @@ const Home = () => {
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-uiupc-orange/5 blur-[150px] rounded-full pointer-events-none" />
 
               <ScrollRevealText 
-                text="JOIN THE FAMILY" 
+                text="Join UIU Photography Club" 
                 className="text-4xl md:text-7xl font-black uppercase tracking-tighter mb-8 relative z-10 block text-zinc-900 dark:text-white"
               />
-              <p className="text-base md:text-lg font-bold mb-14 max-w-2xl mx-auto uppercase tracking-[0.2em] leading-relaxed relative z-10 text-zinc-500 dark:text-white/40">
+              <p className="text-base md:text-lg font-medium mb-14 max-w-2xl mx-auto italic leading-relaxed relative z-10 text-zinc-500 dark:text-white/40 font-serif">
                 Begin your creative journey with United International University Photography Club.
               </p>
               

@@ -2,23 +2,7 @@
 
 import React from "react";
 import { FaUser, FaEnvelope, FaPhone, FaUniversity, FaImage, FaTshirt, FaHome, FaCalendar, FaCheck, FaTimes } from "react-icons/fa";
-
-interface Payment {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  institute: string;
-  category: string;
-  photoCount: number;
-  tshirtSize: string;
-  address: string;
-  paymentMethod: string;
-  transactionId: string;
-  totalAmount: number;
-  timestamp: string;
-  status: string;
-}
+import { Payment } from "@/types";
 
 interface PaymentModalProps {
   payment: Payment | null;

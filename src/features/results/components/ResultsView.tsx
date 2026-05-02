@@ -14,15 +14,39 @@ import {
 import GlobalLoader from "@/components/shared/GlobalLoader";
 import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
+interface SinglePhoto {
+  id: string;
+  name: string;
+  institute: string;
+  photos: number | string;
+  selected: boolean;
+}
+
+interface Story {
+  id: string;
+  name: string;
+  institute: string;
+  photos: number | string;
+  selected: boolean;
+}
+
+interface ResultsData {
+  success: boolean;
+  title: string;
+  singlePhotos: SinglePhoto[];
+  stories: Story[];
+  error?: string;
+}
+
 const ResultsView = () => {
   const params = useParams();
   const eventId = params.eventId as string;
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("single");
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [isToolVisible, setIsToolVisible] = useState(true);
 
@@ -82,9 +106,10 @@ const ResultsView = () => {
 
         setResults(data);
         setError(null);
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
         console.error("Error fetching results:", err);
-        setError(err.message);
+        setError(errorMessage);
         if (!results) {
           setResults({ success: true, title: "Selected Participants", singlePhotos: [], stories: [] });
         }
@@ -99,7 +124,7 @@ const ResultsView = () => {
   const displayResults = useMemo(() => {
     if (!results) return [];
     const categoryResults = selectedCategory === "single" ? results.singlePhotos || [] : results.stories || [];
-    const filtered = categoryResults.filter((item: any) => {
+    const filtered = categoryResults.filter((item: SinglePhoto | Story) => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase();
       return (
@@ -213,7 +238,7 @@ const ResultsView = () => {
         <div className="max-w-7xl mx-auto">
             <div className="space-y-4">
                 <AnimatePresence mode="popLayout">
-                    {currentItems.map((item: any, index: number) => (
+                    {currentItems.map((item: SinglePhoto | Story, index: number) => (
                         <motion.div
                             key={item.id || index}
                             layout

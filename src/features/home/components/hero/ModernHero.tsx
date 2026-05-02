@@ -23,6 +23,7 @@ import DynamicGrid from '@/components/shared/DynamicGrid';
 import ImagePreviewModal from "./ImagePreviewModal";
 import { useLoaderStore } from "@/store/useLoaderStore";
 import { useTimelineEngine } from "./hooks/useTimelineEngine";
+import { fetchHeroImages } from "@/lib/fetchers";
 import { useInteractionSystem } from "./hooks/useInteractionSystem";
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
 import { IMAGE_WIDTH, IMAGE_HEIGHT, failedUrls, type HeroImage } from "./utils/constants";
@@ -34,6 +35,18 @@ const ModernHero: React.FC = () => {
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dynamicImages, setDynamicImages] = useState<HeroImage[]>([]);
+
+  // ── Fetch Data ──────────────────────────────────────────
+  useEffect(() => {
+    const loadImages = async () => {
+      const images = await fetchHeroImages();
+      if (images.length > 0) {
+        setDynamicImages(images);
+      }
+    };
+    loadImages();
+  }, []);
 
   // ── Engine ──────────────────────────────────────────────
   const { 
@@ -43,7 +56,7 @@ const ModernHero: React.FC = () => {
     setDragVelocity, 
     setHoveredIndex,
     seekToImage
-  } = useTimelineEngine(isPaused);
+  } = useTimelineEngine(isPaused, dynamicImages);
 
   // ── DOM Refs for direct manipulation ────────────────────
   const containerRef = useRef<HTMLDivElement>(null);

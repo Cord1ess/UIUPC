@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import {
   FaUsers,
   FaCalendarAlt,
@@ -57,34 +57,40 @@ const milestones: MilestoneItem[] = [
 
 const Milestones: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [animated, setAnimated] = useState(false);
   const { theme } = useTheme();
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !animated) {
-            setAnimated(true);
-          }
-        });
-      },
-      { threshold: 0.2 }
-    );
+  // Animation variants for the card entrance
+  const cardVariants = {
+    initial: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.6, ease: "easeOut" } 
+    }
+  };
 
-    const currentRef = containerRef.current;
-    if (currentRef) observer.observe(currentRef);
-    return () => {
-      if (currentRef) observer.unobserve(currentRef);
-    };
-  }, [animated]);
+  // Icon animation variants for scroll-trigger (Mobile) and hover (Desktop)
+  const iconVariants = {
+    initial: { 
+      scale: 1, 
+      color: theme === 'dark' ? "#FFFFFF" : "#1A1A1A", // Explicit hex instead of currentColor
+      opacity: 0.1 
+    },
+    active: { 
+      scale: 1.15, 
+      color: "#f58920", 
+      opacity: 1,
+      transition: { duration: 0.4 } 
+    }
+  };
 
   return (
-    <section className="px-6" ref={containerRef}>
+    <section className="px-6 pt-4 pb-12" ref={containerRef}>
       <div className="max-w-7xl mx-auto">
         <div className="mb-10">
           <ScrollRevealText 
             text="OUR CLUB MILESTONES" 
+            delayOffset={0.5}
             className="text-4xl md:text-5xl font-black text-black dark:text-white uppercase tracking-tighter mb-4"
           />
           <div className="w-16 h-1 bg-uiupc-orange mb-6"></div>
@@ -93,20 +99,28 @@ const Milestones: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {milestones.map((item, index) => {
             const Icon = item.icon;
             return (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className={`${theme === 'dark' ? 'bg-zinc-900 border-white/5' : 'bg-white border-black/5'} p-7 rounded-slight shadow-m3-1 dark:shadow-none transition-all duration-300 hover:shadow-m3-2 dark:hover:shadow-uiupc-orange/10 hover:-translate-y-1 group border flex items-center justify-between`}
+                initial="initial"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.1 }}
+                variants={cardVariants}
+                className={`
+                  relative p-8 rounded-[2rem] border transition-all duration-500
+                  flex items-center justify-between group
+                  ${theme === 'dark' 
+                    ? 'bg-zinc-900 border-white/5 hover:border-uiupc-orange/20' 
+                    : 'bg-white border-black/5 hover:border-uiupc-orange/20 shadow-xl shadow-black/[0.02]'}
+                  hover:-translate-y-1
+                `}
               >
-                <div className="flex flex-col space-y-1">
+                <div className="flex flex-col space-y-1 relative z-10">
                   <div className="flex items-baseline gap-1 mb-1">
-                    <span className={`text-4xl font-black ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
+                    <span className={`text-4xl md:text-5xl font-black ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
                       {item.number}
                     </span>
                     {item.suffix && (
@@ -122,9 +136,30 @@ const Milestones: React.FC = () => {
                   </p>
                 </div>
                 
-                <div className="text-uiupc-orange/10 dark:text-uiupc-orange/5 transition-all duration-500 group-hover:scale-110 group-hover:text-uiupc-orange flex-shrink-0">
-                  <Icon className="text-6xl" />
-                </div>
+                {/* Icon with Hybrid Interaction: Desktop Hover & Mobile Scroll-Pulse */}
+                <motion.div 
+                  initial="initial"
+                  whileInView="active"
+                  viewport={{ 
+                    once: false, 
+                    amount: 0.8 // Mobile: Pulse when card is mostly in view
+                  }}
+                  variants={iconVariants}
+                  // Desktop Hover (using the same 'active' variant)
+                  whileHover="active"
+                  className="flex-shrink-0 relative z-10 text-zinc-400/20 dark:text-white/5 lg:group-hover:text-uiupc-orange lg:group-hover:scale-110 transition-all duration-300"
+                >
+                  <Icon className="text-5xl md:text-6xl" />
+                </motion.div>
+
+                {/* Mobile Glow Overlay (triggered by whileInView on icon) */}
+                <motion.div 
+                  variants={{
+                    initial: { opacity: 0 },
+                    active: { opacity: 0.05 }
+                  }}
+                  className="absolute inset-0 bg-uiupc-orange pointer-events-none md:hidden"
+                />
               </motion.div>
             );
           })}

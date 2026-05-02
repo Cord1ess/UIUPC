@@ -22,8 +22,9 @@ interface PathSegment {
 interface AdminDrivePickerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (fileId: string, fileUrl: string) => void;
+  onSelect: (fileId: string, fileUrl: string, name: string) => void;
   title?: string;
+  allowFolderSelection?: boolean;
 }
 
 // Memory cache for instantaneous navigation
@@ -33,7 +34,8 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
   isOpen,
   onClose,
   onSelect,
-  title = "Select Image from Drive"
+  title = "Select Image from Drive",
+  allowFolderSelection = false
 }) => {
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [items, setItems] = useState<DriveItem[]>([]);
@@ -151,19 +153,27 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
 
   const handleItemClick = (item: DriveItem) => {
     if (item.type === 'folder') {
-      fetchFolder(item.id);
-      setSearchQuery('');
+      if (allowFolderSelection) {
+        setSelectedItem(item);
+      } else {
+        fetchFolder(item.id);
+        setSearchQuery('');
+      }
     } else {
       setSelectedItem(item);
     }
   };
 
   const handleConfirmSelection = () => {
-    if (selectedItem && selectedItem.type === 'file') {
-      // Return both ID and a view URL for immediate use/preview
-      const viewUrl = `https://drive.google.com/uc?export=view&id=${selectedItem.id}`;
-      onSelect(selectedItem.id, viewUrl);
-      onClose();
+    if (selectedItem) {
+      if (selectedItem.type === 'file') {
+        const viewUrl = `https://drive.google.com/uc?export=view&id=${selectedItem.id}`;
+        onSelect(selectedItem.id, viewUrl, selectedItem.name);
+        onClose();
+      } else if (selectedItem.type === 'folder' && allowFolderSelection) {
+        onSelect(selectedItem.id, 'FOLDER', selectedItem.name);
+        onClose();
+      }
     }
   };
 
@@ -302,7 +312,21 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
                       {/* Thumbnail/Icon */}
                       <div className="w-full aspect-square rounded-xl mb-3 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 overflow-hidden relative">
                         {item.type === 'folder' ? (
-                          <FaFolder className="text-4xl text-blue-400 group-hover:scale-110 transition-transform" />
+                          <div className="relative group/folder">
+                            <FaFolder className="text-4xl text-blue-400 group-hover:scale-110 transition-transform" />
+                            {allowFolderSelection && (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  fetchFolder(item.id);
+                                  setSearchQuery('');
+                                }}
+                                className="absolute -bottom-2 -right-2 bg-white dark:bg-zinc-800 shadow-lg border border-black/5 rounded-lg px-2 py-1 text-[8px] font-black uppercase tracking-tighter hover:bg-uiupc-orange hover:text-white transition-all z-20"
+                              >
+                                Enter
+                              </button>
+                            )}
+                          </div>
                         ) : item.type === 'file' ? (
                           <img 
                             src={getImageUrl(item.id, 150, 60)} 
@@ -315,7 +339,7 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
                         )}
                         
                         {/* Selection Checkmark */}
-                        {item.type === 'file' && selectedItem?.id === item.id && (
+                        {selectedItem?.id === item.id && (
                           <div className="absolute top-2 right-2 w-6 h-6 bg-uiupc-orange rounded-full flex items-center justify-center text-white shadow-lg">
                             <FaCheckCircle className="text-sm" />
                           </div>
@@ -359,7 +383,7 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
                 </button>
                 <button 
                   onClick={handleConfirmSelection}
-                  disabled={!selectedItem || selectedItem.type !== 'file'}
+                  disabled={!selectedItem || (selectedItem.type !== 'file' && !(selectedItem.type === 'folder' && allowFolderSelection))}
                   className="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-uiupc-orange text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md"
                 >
                   Confirm Selection

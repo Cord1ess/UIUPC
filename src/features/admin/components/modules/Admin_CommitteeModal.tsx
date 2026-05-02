@@ -13,7 +13,8 @@ import {
   FaLayerGroup,
   FaSortAmountUp,
   FaGraduationCap,
-  FaEdit
+  FaEdit,
+  FaIdBadge
 } from 'react-icons/fa';
 import { Admin_DrivePicker } from "@/features/admin/components";
 import { getImageUrl } from "@/utils/imageUrl";
@@ -36,7 +37,8 @@ export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOp
     image_url: '',
     facebook_link: '',
     linkedin_link: '',
-    priority: 10
+    priority: 10,
+    student_id: ''
   });
 
   useEffect(() => {
@@ -49,7 +51,8 @@ export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOp
         image_url: item.image_url || '',
         facebook_link: item.social_links?.facebook || '',
         linkedin_link: item.social_links?.linkedin || '',
-        priority: item.order_index || 0
+        priority: item.order_index || 0,
+        student_id: item.student_id || ''
       });
     } else {
       setFormData({
@@ -60,7 +63,8 @@ export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOp
         image_url: '',
         facebook_link: '',
         linkedin_link: '',
-        priority: 0
+        priority: 0,
+        student_id: ''
       });
     }
   }, [item, isOpen]);
@@ -76,13 +80,14 @@ export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOp
       year: formData.batch,
       image_url: formData.image_url,
       order_index: formData.priority,
+      student_id: formData.student_id || null,
       social_links: {
         facebook: formData.facebook_link,
         linkedin: formData.linkedin_link
       }
     };
 
-    const result = await onSave(item?.id || null, dbData);
+    const result = await onSave(item && !item._prefill ? item.id : null, dbData);
     if (result?.success) {
       onClose();
     }
@@ -137,7 +142,7 @@ export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOp
                 <div>
                   <span className="text-uiupc-orange text-[10px] font-black uppercase tracking-[0.4em] mb-4 block">Committee Member</span>
                   <h3 className="text-4xl font-black uppercase tracking-tighter dark:text-white">
-                    {item ? "Edit Member" : "New Member"}
+                    {item && !item._prefill ? "Edit Committee Member" : "Add New Committee Member"}
                   </h3>
                 </div>
                 <button onClick={onClose} className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-zinc-400 hover:text-red-500 transition-all flex items-center justify-center group">
@@ -178,7 +183,59 @@ export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOp
                     />
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2"><FaGraduationCap className="text-zinc-400" /> Session</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                      <FaIdBadge className="text-zinc-400" /> Student ID
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text" value={formData.student_id}
+                        onChange={e => setFormData({ ...formData, student_id: e.target.value })}
+                        className="flex-1 bg-zinc-50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 p-4 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold transition-all"
+                        placeholder="e.g. 011221234"
+                      />
+                      <button 
+                        type="button"
+                        onClick={async () => {
+                          if (!formData.student_id) return alert("Enter Student ID first");
+                          setLoading(true);
+                          const { data, error } = await supabase
+                            .from('committees')
+                            .select('*')
+                            .eq('student_id', formData.student_id)
+                            .order('created_at', { ascending: false })
+                            .limit(1);
+                          
+                          if (data?.[0]) {
+                            const latest = data[0];
+                            setFormData(prev => ({
+                              ...prev,
+                              full_name: latest.member_name || prev.full_name,
+                              image_url: latest.image_url || prev.image_url,
+                              facebook_link: latest.social_links?.facebook || prev.facebook_link,
+                              linkedin_link: latest.social_links?.linkedin || prev.linkedin_link,
+                              department: latest.department || prev.department
+                            }));
+                          } else {
+                            alert("No existing record found for this ID.");
+                          }
+                          setLoading(false);
+                        }}
+                        disabled={loading}
+                        className="px-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-uiupc-orange rounded-2xl transition-all flex items-center justify-center"
+                        title="Auto-fill from existing records"
+                      >
+                        <FaSync className={loading ? 'animate-spin' : ''} />
+                      </button>
+                    </div>
+                    <p className="text-[9px] text-zinc-500 italic">
+                      Links this role to a member's permanent identity across all years.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2"><FaGraduationCap className="text-zinc-400" /> Committee Year</label>
                     <input 
                       type="text" required value={formData.batch}
                       onChange={e => setFormData({ ...formData, batch: e.target.value })}
@@ -249,8 +306,8 @@ export const Admin_CommitteeModal: React.FC<Admin_CommitteeModalProps> = ({ isOp
                     type="submit" disabled={loading}
                     className="flex-[2] py-5 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-uiupc-orange/20 hover:translate-y-[-2px] active:translate-y-0 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                   >
-                    {loading ? <FaSync className="animate-spin" /> : (item ? <FaEdit /> : <FaCrown />)}
-                    {loading ? 'Saving...' : (item ? 'Save Changes' : 'Add')}
+                    {loading ? <FaSync className="animate-spin" /> : (item && !item._prefill ? <FaEdit /> : <FaCrown />)}
+                    {loading ? 'Saving...' : (item && !item._prefill ? 'Save Changes' : 'Add')}
                   </button>
                 </div>
               </form>

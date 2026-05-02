@@ -8,9 +8,11 @@ import {
   FaChevronRight, 
   FaImage,
   FaExternalLinkAlt,
-  FaEdit,
   FaTrash,
-  FaCameraRetro
+  FaCameraRetro,
+  FaStar,
+  FaRegStar,
+  FaEdit
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { Admin_Dropdown } from "@/features/admin/components";
@@ -18,6 +20,7 @@ import Admin_GalleryModal from "./Admin_GalleryModal";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/lib/supabase";
+import { getImageUrl } from "@/utils/imageUrl";
 
 export const Admin_Gallery: React.FC = () => {
   const { user, adminProfile } = useSupabaseAuth();
@@ -110,13 +113,26 @@ export const Admin_Gallery: React.FC = () => {
   };
 
   const handlePhotoDelete = async (photoId: string) => {
-    if (!window.confirm("Delete asset?")) return;
+    if (!window.confirm("Delete this photo from gallery?")) return;
     try {
       const { error } = await supabase.from("gallery").delete().eq('id', photoId);
       if (error) throw error;
       refetch();
     } catch (err: any) {
       console.error("Delete failed:", err.message);
+    }
+  };
+
+  const handleToggleHero = async (item: any) => {
+    try {
+      const { error } = await supabase
+        .from("gallery")
+        .update({ featured_on_hero: !item.featured_on_hero })
+        .eq('id', item.id);
+      if (error) throw error;
+      refetch();
+    } catch (err: any) {
+      console.error("Toggle hero failed:", err.message);
     }
   };
 
@@ -157,7 +173,7 @@ export const Admin_Gallery: React.FC = () => {
               onClick={() => { resetForm(); setShowUploadModal(true); }} 
               className="px-8 h-14 mt-auto flex items-center gap-3 bg-uiupc-orange text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-uiupc-orange/20 hover:brightness-110 transition-all"
             >
-              <FaPlus /> Upload Asset
+              <FaPlus /> Add New Photo
             </button>
           </div>
         </div>
@@ -169,23 +185,28 @@ export const Admin_Gallery: React.FC = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-zinc-50 dark:bg-zinc-900/50">
-                <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Media Asset</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Exhibition Category</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Uploader</th>
+                <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Photo</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Event Category</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Added By</th>
                 <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Date Added</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Show on Home Page</th>
                 <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
               {isLoading ? (
-                [...Array(6)].map((_, i) => <tr key={i} className="animate-pulse"><td colSpan={5} className="px-8 py-8"><div className="h-8 bg-zinc-50 dark:bg-zinc-900 rounded-xl" /></td></tr>)
+                [...Array(6)].map((_, i) => <tr key={i} className="animate-pulse"><td colSpan={6} className="px-8 py-8"><div className="h-8 bg-zinc-50 dark:bg-zinc-900 rounded-xl" /></td></tr>)
               ) : (
                 (photos || []).filter(p => (p.title || "").toLowerCase().includes(searchTerm.toLowerCase())).map((item) => (
                   <motion.tr key={item.id} className="group hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition-all">
                     <td className="px-8 py-6 whitespace-nowrap">
                       <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden shrink-0 border border-black/5 dark:border-white/5 group-hover:scale-105 transition-transform shadow-inner">
-                          {item.image_url ? <img src={item.image_url} alt="" className="w-full h-full object-cover" /> : <FaImage className="text-zinc-300 mx-auto mt-4" />}
+                        <div className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden shrink-0 border border-black/5 dark:border-white/5 group-hover:scale-105 transition-transform shadow-inner flex items-center justify-center">
+                          {item.image_url ? (
+                            <img src={getImageUrl(item.image_url, 150, 150)} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <FaImage className="text-zinc-300" />
+                          )}
                         </div>
                         <div className="flex flex-col min-w-[200px]">
                           <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tight truncate">{item.title}</span>
@@ -200,6 +221,19 @@ export const Admin_Gallery: React.FC = () => {
                     </td>
                     <td className="px-6 py-6 whitespace-nowrap">
                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{item.uploaded_by?.split('@')[0] || "Admin"}</span>
+                    </td>
+                     <td className="px-6 py-6 whitespace-nowrap">
+                       <button 
+                         onClick={() => handleToggleHero(item)}
+                         className={`flex items-center gap-2 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest transition-all ${
+                           item.featured_on_hero 
+                             ? 'bg-uiupc-orange/10 text-uiupc-orange border border-uiupc-orange/20' 
+                             : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 border border-transparent hover:border-zinc-300'
+                         }`}
+                       >
+                         {item.featured_on_hero ? <FaStar /> : <FaRegStar />}
+                         {item.featured_on_hero ? "Featured" : "Show on Home"}
+                       </button>
                     </td>
                     <td className="px-6 py-6 whitespace-nowrap">
                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{new Date(item.created_at).toLocaleDateString()}</span>
@@ -224,7 +258,7 @@ export const Admin_Gallery: React.FC = () => {
       {/* ── PAGINATION ─────────────────────────────────────────── */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-10 border-t border-black/5 dark:border-white/5">
-          <div className="flex flex-col"><p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Media Tracker</p><p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Page {page + 1} of {totalPages} | Total {count} Assets</p></div>
+          <div className="flex flex-col"><p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Gallery Overview</p><p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Page {page + 1} of {totalPages} | Total {count} Photos</p></div>
           <div className="flex items-center gap-3">
             <button disabled={page === 0} onClick={() => { setPage(p => Math.max(0, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange shadow-sm transition-all"><FaChevronLeft className="text-xs" /></button>
             <button disabled={page >= totalPages - 1} onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange shadow-sm transition-all"><FaChevronRight className="text-xs" /></button>

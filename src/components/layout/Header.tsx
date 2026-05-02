@@ -10,15 +10,12 @@ import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useLoaderStore } from "@/store/useLoaderStore";
 import { FiSun, FiMoon } from "react-icons/fi";
+import { FaUsers, FaLayerGroup, FaTrophy, FaBookOpen, FaPalette, FaEnvelope } from "react-icons/fa";
 import myLogo from "@/assets/UIUPC Logo.svg";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────
 interface NavItem {
-  path: string;
-  label: string;
-}
-
-interface SubMenuItem {
   path: string;
   label: string;
 }
@@ -28,56 +25,37 @@ const PRIMARY_LINKS: NavItem[] = [
   { path: "/gallery", label: "Gallery" },
 ];
 
-const EXPLORE_SUBMENU: SubMenuItem[] = [
-  { path: "/members", label: "Members" },
-  { path: "/studio", label: "Studio" },
-  { path: "/archive", label: "Archive" },
-  { path: "/achievements", label: "Achievements" },
-  { path: "/blog", label: "Blog" },
-  { path: "/contact", label: "Contact" },
+const EXPLORE_SUBMENU = [
+  { path: "/members", label: "Members", icon: FaUsers },
+  { path: "/departments", label: "Departments", icon: FaLayerGroup },
+  { path: "/achievements", label: "Achievements", icon: FaTrophy },
+  { path: "/blog", label: "Blog", icon: FaBookOpen },
+  { path: "/studio", label: "Studio", icon: FaPalette },
+  { path: "/contact", label: "Contact", icon: FaEnvelope },
 ];
 
-
-// All navigable paths for active detection
 const ALL_EXPLORE_PATHS = EXPLORE_SUBMENU.map((i) => i.path);
 
 // ─── Component ────────────────────────────────────────────
 const Header: React.FC = memo(() => {
   const pathname = usePathname();
-  const { user: firebaseUser } = useAuth();
   const { user: supabaseUser, signOut: supabaseSignOut } = useSupabaseAuth();
   const { theme, toggleTheme, isSwitching } = useTheme();
   const { isAnimationComplete } = useLoaderStore();
 
-  // ── State ──
   const [mobileOpen, setMobileOpen] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
-  const [mobileExploreOpen, setMobileExploreOpen] = useState(false);
-
-  // ── Refs ──
-  const headerRef = useRef<HTMLElement>(null);
+  
   const exploreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Close menus on route change ──
   useEffect(() => {
     setMobileOpen(false);
     setExploreOpen(false);
-    setMobileExploreOpen(false);
   }, [pathname]);
 
   const isActive = useCallback((path: string) => pathname === path, [pathname]);
   const isExploreActive = ALL_EXPLORE_PATHS.includes(pathname);
   const isAdminPage = pathname.startsWith('/admin');
-
-
-  const handleSignOut = useCallback(async () => {
-    try {
-      await signOut(auth);
-      setMobileOpen(false);
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  }, []);
 
   const openExplore = useCallback(() => {
     if (exploreTimeoutRef.current) clearTimeout(exploreTimeoutRef.current);
@@ -88,7 +66,6 @@ const Header: React.FC = memo(() => {
     exploreTimeoutRef.current = setTimeout(() => setExploreOpen(false), 200);
   }, []);
 
-  // ── Staggered animation delay helper ──
   const itemDelay = (i: number) => ({
     animation: isAnimationComplete
       ? `header-item-in 0.4s cubic-bezier(0.16,1,0.3,1) ${0.4 + i * 0.06}s both`
@@ -96,40 +73,36 @@ const Header: React.FC = memo(() => {
     opacity: isAnimationComplete ? undefined : 0,
   });
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <>
       <header
-        ref={headerRef}
         className={`fixed top-4 left-4 right-4 mx-auto z-[1000] flex items-center justify-between
                    w-auto max-w-3xl border transition-all duration-300 ease-in-out
-                   rounded-xl px-5 py-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.1)]
-                   ${theme === "light"
-            ? "bg-white border-black/[0.08] text-black"
-            : "bg-[#171717] border-white/[0.08] text-white"}
-                   `}
+                   rounded-xl px-5 py-2.5 shadow-lg
+                   ${theme === "light" ? "bg-white border-black/5 text-black" : "bg-[#171717] border-white/5 text-white"}`}
         style={{
-          animation: isAnimationComplete
-            ? "header-expand 0.8s cubic-bezier(0.16,1,0.3,1) both"
-            : "none",
+          animation: isAnimationComplete ? "header-expand 0.8s cubic-bezier(0.16,1,0.3,1) both" : "none",
           opacity: isAnimationComplete ? undefined : 0,
-          transformOrigin: "center",
         }}
       >
-        {/* ── Left: Logo Section ── */}
+        {/* ── Left: Logo ── */}
         <div className="flex-1 flex items-center" style={itemDelay(0)}>
-          <Link
-            href="/"
+          <Link 
+            href="/" 
+            onClick={handleLogoClick}
             className="flex items-center gap-3 shrink-0"
-            onClick={() => setMobileOpen(false)}
           >
             <img src={myLogo.src} alt="UIUPC Logo" className="w-10 h-10 object-contain" />
-            <div className="flex flex-col leading-none relative -top-[1px]">
-              <span className={`text-2xl font-black uppercase tracking-tighter transition-colors duration-300 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
-                UIUPC
-              </span>
-              <span className="text-uiupc-orange text-[8px] font-bold uppercase tracking-[0.12em] whitespace-nowrap">
-                UIU PHOTOGRAPHY CLUB
-              </span>
+            <div className="flex flex-col leading-none">
+              <span className="text-2xl font-black uppercase tracking-tighter">UIUPC</span>
+              <span className="text-uiupc-orange text-[8px] font-bold uppercase tracking-[0.12em]">UIU PHOTOGRAPHY CLUB</span>
             </div>
           </Link>
         </div>
@@ -140,168 +113,115 @@ const Header: React.FC = memo(() => {
             <Link
               key={item.path}
               href={item.path}
-              className={`px-3.5 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-colors duration-200
-                ${theme === 'light'
-                  ? (isActive(item.path) ? "text-uiupc-orange bg-uiupc-orange/[0.07]" : "text-black/50 hover:text-black hover:bg-black/[0.03]")
-                  : (isActive(item.path) ? "text-uiupc-orange bg-uiupc-orange/[0.15]" : "text-white/50 hover:text-white hover:bg-white/[0.05]")
-                }`}
+              className={`px-3.5 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-all
+                ${isActive(item.path) ? "text-uiupc-orange bg-uiupc-orange/5" : "text-zinc-500 hover:text-uiupc-orange hover:bg-zinc-50 dark:hover:bg-white/5"}`}
               style={itemDelay(i + 1)}
             >
               {item.label}
             </Link>
           ))}
 
-          <div
-            className="relative"
-            onMouseEnter={openExplore}
-            onMouseLeave={closeExplore}
-            style={itemDelay(PRIMARY_LINKS.length + 1)}
-          >
+          <div onMouseEnter={openExplore} onMouseLeave={closeExplore} style={itemDelay(PRIMARY_LINKS.length + 1)}>
             <button
-              className={`flex items-center gap-1 px-3.5 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-colors duration-200
-                ${theme === 'light'
-                  ? (isExploreActive ? "text-uiupc-orange bg-uiupc-orange/[0.07]" : "text-black/50 hover:text-black hover:bg-black/[0.03]")
-                  : (isExploreActive ? "text-uiupc-orange bg-uiupc-orange/[0.15]" : "text-white/50 hover:text-white hover:bg-white/[0.05]")
-                }`}
-              onClick={() => setExploreOpen((p) => !p)}
+              className={`flex items-center gap-1 px-3.5 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-all
+                ${isExploreActive ? "text-uiupc-orange bg-uiupc-orange/5" : "text-zinc-500 hover:text-uiupc-orange hover:bg-zinc-50 dark:hover:bg-white/5"}`}
             >
               Explore
               <svg className={`w-3 h-3 transition-transform ${exploreOpen ? "rotate-180" : ""}`} viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
               </svg>
             </button>
-
-            {/* Desktop Submenu */}
-            <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 border rounded-xl shadow-xl transition-all origin-top
-              ${theme === 'light' ? 'bg-white border-black/[0.06]' : 'bg-neutral-800 border-white/[0.06]'}
-              ${exploreOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}
-            >
-              <div className="py-1.5">
-                {EXPLORE_SUBMENU.map((sub) => (
-                  <Link
-                    key={sub.path}
-                    href={sub.path}
-                    className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest transition-colors
-                      ${theme === 'light'
-                        ? (isActive(sub.path) ? "text-uiupc-orange bg-uiupc-orange/[0.05]" : "text-black/50 hover:text-black hover:bg-black/[0.03]")
-                        : (isActive(sub.path) ? "text-uiupc-orange bg-uiupc-orange/[0.12]" : "text-white/50 hover:text-white hover:bg-white/[0.05]")
-                      }`}
-                  >
-                    {sub.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
           </div>
         </nav>
 
         {/* ── Right: CTA / Theme ── */}
         <div className="flex-1 flex items-center justify-end gap-2" style={itemDelay(PRIMARY_LINKS.length + 3)}>
-          {/* Theme Toggle Button */}
           <button
             onClick={(e) => toggleTheme(e)}
-            disabled={isSwitching}
-            className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-300 relative overflow-hidden
-              ${isSwitching ? 'opacity-70 scale-95 cursor-wait' : 'hover:scale-105 active:scale-95'}
-              ${theme === 'light' ? 'bg-black/[0.04] hover:bg-black/[0.08]' : 'bg-white/[0.04] hover:bg-white/[0.08]'}`}
-            aria-label="Toggle theme"
+            className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${theme === 'light' ? 'bg-zinc-100 hover:bg-zinc-200' : 'bg-white/5 hover:bg-white/10'}`}
           >
-            {isSwitching ? (
-               <div className="w-4 h-4 border-2 border-uiupc-orange border-t-transparent rounded-full animate-spin" />
-            ) : (
-               theme === "light" ? (
-                 <FiMoon className="w-4 h-4 text-black" />
-               ) : (
-                 <FiSun className="w-4 h-4 text-white" />
-               )
-            )}
+            {theme === "light" ? <FiMoon className="text-black" /> : <FiSun className="text-white" />}
           </button>
 
           <div className="hidden lg:block">
             {supabaseUser ? (
-              isAdminPage ? (
-                <button
-                  onClick={() => supabaseSignOut()}
-                  className={`h-9 px-5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all
-                    ${theme === 'light' ? 'bg-black text-white' : 'bg-white text-black'}`}
-                >
-                  Log out
-                </button>
-              ) : (
-                <Link
-                  href="/admin"
-                  className="h-9 px-5 flex items-center justify-center rounded-lg bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg"
-                >
-                  Admin Panel
-                </Link>
-              )
+              <Link href="/admin" className="h-9 px-5 flex items-center justify-center rounded-lg bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest hover:brightness-110 shadow-lg">
+                Admin Panel
+              </Link>
             ) : (
-              <Link
-                href="/join"
-                className="h-9 px-5 flex items-center justify-center rounded-lg bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all"
-              >
+              <Link href="/join" className="h-9 px-5 flex items-center justify-center rounded-lg bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all">
                 Join us
               </Link>
             )}
           </div>
 
-          {/* Mobile Hamburger */}
           <button className="lg:hidden flex flex-col justify-center items-center w-8 h-8 gap-[5px]" onClick={() => setMobileOpen((p) => !p)}>
-            <span className={`block w-5 h-[1.5px] rounded-full transition-all ${mobileOpen ? "rotate-45 translate-y-[6.5px]" : ""} ${theme === 'dark' ? 'bg-white' : 'bg-black'}`} />
-            <span className={`block w-5 h-[1.5px] rounded-full transition-all ${mobileOpen ? "opacity-0" : ""} ${theme === 'dark' ? 'bg-white' : 'bg-black'}`} />
-            <span className={`block w-5 h-[1.5px] rounded-full transition-all ${mobileOpen ? "-rotate-45 -translate-y-[6.5px]" : ""} ${theme === 'dark' ? 'bg-white' : 'bg-black'}`} />
+            <span className={`block w-5 h-[1.5px] rounded-full transition-all ${mobileOpen ? "rotate-45 translate-y-[6.5px]" : ""} bg-current`} />
+            <span className={`block w-5 h-[1.5px] rounded-full transition-all ${mobileOpen ? "opacity-0" : ""} bg-current`} />
+            <span className={`block w-5 h-[1.5px] rounded-full transition-all ${mobileOpen ? "-rotate-45 -translate-y-[6.5px]" : ""} bg-current`} />
           </button>
         </div>
 
-        {/* ── Mobile Dropdown ── */}
-        <div className={`absolute top-[calc(100%+8px)] left-0 right-0 z-[999] border rounded-xl shadow-2xl transition-all origin-top lg:hidden
-          ${theme === 'light' ? 'bg-white border-black/[0.06]' : 'bg-neutral-800 border-white/[0.06]'}
-          ${mobileOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}>
-          <div className="p-4 flex flex-col gap-1">
-            {[...PRIMARY_LINKS, ...EXPLORE_SUBMENU].map((item) => (
-              <Link 
-                key={item.path} 
-                href={item.path} 
-                className={`w-full py-3.5 px-4 rounded-lg text-xs font-black uppercase tracking-widest transition-colors
-                  ${isActive(item.path) 
-                    ? "text-uiupc-orange bg-uiupc-orange/5" 
-                    : theme === 'light' ? "text-black/60 hover:bg-black/5" : "text-white/60 hover:bg-white/5"}`}
-                onClick={() => setMobileOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="mt-2 pt-2 border-t border-black/5 dark:border-white/5 flex flex-col gap-2">
-              {supabaseUser ? (
-                isAdminPage ? (
-                  <button 
-                    onClick={() => { supabaseSignOut(); setMobileOpen(false); }} 
-                    className={`w-full py-4 px-4 rounded-lg text-xs font-black uppercase tracking-widest text-left
-                      ${theme === 'light' ? 'bg-black text-white' : 'bg-white text-black'}`}
-                  >
-                    Log out
-                  </button>
-                ) : (
+        {/* ── Desktop Submenu (Direct Child of Header) ── */}
+        <AnimatePresence>
+          {exploreOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              onMouseEnter={openExplore}
+              onMouseLeave={closeExplore}
+              className={`absolute top-full left-0 right-0 mt-3 p-3 rounded-2xl shadow-2xl border grid grid-cols-6 gap-2 z-[2000]
+                ${theme === 'light' ? 'bg-white border-black/5' : 'bg-[#171717] border-white/5'}`}
+            >
+              {EXPLORE_SUBMENU.map((sub) => {
+                const Icon = sub.icon;
+                const isSubActive = isActive(sub.path);
+                return (
                   <Link
-                    href="/admin"
-                    className="block w-full text-center py-4 rounded-lg bg-uiupc-orange text-white text-xs font-black uppercase tracking-widest"
+                    key={sub.path}
+                    href={sub.path}
+                    className={`flex flex-col items-center justify-center min-h-[80px] p-3 rounded-xl transition-all group border text-center
+                      ${theme === 'light' 
+                        ? (isSubActive ? 'bg-zinc-100 border-uiupc-orange text-uiupc-orange' : 'bg-zinc-50 border-black/5 text-zinc-500 hover:border-uiupc-orange/30 hover:text-uiupc-orange') 
+                        : (isSubActive ? 'bg-white/10 border-uiupc-orange text-uiupc-orange' : 'bg-white/[0.03] border-white/5 text-zinc-400 hover:border-uiupc-orange/30 hover:text-uiupc-orange')
+                      }`}
+                  >
+                    <Icon className={`text-xl mb-2 transition-all duration-300 group-hover:scale-110 ${isSubActive ? 'text-uiupc-orange' : 'text-zinc-400 group-hover:text-uiupc-orange'}`} />
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] leading-tight">{sub.label}</span>
+                  </Link>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Mobile Dropdown ── */}
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className={`absolute top-[calc(100%+8px)] left-0 right-0 z-[999] border rounded-xl shadow-2xl overflow-hidden lg:hidden
+                ${theme === 'light' ? 'bg-white border-black/5' : 'bg-[#171717] border-white/5'}`}
+            >
+              <div className="p-4 flex flex-col gap-1">
+                {[...PRIMARY_LINKS, ...EXPLORE_SUBMENU].map((item) => (
+                  <Link 
+                    key={item.path} 
+                    href={item.path} 
+                    className={`w-full py-3.5 px-4 rounded-lg text-xs font-black uppercase tracking-widest transition-all
+                      ${isActive(item.path) ? "text-uiupc-orange bg-uiupc-orange/5" : "text-zinc-500 hover:bg-zinc-50 dark:hover:bg-white/5"}`}
                     onClick={() => setMobileOpen(false)}
                   >
-                    Admin Panel
+                    {item.label}
                   </Link>
-                )
-              ) : (
-                <Link 
-                  href="/join" 
-                  className="block w-full text-center py-4 rounded-lg bg-uiupc-orange text-white text-xs font-black uppercase tracking-widest" 
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Join us
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
     </>
   );

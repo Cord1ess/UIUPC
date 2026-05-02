@@ -29,11 +29,15 @@ interface ClubEvent {
   description: string;
   date: string;
   location: string;
-  cover_image: string;
+  image: string;
   event_type: 'workshop' | 'exhibition' | 'contest' | 'other';
   status: 'upcoming' | 'ongoing' | 'completed';
   registration_link?: string;
   created_at: string;
+  is_mapped?: boolean;
+  latitude?: number;
+  longitude?: number;
+  map_icon_type?: string;
 }
 
 const EventStatusBadge = ({ status }: { status: string }) => {
@@ -152,16 +156,17 @@ export const Admin_Events: React.FC = () => {
         </div>
       </div>
 
+
       {/* ── DATA TABLE ─────────────────────────────────────────── */}
       <div className="bg-white dark:bg-[#080808] rounded-[2.5rem] border border-black/5 dark:border-white/5 overflow-hidden shadow-sm">
         <div className="overflow-x-auto no-scrollbar">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-zinc-50 dark:bg-zinc-900/50">
-                <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Event Identity</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Schedule & Venue</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Category</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Status</th>
+                <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Event Name</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Date & Location</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Event Type</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Event Status</th>
                 <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actions</th>
               </tr>
             </thead>
@@ -212,7 +217,7 @@ export const Admin_Events: React.FC = () => {
       {/* ── PAGINATION ────────────────────────────────────────── */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-10 border-t border-black/5 dark:border-white/5">
-          <div className="flex flex-col"><p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Events Tracker</p><p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Page {page + 1} of {totalPages} | Total {count} Sessions</p></div>
+          <div className="flex flex-col"><p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Event Summary</p><p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Page {page + 1} of {totalPages} | Total {count} Events</p></div>
           <div className="flex items-center gap-3">
             <button disabled={page === 0} onClick={() => { setPage(p => Math.max(0, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange shadow-sm transition-all"><FaChevronLeft className="text-xs" /></button>
             <button disabled={page >= totalPages - 1} onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange shadow-sm transition-all"><FaChevronRight className="text-xs" /></button>
@@ -249,8 +254,12 @@ const EventForm: React.FC<{ initialData?: ClubEvent; onSuccess: () => void; onCa
     location: initialData?.location || 'UIU Campus',
     event_type: initialData?.event_type || 'workshop',
     status: initialData?.status || 'upcoming',
-    cover_image: initialData?.cover_image || '',
-    registration_link: initialData?.registration_link || ''
+    image: initialData?.image || '',
+    registration_link: initialData?.registration_link || '',
+    is_mapped: initialData?.is_mapped || false,
+    latitude: initialData?.latitude || 0,
+    longitude: initialData?.longitude || 0,
+    map_icon_type: initialData?.map_icon_type || 'workshop'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -271,12 +280,12 @@ const EventForm: React.FC<{ initialData?: ClubEvent; onSuccess: () => void; onCa
       <div className="space-y-3">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Cover Image</label>
         <div className="flex items-center gap-4">
-          {formData.cover_image && (
+          {formData.image && (
             <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-black/5 dark:border-white/5 bg-zinc-100 dark:bg-zinc-800">
-               <img src={getImageUrl(formData.cover_image, 150, 70)} className="w-full h-full object-cover" alt="Preview" />
+               <img src={getImageUrl(formData.image, 150, 70)} className="w-full h-full object-cover" alt="Preview" />
             </div>
           )}
-          <input type="text" value={formData.cover_image} onChange={(e) => setFormData({...formData, cover_image: e.target.value})} className="flex-1 bg-zinc-50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 p-5 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold text-sm" placeholder="Paste Drive ID or click Browse..." />
+          <input type="text" value={formData.image} onChange={(e) => setFormData({...formData, image: e.target.value})} className="flex-1 bg-zinc-50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 p-5 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold text-sm" placeholder="Paste Drive ID or click Browse..." />
           <button type="button" onClick={() => setIsPickerOpen(true)} className="px-6 py-5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-uiupc-orange hover:bg-uiupc-orange/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Browse Drive</button>
         </div>
       </div>
@@ -312,6 +321,57 @@ const EventForm: React.FC<{ initialData?: ClubEvent; onSuccess: () => void; onCa
           <input type="text" required value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 p-5 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold" />
         </div>
       </div>
+
+      {/* ── GEOGRAPHICAL MAPPING ──────────────────────────────── */}
+      <div className="p-8 bg-zinc-50 dark:bg-zinc-900/30 rounded-[2.5rem] border border-black/5 dark:border-white/5 space-y-8">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h4 className="text-sm font-black uppercase tracking-tight dark:text-white">Geographical Mapping</h4>
+            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Pin this event to the interactive world map</p>
+          </div>
+          <button 
+            type="button" 
+            onClick={() => setFormData({...formData, is_mapped: !formData.is_mapped})}
+            className={`w-14 h-8 rounded-full relative transition-colors duration-300 ${formData.is_mapped ? 'bg-uiupc-orange' : 'bg-zinc-200 dark:bg-zinc-800'}`}
+          >
+            <motion.div 
+              animate={{ x: formData.is_mapped ? 24 : 4 }}
+              className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-sm"
+            />
+          </button>
+        </div>
+
+        {formData.is_mapped && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-8 pt-4 border-t border-black/5 dark:border-white/5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Latitude</label>
+                  <input type="number" step="any" value={formData.latitude} onChange={(e) => setFormData({...formData, latitude: parseFloat(e.target.value)})} className="w-full bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 p-5 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold" />
+               </div>
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Longitude</label>
+                  <input type="number" step="any" value={formData.longitude} onChange={(e) => setFormData({...formData, longitude: parseFloat(e.target.value)})} className="w-full bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 p-5 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold" />
+               </div>
+            </div>
+            <div className="space-y-4">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Map Icon Style</label>
+              <div className="flex flex-wrap gap-3">
+                 {(['workshop', 'photowalk', 'exhibition', 'contest'] as const).map(type => (
+                   <button 
+                    key={type} 
+                    type="button" 
+                    onClick={() => setFormData({...formData, map_icon_type: type})}
+                    className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${formData.map_icon_type === type ? 'bg-uiupc-orange text-white border-uiupc-orange shadow-lg' : 'bg-white dark:bg-zinc-900 border-black/5 dark:border-white/5 text-zinc-400'}`}
+                   >
+                     {type}
+                   </button>
+                 ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
+
       <div className="flex flex-col md:flex-row gap-4 pt-10 border-t border-black/5 dark:border-white/5">
         <button type="button" onClick={onCancel} className="flex-1 py-6 bg-zinc-100 dark:bg-zinc-900 text-zinc-500 text-[10px] font-black uppercase tracking-widest rounded-3xl hover:bg-zinc-200 transition-all">Cancel</button>
         <button type="submit" disabled={loading} className="flex-[2] py-6 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-3xl shadow-2xl hover:translate-y-[-2px] transition-all disabled:opacity-50">{loading ? <FaSpinner className="animate-spin mx-auto" /> : (initialData ? 'Update Event' : 'Create Event')}</button>
@@ -320,8 +380,8 @@ const EventForm: React.FC<{ initialData?: ClubEvent; onSuccess: () => void; onCa
       <Admin_DrivePicker
         isOpen={isPickerOpen}
         onClose={() => setIsPickerOpen(false)}
-        onSelect={(fileId, fileUrl) => {
-          setFormData({ ...formData, cover_image: fileId });
+        onSelect={(fileId, fileUrl, name) => {
+          setFormData({ ...formData, image: fileId });
         }}
         title="Select Event Cover"
       />

@@ -62,7 +62,10 @@ const ScrollRevealText: React.FC<ScrollRevealTextProps> = ({
   }
 
   const wordVariants: Variants = {
-    hidden: { opacity: 0 },
+    hidden: { 
+      opacity: 0,
+      color: finalColor // Explicitly start from final color to avoid currentColor warning
+    },
     visible: (i: number) => {
       const revealDelay = i * 0.12 + (i % 3) * 0.05 + delayOffset;
       return {
@@ -91,9 +94,7 @@ const ScrollRevealText: React.FC<ScrollRevealTextProps> = ({
           variants={wordVariants}
           initial="hidden"
           whileInView="visible"
-          animate={{ color: finalColor }}
-          transition={{ duration: 0.3 }}
-          viewport={{ once: true, margin: "20%" }}
+          viewport={{ once: true, margin: "0px 0px -100px 0px" }}
           onAnimationComplete={(def) => {
             // Once the absolutely final word finishes its "visible" sequence, lock it
             if (def === "visible" && i === words.length - 1) {

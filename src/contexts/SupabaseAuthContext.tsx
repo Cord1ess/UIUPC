@@ -57,61 +57,80 @@ export function SupabaseAuthProvider({ children }: ProviderProps) {
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const lastFetchedEmailRef = React.useRef<string | null>(null);
+
   // Fetch admin profile from the admins table
-  const fetchAdminProfile = async (email: string) => {
-    const { data, error } = await supabase
-      .from('admins')
-      .select('*')
-      .eq('email', email)
-      .maybeSingle();
+  const fetchAdminProfile = async (email: string, mounted: boolean) => {
+    // Avoid redundant fetches if the email hasn't changed
+    if (lastFetchedEmailRef.current === email && adminProfile) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle();
 
-    if (error) {
-      console.error('Supabase error fetching admin profile:', error.message, error.details, error.hint);
-      setAdminProfile(null);
-      return;
+      if (!mounted) return;
+
+      if (error) {
+        // Silently handle AbortErrors or typical race condition cancellations
+        if (error.message?.includes('AbortError') || error.message?.includes('broken by another request')) {
+          return;
+        }
+        console.error('Supabase error fetching admin profile:', error.message);
+        setAdminProfile(null);
+        return;
+      }
+
+      if (!data) {
+        setAdminProfile(null);
+        return;
+      }
+
+      lastFetchedEmailRef.current = email;
+      setAdminProfile({
+        id: data.id,
+        email: data.email,
+        display_name: data.display_name,
+        role: data.role as AdminRole,
+        is_active: data.is_active,
+      });
+    } catch (err) {
+      if (mounted) {
+        console.error('Unexpected error in fetchAdminProfile:', err);
+      }
     }
-
-    if (!data) {
-      console.warn('Admin profile not found in database for email:', email);
-      setAdminProfile(null);
-      return;
-    }
-
-    setAdminProfile({
-      id: data.id,
-      email: data.email,
-      display_name: data.display_name,
-      role: data.role as AdminRole,
-      is_active: data.is_active,
-    });
   };
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user?.email) {
-        fetchAdminProfile(session.user.email);
-      }
-      setLoading(false);
-    });
+    let mounted = true;
 
-    // Listen for auth changes
+    // Listen for auth changes - this is the source of truth
+    // It also handles the initial session check on mount
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        if (!mounted) return;
+
+        const currentUser = session?.user ?? null;
         setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user?.email) {
-          await fetchAdminProfile(session.user.email);
+        setUser(currentUser);
+
+        if (currentUser?.email) {
+          await fetchAdminProfile(currentUser.email, mounted);
         } else {
+          lastFetchedEmailRef.current = null;
           setAdminProfile(null);
         }
+        
         setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Sign in with email and password

@@ -60,6 +60,8 @@ import DynamicGrid from "@/components/shared/DynamicGrid";
 import { cookies } from "next/headers";
 import PageTransition from "@/components/layout/PageTransition";
 
+import GlobalPrefetch from "@/components/shared/GlobalPrefetch";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -69,14 +71,10 @@ export default async function RootLayout({
   const theme = cookieStore.get("theme")?.value || "light";
 
   return (
-    <html lang="en" className={`${theme === "dark" ? "dark" : ""} ${dmSans.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://wsrv.nl" />
-        <link rel="dns-prefetch" href="https://wsrv.nl" />
-        <link rel="dns-prefetch" href="https://drive.google.com" />
-      </head>
+    <html lang="en" className={`${theme === "dark" ? "dark" : ""} ${dmSans.variable} ${playfairDisplay.variable}`} suppressHydrationWarning data-scroll-behavior="smooth">
       <body className="font-sans antialiased transition-colors duration-300 relative min-h-screen">
         <ThemeProvider>
+          <GlobalPrefetch />
           <DynamicGrid />
           <AuthProvider>
             <SupabaseAuthProvider>

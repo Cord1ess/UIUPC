@@ -12,6 +12,10 @@ import { useRouter } from "next/navigation";
 import ScrollRevealText from "@/components/motion/ScrollRevealText";
 import { motion, AnimatePresence } from "framer-motion";
 import { Admin_Dropdown } from "./Admin_Dropdown";
+import { Admin_CommitteeModal } from "../modules/Admin_CommitteeModal";
+import { Admin_MemberTrajectory } from "../modules/Admin_MemberTrajectory";
+import { supabase } from "@/lib/supabase";
+import { Admin_FilterMenu } from "./Admin_FilterMenu";
 
 import {
   FaSync,
@@ -24,14 +28,15 @@ import {
   FaNewspaper,
   FaImage,
   FaShieldAlt,
-  FaHistory,
-  FaArchive
+  FaArchive,
+  FaMapMarkedAlt,
+  FaHistory
 } from "react-icons/fa";
 
 const LocalLoader = () => (
   <div className="w-full py-32 flex flex-col items-center justify-center gap-6">
     <div className="w-10 h-10 border-4 border-uiupc-orange/10 border-t-uiupc-orange rounded-full animate-spin" />
-    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Initializing Module...</p>
+    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Opening Panel...</p>
   </div>
 );
 
@@ -40,15 +45,31 @@ const Admin_Members = dynamic(() => import("../modules/Admin_Members").then(mod 
 const Admin_Submissions = dynamic(() => import("../modules/Admin_Submissions").then(mod => mod.Admin_Submissions), { loading: () => <LocalLoader />, ssr: false });
 const Admin_Blog = dynamic(() => import("../modules/Admin_Blog"), { loading: () => <LocalLoader />, ssr: false });
 const Admin_Events = dynamic(() => import("../modules/Admin_Events").then(mod => mod.Admin_Events), { loading: () => <LocalLoader />, ssr: false });
+const Admin_EventMap = dynamic(() => import("../modules/Admin_EventMap").then(mod => mod.Admin_EventMap), { loading: () => <LocalLoader />, ssr: false });
 const Admin_Gallery = dynamic(() => import("../modules/Admin_Gallery"), { loading: () => <LocalLoader />, ssr: false });
 const Admin_Committee = dynamic(() => import("../modules/Admin_Committee").then(mod => mod.Admin_Committee), { loading: () => <LocalLoader />, ssr: false });
 const Admin_Finance = dynamic(() => import("../governance/Admin_Finance").then(mod => mod.Admin_Finance), { loading: () => <LocalLoader />, ssr: false });
 const Admin_Audit = dynamic(() => import("../governance/Admin_Audit").then(mod => mod.Admin_Audit), { loading: () => <LocalLoader />, ssr: false });
 const Admin_Archive = dynamic(() => import("../modules/Admin_Archive").then(mod => mod.Admin_Archive), { loading: () => <LocalLoader />, ssr: false });
 const Admin_Access = dynamic(() => import("../governance/Admin_Access").then(mod => mod.Admin_Access), { loading: () => <LocalLoader />, ssr: false });
+const Admin_Departments = dynamic(() => import("../modules/Admin_Departments").then(mod => mod.Admin_Departments), { loading: () => <LocalLoader />, ssr: false });
+const Admin_Achievements = dynamic(() => import("../modules/Admin_Achievements").then(mod => mod.Admin_Achievements), { loading: () => <LocalLoader />, ssr: false });
+
+import { useAdminData } from "@/contexts/AdminDataContext";
 
 export const Admin_Dashboard = ({ forcedTab }: { forcedTab?: string }) => {
   const { user, adminProfile, loading: authLoading } = useSupabaseAuth();
+  const { 
+    members, 
+    submissions, 
+    events, 
+    finances,
+    committees: allCommitteeData,
+    isLoading: dataLoading, 
+    isRefreshing: dataValidating, 
+    refreshAll,
+    connectionStatus 
+  } = useAdminData();
   const router = useRouter();
 
   const [dataType, setDataType] = useState(forcedTab || "membership");
@@ -65,18 +86,25 @@ export const Admin_Dashboard = ({ forcedTab }: { forcedTab?: string }) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
 
+  const [committeeModalItem, setCommitteeModalItem] = useState<any>(null);
+  const [showCommitteeModal, setShowCommitteeModal] = useState(false);
+
+  const [trajectoryStudentId, setTrajectoryStudentId] = useState<string | null>(null);
+
   useEffect(() => { if (forcedTab) setDataType(forcedTab); }, [forcedTab]);
   useEffect(() => { if (!authLoading && !user) router.push("/login"); }, [user, authLoading, router]);
 
-  const { data: members, refetch: refetchMem } = useSupabaseData("members", { limit: 5000 });
-  const { data: subs, refetch: refetchSubs } = useSupabaseData("exhibition_submissions", { limit: 5000 });
-  const { data: finances } = useSupabaseData("finances", { limit: 1000 });
-  
+  const isBackgroundLoading = dataLoading || dataValidating;
+
   const sessions = useMemo(() => {
     const s = new Set<string>();
-    if (Array.isArray(members)) members.forEach(m => m.session && s.add(m.session));
-    return Array.from(s).sort();
-  }, [members]);
+    if (dataType === 'committee') {
+      if (Array.isArray(allCommitteeData)) allCommitteeData.forEach(c => c.year && s.add(c.year));
+    } else {
+      if (Array.isArray(members)) members.forEach(m => m.session && s.add(m.session));
+    }
+    return Array.from(s).sort((a, b) => b.localeCompare(a));
+  }, [members, allCommitteeData, dataType]);
 
   const balance = useMemo(() => {
     if (!Array.isArray(finances)) return 0;
@@ -87,7 +115,7 @@ export const Admin_Dashboard = ({ forcedTab }: { forcedTab?: string }) => {
     setIsSyncing(true);
     setSyncFeedback(null);
     try {
-      await Promise.all([refetchMem(), refetchSubs()]);
+      await refreshAll();
       setRefreshKey(prev => prev + 1);
       setSyncFeedback("Synced!");
       setTimeout(() => setSyncFeedback(null), 2000);
@@ -97,7 +125,7 @@ export const Admin_Dashboard = ({ forcedTab }: { forcedTab?: string }) => {
     } finally {
       setIsSyncing(false);
     }
-  }, [refetchMem, refetchSubs]);
+  }, [refreshAll]);
 
   const {
     admin_SubmissionsStatus,
@@ -129,17 +157,72 @@ export const Admin_Dashboard = ({ forcedTab }: { forcedTab?: string }) => {
     setIsToggling(false);
   };
 
+  const handlePromoteToCommittee = (member: any) => {
+    setCommitteeModalItem({
+      _prefill: true,
+      member_name: member.full_name,
+      student_id: member.student_id,
+      department: member.department,
+    });
+    setShowCommitteeModal(true);
+  };
+
+  const handleViewTrajectory = (member: any) => {
+    if (member.student_id) {
+      setTrajectoryStudentId(member.student_id);
+    } else {
+      alert("This member does not have a student ID.");
+    }
+  };
+
+  const handleCommitteeUpsert = async (id: string | null, recordData: any) => {
+    try {
+      const { error } = id 
+        ? await supabase.from("committees").update(recordData).eq('id', id)
+        : await supabase.from("committees").insert([recordData]);
+      if (error) throw error;
+      refreshDashboard();
+      return { success: true };
+    } catch (err: any) {
+      alert("Error: " + err.message);
+      return { success: false, message: err.message };
+    }
+  };
+
+  const [filterDept, setFilterDept] = useState("all");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterLink, setFilterLink] = useState("all");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  const committeeStats = useMemo(() => {
+    if (!Array.isArray(allCommitteeData)) return { count: 0, label: "Total Committee" };
+    if (selectedSession === "all") return { count: allCommitteeData.length, label: "Total Committee Members" };
+    const filtered = allCommitteeData.filter(c => c.year === selectedSession);
+    return { count: filtered.length, label: `${selectedSession} Committee` };
+  }, [allCommitteeData, selectedSession]);
+
+  const departments = useMemo(() => {
+    const d = new Set<string>();
+    if (Array.isArray(allCommitteeData)) {
+      allCommitteeData.forEach(item => (item.department || item.tag) && d.add(item.department || item.tag));
+    }
+    return Array.from(d).sort();
+  }, [allCommitteeData]);
+
   const getModuleInfo = () => {
+    const loader = <FaSync className="animate-spin text-zinc-400 text-2xl" />;
     switch (dataType) {
-      case "membership": return { label: "Total Members", value: members?.length || 0, icon: <FaUsers />, toggle: "Join Page" };
-      case "photos": return { label: "Submissions", value: subs?.length || 0, icon: <FaImage />, toggle: "Entry Portal" };
-      case "finances": return { label: "Balance", value: `৳${balance.toLocaleString()}`, icon: <FaWallet />, toggle: null };
-      case "blog": return { label: "Articles", value: "Live", icon: <FaNewspaper />, toggle: "Public View" };
-      case "events": return { label: "Schedule", value: "Active", icon: <FaCalendarAlt />, toggle: null };
-      case "gallery": return { label: "Assets", value: "Cloud", icon: <FaImage />, toggle: null };
-      case "audit": return { label: "System Logs", value: "Recording", icon: <FaHistory />, toggle: null };
-      case "archive": return { label: "Archives", value: "Historical", icon: <FaArchive />, toggle: null };
-      case "admins": return { label: "Personnel", value: "Secure", icon: <FaShieldAlt />, toggle: null };
+      case "membership": return { label: "Member List", value: dataLoading ? loader : members?.length || 0, icon: <FaUsers />, toggle: "Join Page" };
+      case "photos": return { label: "Entry Requests", value: dataLoading ? loader : submissions?.length || 0, icon: <FaImage />, toggle: "Entry Portal" };
+      case "finances": return { label: "Money / Fees", value: dataLoading ? loader : `৳${balance.toLocaleString()}`, icon: <FaWallet />, toggle: null };
+      case "committee": return { label: committeeStats.label, value: dataLoading ? loader : committeeStats.count, icon: <FaUsers />, toggle: null };
+      case "blog": return { label: "Blog Posts", value: "Live", icon: <FaNewspaper />, toggle: "Public View" };
+      case "events": return { label: "Events List", value: "Active", icon: <FaCalendarAlt />, toggle: null };
+      case "event_map": return { label: "Map Points", value: "GPS", icon: <FaMapMarkedAlt />, toggle: null };
+      case "gallery": return { label: "Public Photos", value: "Cloud", icon: <FaImage />, toggle: null };
+      case "audit": return { label: "Activity Logs", value: "Recording", icon: <FaHistory />, toggle: null };
+      case "archive": return { label: "Previous Years", value: "Old Records", icon: <FaArchive />, toggle: null };
+      case "admins": return { label: "Admin Access", value: "Secure", icon: <FaShieldAlt />, toggle: null };
       default: return { label: "Records", value: 0, icon: <FaDatabase />, toggle: null };
     }
   };
@@ -157,9 +240,19 @@ export const Admin_Dashboard = ({ forcedTab }: { forcedTab?: string }) => {
           text={dataType.charAt(0).toUpperCase() + dataType.slice(1).replace(/_/g, ' ')}
           className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white leading-none"
         />
-        <p className="text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest text-[10px] pl-1 border-l-2 border-uiupc-orange">
-          Command Center: Managed by {adminProfile?.role || 'authorized'} personnel.
-        </p>
+        <div className="flex items-center gap-4">
+           <p className="text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest text-[10px] pl-1 border-l-2 border-uiupc-orange">
+             Control Panel: Managed by authorized team members.
+           </p>
+           <div className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border flex items-center gap-2 ${
+             connectionStatus === 'online' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 
+             connectionStatus === 'degraded' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
+             'bg-red-500/10 text-red-500 border-red-500/20 animate-pulse'
+           }`}>
+             <span className={`w-1.5 h-1.5 rounded-full ${connectionStatus === 'online' ? 'bg-green-500' : connectionStatus === 'degraded' ? 'bg-yellow-500' : 'bg-red-500'}`} />
+             {connectionStatus}
+           </div>
+        </div>
       </div>
 
       <div className="space-y-12">
@@ -175,8 +268,25 @@ export const Admin_Dashboard = ({ forcedTab }: { forcedTab?: string }) => {
             </div>
           </div>
 
-          {/* 2. Global Toggle (if applicable) */}
-          {moduleInfo.toggle ? (
+          {/* 2. Global Toggle or Committee Filters */}
+          {dataType === 'committee' ? (
+            <div className="p-8 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-[2.5rem] flex flex-col justify-between shadow-sm">
+               <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Quick Filters</p>
+               <div className="mt-4">
+                 <Admin_FilterMenu 
+                   currentDept={filterDept}
+                   currentCategory={filterCategory}
+                   currentSort={sortOrder}
+                   currentLink={filterLink}
+                   departments={departments}
+                   onDeptChange={setFilterDept}
+                   onCategoryChange={setFilterCategory}
+                   onSortChange={setSortOrder}
+                   onLinkChange={setFilterLink}
+                 />
+               </div>
+            </div>
+          ) : moduleInfo.toggle ? (
             <div className={`p-8 rounded-[2.5rem] flex flex-col justify-between border transition-all duration-500 shadow-sm relative group ${isEnabled ? 'bg-green-500/[0.03] border-green-500/20' : 'bg-red-500/[0.03] border-red-500/20'}`}>
               <p className={`text-[10px] font-black uppercase tracking-widest ${isEnabled ? 'text-green-500' : 'text-red-500'}`}>{moduleInfo.toggle}</p>
               <div className="flex items-center justify-between mt-4">
@@ -188,17 +298,19 @@ export const Admin_Dashboard = ({ forcedTab }: { forcedTab?: string }) => {
             </div>
           ) : (
             <div className="p-8 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-[2.5rem] flex flex-col justify-between shadow-sm">
-               <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Module Status</p>
+               <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">System Status</p>
                <div className="flex items-center gap-3 mt-4">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-lg font-black uppercase tracking-tighter dark:text-white">OPERATIONAL</span>
+                  <span className={`w-2 h-2 rounded-full ${connectionStatus === 'online' ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
+                  <span className="text-lg font-black uppercase tracking-tighter dark:text-white">{connectionStatus === 'online' ? 'READY' : 'ERROR'}</span>
                </div>
             </div>
           )}
 
           {/* 3. Session Selection */}
           <div className="p-8 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-[2.5rem] flex flex-col justify-between shadow-sm">
-            <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Active Session</p>
+            <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">
+              {dataType === 'committee' ? 'Committee Year' : 'Active Session'}
+            </p>
             <div className="mt-4 flex items-center gap-3">
                <div className="w-10 h-10 bg-zinc-50 dark:bg-zinc-900 rounded-xl flex items-center justify-center text-zinc-400"><FaCalendarAlt /></div>
                <Admin_Dropdown 
@@ -213,37 +325,62 @@ export const Admin_Dashboard = ({ forcedTab }: { forcedTab?: string }) => {
           {/* 4. Global Cloud Sync */}
           <div className="p-8 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-[2.5rem] flex flex-col justify-between shadow-sm group">
              <div className="flex items-center justify-between">
-                <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Database Sync</p>
-                <button disabled={isSyncing} onClick={refreshDashboard} className={`w-10 h-10 bg-zinc-50 dark:bg-zinc-900 border border-black/5 dark:border-white/5 rounded-xl flex items-center justify-center text-zinc-400 hover:text-uiupc-orange transition-all ${isSyncing ? 'animate-spin' : ''}`}>
-                  <FaSync className="text-[12px]" />
+                <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Sync Status</p>
+                <button disabled={isSyncing || isBackgroundLoading} onClick={refreshDashboard} className={`w-10 h-10 bg-zinc-50 dark:bg-zinc-900 border border-black/5 dark:border-white/5 rounded-xl flex items-center justify-center text-zinc-400 hover:text-uiupc-orange transition-all ${(isSyncing || isBackgroundLoading) ? 'animate-spin' : ''}`}>
+                   <FaSync className="text-[12px]" />
                 </button>
              </div>
              <div className="flex flex-col mt-4">
-                <p className={`text-2xl font-black tracking-tighter uppercase flex items-center gap-3 ${isSyncing ? 'text-zinc-400' : 'text-green-500'}`}>
-                  {syncFeedback || "LIVE"}
-                </p>
+                <div className="flex items-baseline gap-2">
+                   <p className={`text-2xl font-black tracking-tighter uppercase ${(isSyncing || isBackgroundLoading) ? 'text-zinc-400' : 'text-green-500'}`}>
+                     {syncFeedback || (isBackgroundLoading ? "SYNCING" : "STABLE")}
+                   </p>
+                </div>
+                <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest mt-1">Database Connected</p>
              </div>
           </div>
         </div>
 
         <AnimatePresence mode="wait">
           <motion.div key={dataType + refreshKey} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="w-full">
-            {dataType === "membership" && <Admin_Members onViewDetails={(item) => { setSelectedItem(item); setShowDetailsModal(true); }} onEmailReply={(item) => { setSelectedEmailItem(item); setShowEmailModal(true); }} forcedSession={selectedSession} />}
+            {dataType === "membership" && <Admin_Members onViewDetails={(item) => { setSelectedItem(item); setShowDetailsModal(true); }} onEmailReply={(item) => { setSelectedEmailItem(item); setShowEmailModal(true); }} onPromoteToCommittee={handlePromoteToCommittee} onViewTrajectory={handleViewTrajectory} forcedSession={selectedSession} />}
             {dataType === "photos" && <Admin_Submissions onOpenDetails={(item) => { setSelectedItem(item); setShowDetailsModal(true); }} onOpenEmail={(item) => { setSelectedEmailItem(item); setShowEmailModal(true); }} />}
             {dataType === "blog" && <Admin_Blog />}
             {dataType === "events" && <Admin_Events />}
+            {dataType === "event_map" && <Admin_EventMap />}
             {dataType === "gallery" && <Admin_Gallery />}
-            {dataType === "committee" && <Admin_Committee />}
+            {dataType === "committee" && (
+              <Admin_Committee 
+                forcedYear={selectedSession} 
+                externalDept={filterDept} 
+                externalCategory={filterCategory} 
+                externalLink={filterLink}
+                externalSort={sortOrder}
+              />
+            )}
             {dataType === "finances" && <Admin_Finance />}
             {dataType === "audit" && <Admin_Audit />}
             {dataType === "archive" && <Admin_Archive />}
             {dataType === "admins" && <Admin_Access />}
+            {dataType === "departments" && <Admin_Departments />}
+            {dataType === "achievements" && <Admin_Achievements />}
           </motion.div>
         </AnimatePresence>
       </div>
 
       <Admin_DetailsModal isOpen={showDetailsModal} onClose={() => setShowDetailsModal(false)} item={selectedItem} dataType={dataType} />
       <Admin_EmailModal isOpen={showEmailModal} onClose={() => setShowEmailModal(false)} item={selectedEmailItem} onSend={async () => {}} sending={false} />
+      <Admin_CommitteeModal
+        isOpen={showCommitteeModal}
+        onClose={() => setShowCommitteeModal(false)}
+        item={committeeModalItem}
+        onSave={handleCommitteeUpsert}
+      />
+      <Admin_MemberTrajectory
+        isOpen={!!trajectoryStudentId}
+        onClose={() => setTrajectoryStudentId(null)}
+        studentId={trajectoryStudentId}
+      />
     </div>
   );
 };

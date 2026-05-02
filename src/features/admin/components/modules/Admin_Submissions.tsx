@@ -10,10 +10,11 @@ import {
   FaChevronLeft, 
   FaChevronRight, 
   FaEnvelope, 
-  FaCamera, 
   FaUniversity,
   FaImages,
-  FaSpinner
+  FaSpinner,
+  FaStar,
+  FaRegStar
 } from 'react-icons/fa';
 import { Admin_Dropdown } from "@/features/admin/components";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
@@ -66,13 +67,15 @@ export const Admin_Submissions: React.FC<Admin_SubmissionsProps> = ({
     return f;
   }, [filterCategory, filterPayment, forcedSession]);
 
-  const { data, count, isLoading, refetch } = useSupabaseData("exhibition_submissions", {
+  const submissionOptions = useMemo(() => ({
     page,
     pageSize,
     filters,
     orderBy: sortBy,
     orderDesc,
-  });
+  }), [page, pageSize, filters, sortBy, orderDesc]);
+
+  const { data, count, isLoading, refetch } = useSupabaseData("exhibition_submissions", submissionOptions);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Delete this submission?")) return;
@@ -82,6 +85,19 @@ export const Admin_Submissions: React.FC<Admin_SubmissionsProps> = ({
       refetch();
     } catch (err: any) {
       console.error("Delete failed:", err.message);
+    }
+  };
+
+  const handleToggleHero = async (item: any) => {
+    try {
+      const { error } = await supabase
+        .from("exhibition_submissions")
+        .update({ featured_on_hero: !item.featured_on_hero })
+        .eq('id', item.id);
+      if (error) throw error;
+      refetch();
+    } catch (err: any) {
+      console.error("Toggle hero failed:", err.message);
     }
   };
 
@@ -145,7 +161,7 @@ export const Admin_Submissions: React.FC<Admin_SubmissionsProps> = ({
               onClick={() => exportToCSV("submissions", data || [])} 
               className="px-8 h-14 mt-auto flex items-center gap-3 bg-uiupc-orange text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-uiupc-orange/20 hover:brightness-110 transition-all"
             >
-              <FaFileExport /> Export
+              <FaFileExport /> Download List
             </button>
           </div>
         </div>
@@ -182,16 +198,17 @@ export const Admin_Submissions: React.FC<Admin_SubmissionsProps> = ({
                 <th className="px-8 py-6 text-left w-20">
                   <input type="checkbox" className="w-5 h-5 rounded-lg border-zinc-300 text-uiupc-orange cursor-pointer" checked={Array.isArray(data) && data.length > 0 && selectedIds.size === data.length} onChange={(e) => e.target.checked ? setSelectedIds(new Set((data || []).map(i => i.id))) : setSelectedIds(new Set())} />
                 </th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Participant</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Institution</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Photos</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Category</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Full Name</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">University</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Photo Count</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Event Type</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Show on Home Page</th>
                 <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
               {isLoading ? (
-                [...Array(6)].map((_, i) => <tr key={i} className="animate-pulse"><td colSpan={6} className="px-8 py-8"><div className="h-8 bg-zinc-50 dark:bg-zinc-900 rounded-xl" /></td></tr>)
+                [...Array(6)].map((_, i) => <tr key={i} className="animate-pulse"><td colSpan={7} className="px-8 py-8"><div className="h-8 bg-zinc-50 dark:bg-zinc-900 rounded-xl" /></td></tr>)
               ) : (
                 (data || []).filter(item => (item.full_name || "").toLowerCase().includes(searchTerm.toLowerCase()) || (item.institution || "").toLowerCase().includes(searchTerm.toLowerCase())).map((item) => (
                   <motion.tr key={item.id} className={`group hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition-all ${selectedIds.has(item.id) ? 'bg-uiupc-orange/[0.03]' : ''}`}>
@@ -215,6 +232,19 @@ export const Admin_Submissions: React.FC<Admin_SubmissionsProps> = ({
                         <FaImages className="text-zinc-300" /> {Number(item.photo_count || 0) + Number(item.story_photo_count || 0)} Files
                       </div>
                     </td>
+                    <td className="px-6 py-6 whitespace-nowrap">
+                       <button 
+                         onClick={() => handleToggleHero(item)}
+                         className={`flex items-center gap-2 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest transition-all ${
+                           item.featured_on_hero 
+                             ? 'bg-uiupc-orange/10 text-uiupc-orange border border-uiupc-orange/20' 
+                             : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 border border-transparent hover:border-zinc-300'
+                         }`}
+                       >
+                         {item.featured_on_hero ? <FaStar /> : <FaRegStar />}
+                         {item.featured_on_hero ? "Featured" : "Show on Home"}
+                       </button>
+                    </td>
                     <td className="px-6 py-6 whitespace-nowrap"><CategoryBadge category={item.category} /></td>
                     <td className="px-8 py-6 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -234,7 +264,7 @@ export const Admin_Submissions: React.FC<Admin_SubmissionsProps> = ({
       {/* ── PAGINATION ────────────────────────────────────────── */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-10 border-t border-black/5 dark:border-white/5">
-          <div className="flex flex-col"><p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Registry Status</p><p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Page {page + 1} of {totalPages} | Total {count} Entries</p></div>
+          <div className="flex flex-col"><p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Submission Tracker</p><p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Page {page + 1} of {totalPages} | Total {count} Submissions</p></div>
           <div className="flex items-center gap-3">
             <button disabled={page === 0} onClick={() => { setPage(p => Math.max(0, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange shadow-sm transition-all"><FaChevronLeft className="text-xs" /></button>
             <button disabled={page >= totalPages - 1} onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange shadow-sm transition-all"><FaChevronRight className="text-xs" /></button>

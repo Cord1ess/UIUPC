@@ -1,5 +1,5 @@
 "use client";
-import useSWR from "swr";
+import useSWR, { SWRConfiguration } from "swr";
 import { supabase } from "@/lib/supabase";
 
 interface SupabaseDataOptions {
@@ -7,80 +7,115 @@ interface SupabaseDataOptions {
   orderBy?: string;
   orderDesc?: boolean;
   enabled?: boolean;
-  filters?: Record<string, any>;
+  filters?: Record<string, string | number | boolean | string[] | number[] | null>;
+  search?: { columns: string[]; term: string };
   page?: number;
   pageSize?: number;
   countOnly?: boolean;
 }
 
-interface FetcherResult {
-  data: any[];
+interface FetcherResult<T> {
+  data: T[];
   count: number | null;
 }
 
-const fetcher = async ([table, options]: [string, SupabaseDataOptions]): Promise<FetcherResult> => {
-  let query = supabase
-    .from(table)
-    .select("*", { count: options.countOnly ? 'exact' : 'exact', head: options.countOnly });
+/**
+ * Enhanced fetcher with built-in retry logic (exponential backoff)
+ */
+const fetcherWithRetry = async <T>(
+  [table, optionsStr]: [string, string], 
+  retryCount = 0
+): Promise<FetcherResult<T>> => {
+  const options: SupabaseDataOptions = JSON.parse(optionsStr);
+  try {
+    let query = supabase
+      .from(table)
+      .select("*", { count: options.countOnly ? 'exact' : 'exact', head: options.countOnly });
 
-  // Apply filters if provided
-  if (options.filters) {
-    Object.entries(options.filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          query = query.in(key, value);
-        } else {
-          query = query.eq(key, value);
+    if (options.filters) {
+      Object.entries(options.filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            query = query.in(key, value);
+          } else {
+            query = query.eq(key, value);
+          }
+        }
+      });
+    }
+
+    if (options.search && options.search.term.trim()) {
+      const searchFilter = options.search.columns
+        .map(col => `${col}.ilike.%${options.search!.term.trim()}%`)
+        .join(',');
+      query = query.or(searchFilter);
+    }
+
+    const orderBy = options.orderBy || (table === 'exhibition_submissions' ? 'submitted_at' : 'created_at');
+    query = query.order(orderBy, { ascending: !options.orderDesc });
+
+    if (options.page !== undefined && options.pageSize !== undefined) {
+      const from = options.page * options.pageSize;
+      const to = from + options.pageSize - 1;
+      query = query.range(from, to);
+    } else if (options.limit) {
+      query = query.limit(options.limit);
+    }
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      // Handle transient errors (e.g. 502, 503, 504) or network failures
+      if ((error.status && error.status >= 500) || error.message.includes("fetch")) {
+        if (retryCount < 3) {
+          const delay = Math.pow(2, retryCount) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return fetcherWithRetry([table, options], retryCount + 1);
         }
       }
-    });
-  }
+      throw error;
+    }
 
-  // Ordering logic: 
-  // 1. Use options.orderBy if explicitly provided
-  // 2. Fallback to 'submitted_at' for exhibition_submissions
-  // 3. Default to 'created_at' for all other tables
-  const orderBy = options.orderBy || (table === 'exhibition_submissions' ? 'submitted_at' : 'created_at');
-  query = query.order(orderBy, { ascending: !options.orderDesc });
-
-  // Pagination / Range
-  if (options.page !== undefined && options.pageSize !== undefined) {
-    const from = options.page * options.pageSize;
-    const to = from + options.pageSize - 1;
-    query = query.range(from, to);
-  } else if (options.limit) {
-    query = query.limit(options.limit);
-  }
-
-  const { data, error, count } = await query;
-
-  if (error) {
-    console.error(`Supabase fetch failed for ${table}:`, error.message, error.details, error.hint);
+    return {
+      data: (data as T[]) || [],
+      count: count
+    };
+  } catch (error: any) {
+    console.error(`[Supabase Error] ${table}:`, error.message);
     throw error;
   }
-
-  return {
-    data: data || [],
-    count: count
-  };
 };
 
-export const useSupabaseData = (table: string, options: SupabaseDataOptions = { orderDesc: true }) => {
+const EMPTY_ARRAY: any[] = [];
+
+/**
+ * Generic hook to fetch data from Supabase tables with SWR caching.
+ * Enhanced with automatic retries and network-aware revalidation.
+ */
+export const useSupabaseData = <T = any>(
+  table: string, 
+  options: SupabaseDataOptions = { orderDesc: true },
+  swrConfig: SWRConfiguration = {}
+) => {
   const isEnabled = options.enabled !== false;
   
-  const { data: result, error, isLoading, isValidating, mutate } = useSWR(
-    (table && isEnabled) ? [table, options] : null,
-    fetcher,
+  const { data: result, error, isLoading, isValidating, mutate } = useSWR<FetcherResult<T>>(
+    (table && isEnabled) ? [table, JSON.stringify(options)] : null,
+    fetcherWithRetry,
     {
       revalidateOnFocus: false,
-      dedupingInterval: 0,
+      revalidateOnReconnect: true,
+      shouldRetryOnError: true,
+      errorRetryCount: 3,
+      dedupingInterval: 2000, // Dedup requests within 2 seconds
+      ...swrConfig
     }
   );
 
   return {
-    data: result?.data || [],
+    data: result?.data || EMPTY_ARRAY,
     count: result?.count ?? 0,
-    error: error?.message || null,
+    error: (error as Error)?.message || null,
     isLoading,
     isRefreshing: isValidating,
     refetch: mutate

@@ -6,6 +6,8 @@ export * from './modules/Admin_Committee';
 export * from './modules/Admin_Archive';
 export * from './modules/Admin_Blog';
 export * from './modules/Admin_Gallery';
+export * from './modules/Admin_Departments';
+export * from './modules/Admin_Achievements';
 
 // Core Infrastructure
 export * from './core/Admin_Dashboard';

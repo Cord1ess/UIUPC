@@ -7,9 +7,9 @@ env.useBrowserCache = true;
 class PipelineSingleton {
     static task = 'image-to-image';
     static model = ''; // Placeholder
-    static instance: any = null;
+    static instance: any | null = null;
 
-    static async getInstance(progress_callback: (p: any) => void) {
+    static async getInstance(progress_callback?: (p: any) => void) {
         if (this.instance === null) {
             // this.instance = await pipeline(this.task, this.model, { progress_callback });
         }
@@ -17,21 +17,28 @@ class PipelineSingleton {
     }
 }
 
-self.addEventListener("message", async (e: MessageEvent) => {
-    const { type, payload } = e.data;
+interface WorkerMessage {
+    type: string;
+    payload: any;
+}
+
+self.addEventListener("message", async (e: MessageEvent<WorkerMessage & { id: string }>) => {
+    const { type, payload, id } = e.data;
     
     if (type === "PROCESS_INPAINT") {
         const { blob, maskBlob } = payload;
         
-        self.postMessage({ type: 'STATUS', message: 'Loading Inpaint Tensors...' });
+        self.postMessage({ type: 'STATUS', message: 'Loading Inpaint Tensors...', id });
         
+        let imageBitmap: ImageBitmap | null = null;
+        let maskBitmap: ImageBitmap | null = null;
+
         try {
             await new Promise(r => setTimeout(r, 400));
-            self.postMessage({ type: 'STATUS', message: 'Analyzing Mask Vector...' });
+            self.postMessage({ type: 'STATUS', message: 'Analyzing Mask Vector...', id });
             
             // 1. Decode original image and mask
-            const imageBitmap = await createImageBitmap(blob);
-            let maskBitmap = null;
+            imageBitmap = await createImageBitmap(blob);
             if (maskBlob) {
                 maskBitmap = await createImageBitmap(maskBlob);
             }
@@ -72,30 +79,34 @@ self.addEventListener("message", async (e: MessageEvent) => {
             await new Promise(r => setTimeout(r, 600));
             
             const resultBlob = await offscreen.convertToBlob({ type: 'image/png' });
-            self.postMessage({ type: 'SUCCESS', resultBlob: resultBlob });
+            self.postMessage({ type: 'SUCCESS', resultBlob: resultBlob, id });
         } catch (error: any) {
-            self.postMessage({ type: 'ERROR', error: error.message });
+            self.postMessage({ type: 'ERROR', error: error.message, id });
+        } finally {
+            // Critical Cleanup: Close bitmaps to free memory in worker thread
+            imageBitmap?.close();
+            maskBitmap?.close();
         }
     }
     
     if (type === "PROCESS_ENHANCE") {
         const { blob, operation } = payload;
         
-        const formatTitle = operation.replace('_', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
-        self.postMessage({ type: 'STATUS', message: `Loading ${formatTitle} Model...` });
+        const formatTitle = (operation as string).replace('_', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+        self.postMessage({ type: 'STATUS', message: `Loading ${formatTitle} Model...`, id });
         
         try {
             // Mocking model footprint initialization 
             await new Promise(r => setTimeout(r, 1000));
-            self.postMessage({ type: 'STATUS', message: 'Applying Neural Filter...' });
+            self.postMessage({ type: 'STATUS', message: 'Applying Neural Filter...', id });
             
             // Simulating image processing (Super Res / Denoise / FBCNN)
             await new Promise(r => setTimeout(r, 2000));
             
             // Returning original blob as placeholder until full transformers JS is piped
-            self.postMessage({ type: 'SUCCESS', resultBlob: blob });
+            self.postMessage({ type: 'SUCCESS', resultBlob: blob, id });
         } catch (error: any) {
-            self.postMessage({ type: 'ERROR', error: error.message });
+            self.postMessage({ type: 'ERROR', error: error.message, id });
         }
     }
 });

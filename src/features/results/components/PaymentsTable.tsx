@@ -2,17 +2,7 @@
 
 import React from "react";
 import { FaMoneyBillWave, FaEye, FaCheck, FaTimes, FaEnvelope, FaChevronLeft, FaChevronRight, FaDownload } from "react-icons/fa";
-
-interface Payment {
-  id: string;
-  name: string;
-  email: string;
-  transactionId: string;
-  amount: number;
-  status: string;
-  timestamp: string;
-  [key: string]: any;
-}
+import { Payment } from "@/types";
 
 interface PaymentsTableProps {
   payments: Payment[];
@@ -68,11 +58,11 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-black uppercase tracking-tighter dark:text-white flex items-center gap-2">
-          <FaMoneyBillWave className="text-green-500" /> Payments <span className="text-zinc-400 text-sm">({payments.length})</span>
+          <FaMoneyBillWave className="text-green-500" /> Payment Records <span className="text-zinc-400 text-sm">({payments.length})</span>
         </h3>
         <div className="flex items-center gap-3">
           <button onClick={onExport} disabled={payments.length === 0} className="px-6 h-10 flex items-center gap-2 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-600 dark:text-zinc-300 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-uiupc-orange disabled:opacity-50 transition-all">
-            <FaDownload /> Export CSV
+            <FaDownload /> Download List
           </button>
         </div>
       </div>
@@ -84,9 +74,9 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
             <tr className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
               <th className="px-6 pb-2 text-left">Date</th>
               <th className="px-6 pb-2 text-left">Name</th>
-              <th className="px-6 pb-2 text-left">TrxID</th>
-              <th className="px-6 pb-2 text-left">Amount</th>
-              <th className="px-6 pb-2 text-left">Status</th>
+              <th className="px-6 pb-2 text-left">Payment ID</th>
+              <th className="px-6 pb-2 text-left">Amount Paid</th>
+              <th className="px-6 pb-2 text-left">Verify Status</th>
               <th className="px-6 pb-2 text-right">Actions</th>
             </tr>
           </thead>

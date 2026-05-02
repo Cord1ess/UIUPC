@@ -6,307 +6,337 @@ export type WorkerMessage =
   | { type: 'PROCESS_COLLAGE'; payload: any }
   | { type: 'PROCESS_ERASE'; payload: any };
 
-self.addEventListener('message', async (e: MessageEvent<WorkerMessage>) => {
-  const { type, payload } = e.data;
+self.addEventListener('message', async (e: MessageEvent<WorkerMessage & { id: string }>) => {
+  const { type, payload, id } = e.data;
 
   try {
     if (type === 'PROCESS_TRANSFORM') {
-      const { blob, transformer, naturalSize } = payload;
+      const { blob, transformer } = payload;
+      let imageBitmap: ImageBitmap | null = null;
+      let logoBitmap: ImageBitmap | null = null;
       
-      // 1. High performance image decoding directly onto GPU
-      const imageBitmap = await createImageBitmap(blob);
-      
-      let width = imageBitmap.width;
-      let height = imageBitmap.height;
-
-      // Calculate Target Dimensions
-      if (transformer.resizer.mode === "dimensions" && transformer.resizer.width) {
-        width = transformer.resizer.width;
-        height = transformer.resizer.height || Math.round(width * (imageBitmap.height / imageBitmap.width));
-      } else if (transformer.resizer.mode === "percentage") {
-        const percentage = transformer.resizer.percentage || 100;
-        width = Math.round(imageBitmap.width * (percentage / 100));
-        height = Math.round(imageBitmap.height * (percentage / 100));
-      }
-
-      // 2. OffscreenCanvas (Runs entirely off the main thread = 0 UI lag)
-      const offscreen = new OffscreenCanvas(width, height);
-      const ctx = offscreen.getContext('2d', { alpha: false }); // Disable alpha for perf
-
-      if (!ctx) throw new Error("Failed to get 2D context");
-
-      // Hardware accelerated draw
-      ctx.drawImage(imageBitmap, 0, 0, width, height);
-
-      // Watermark Logic
-      if (transformer.watermark.enabled) {
-        ctx.globalAlpha = transformer.watermark.opacity;
+      try {
+        // 1. High performance image decoding directly onto GPU
+        imageBitmap = await createImageBitmap(blob);
         
-        if (transformer.watermark.type === 'logo' && transformer.watermark.imageUri) {
-          try {
-            const logoRes = await fetch(transformer.watermark.imageUri);
-            const logoBlob = await logoRes.blob();
-            const logoBitmap = await createImageBitmap(logoBlob);
-            
-            // Calculate scale
-            const scale = transformer.watermark.scale || 0.15;
-            const logoTargetWidth = width * scale;
-            const logoTargetHeight = logoBitmap.height * (logoTargetWidth / logoBitmap.width);
+        let width = imageBitmap.width;
+        let height = imageBitmap.height;
 
-            if (transformer.watermark.tiled) {
-              const pattern = ctx.createPattern(logoBitmap, 'repeat');
-              if (pattern) {
-                 ctx.fillStyle = pattern;
-                 ctx.fillRect(0, 0, width, height);
-              }
-            } else {
-            const { x, y } = getWatermarkPosition(
-                transformer.watermark.position, 
-                width, height, logoTargetWidth, logoTargetHeight, 
-                width * (transformer.watermark.inset || 0.05)
-              );
-              ctx.drawImage(logoBitmap, x, y, logoTargetWidth, logoTargetHeight);
-            }
-          } catch (err) {
-            console.error("Logo Watermark Failed", err);
-          }
-        } else if (transformer.watermark.type === 'text') {
-           const scale = transformer.watermark.scale || 0.06;
-           const fontSize = Math.max(width * scale, 12);
-           const text = transformer.watermark.text || "UIUPC";
-           ctx.font = `bold ${fontSize}px sans-serif`;
-           ctx.fillStyle = "white";
-           ctx.strokeStyle = "rgba(0,0,0,0.5)";
-           ctx.lineWidth = fontSize * 0.05;
-           
-           const metrics = ctx.measureText(text);
-           const textWidth = metrics.width;
-           const textHeight = fontSize; 
-
-           if (transformer.watermark.tiled) {
-              ctx.translate(width / 2, height / 2);
-              ctx.rotate(-Math.PI / 4);
-              const stepX = width * 0.3;
-              const stepY = height * 0.2;
-              const diag = Math.sqrt(width * width + height * height);
-              ctx.textAlign = 'center';
-              ctx.fillStyle = "white";
-              ctx.strokeStyle = "rgba(0,0,0,0.5)";
-              ctx.lineWidth = 2;
-              
-              for (let y = -diag; y < diag * 2; y += stepY) {
-                 for (let x = -diag; x < diag * 2; x += stepX) {
-                    ctx.strokeText(text, x, y);
-                    ctx.fillText(text, x, y);
-                 }
-              }
-              ctx.resetTransform();
-           } else {
-              const { x, y } = getWatermarkPosition(
-                transformer.watermark.position, 
-                width, height, textWidth, textHeight, 
-                width * (transformer.watermark.inset || 0.05)
-              );
-              
-              ctx.textAlign = "left";
-              ctx.textBaseline = "top";
-              ctx.fillStyle = "white";
-              ctx.strokeStyle = "rgba(0,0,0,0.5)";
-              ctx.lineWidth = fontSize * 0.05;
-              
-              ctx.strokeText(text, x, y);
-              ctx.fillText(text, x, y);
-           }
+        // Calculate Target Dimensions
+        if (transformer.resizer.mode === "dimensions" && transformer.resizer.width) {
+          width = transformer.resizer.width;
+          height = transformer.resizer.height || Math.round(width * (imageBitmap.height / imageBitmap.width));
+        } else if (transformer.resizer.mode === "percentage") {
+          const percentage = transformer.resizer.percentage || 100;
+          width = Math.round(imageBitmap.width * (percentage / 100));
+          height = Math.round(imageBitmap.height * (percentage / 100));
         }
-      }
 
-      // 3. Ultra-fast binary output
-      const resultBlob = await offscreen.convertToBlob({ type: "image/webp", quality: 0.95 });
-      
-      // Post result back to main thread
-      self.postMessage({ type: 'SUCCESS', resultBlob, width, height });
+        // 2. OffscreenCanvas (Runs entirely off the main thread = 0 UI lag)
+        const offscreen = new OffscreenCanvas(width, height);
+        const ctx = offscreen.getContext('2d', { alpha: false }); // Disable alpha for perf
+
+        if (!ctx) throw new Error("Failed to get 2D context");
+
+        // Hardware accelerated draw
+        ctx.drawImage(imageBitmap, 0, 0, width, height);
+
+        // Watermark Logic
+        if (transformer.watermark.enabled) {
+          ctx.globalAlpha = transformer.watermark.opacity;
+          
+          if (transformer.watermark.type === 'logo' && transformer.watermark.imageUri) {
+            try {
+              const logoRes = await fetch(transformer.watermark.imageUri);
+              const logoBlob = await logoRes.blob();
+              logoBitmap = await createImageBitmap(logoBlob);
+              
+              // Calculate scale
+              const scale = transformer.watermark.scale || 0.15;
+              const logoTargetWidth = width * scale;
+              const logoTargetHeight = logoBitmap.height * (logoTargetWidth / logoBitmap.width);
+
+              if (transformer.watermark.tiled) {
+                const pattern = ctx.createPattern(logoBitmap, 'repeat');
+                if (pattern) {
+                   ctx.fillStyle = pattern;
+                   ctx.fillRect(0, 0, width, height);
+                }
+              } else {
+              const { x, y } = getWatermarkPosition(
+                  transformer.watermark.position, 
+                  width, height, logoTargetWidth, logoTargetHeight, 
+                  width * (transformer.watermark.inset || 0.05)
+                );
+                ctx.drawImage(logoBitmap, x, y, logoTargetWidth, logoTargetHeight);
+              }
+            } catch (err) {
+              console.error("Logo Watermark Failed", err);
+            }
+          } else if (transformer.watermark.type === 'text') {
+             const scale = transformer.watermark.scale || 0.06;
+             const fontSize = Math.max(width * scale, 12);
+             const text = transformer.watermark.text || "UIUPC";
+             ctx.font = `bold ${fontSize}px sans-serif`;
+             ctx.fillStyle = "white";
+             ctx.strokeStyle = "rgba(0,0,0,0.5)";
+             ctx.lineWidth = fontSize * 0.05;
+             
+             const metrics = ctx.measureText(text);
+             const textWidth = metrics.width;
+             const textHeight = fontSize; 
+
+             if (transformer.watermark.tiled) {
+                ctx.translate(width / 2, height / 2);
+                ctx.rotate(-Math.PI / 4);
+                const stepX = width * 0.3;
+                const stepY = height * 0.2;
+                const diag = Math.sqrt(width * width + height * height);
+                ctx.textAlign = 'center';
+                ctx.fillStyle = "white";
+                ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                ctx.lineWidth = 2;
+                
+                for (let y = -diag; y < diag * 2; y += stepY) {
+                   for (let x = -diag; x < diag * 2; x += stepX) {
+                      ctx.strokeText(text, x, y);
+                      ctx.fillText(text, x, y);
+                   }
+                }
+                ctx.resetTransform();
+             } else {
+                const { x, y } = getWatermarkPosition(
+                  transformer.watermark.position, 
+                  width, height, textWidth, textHeight, 
+                  width * (transformer.watermark.inset || 0.05)
+                );
+                
+                ctx.textAlign = "left";
+                ctx.textBaseline = "top";
+                ctx.fillStyle = "white";
+                ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                ctx.lineWidth = fontSize * 0.05;
+                
+                ctx.strokeText(text, x, y);
+                ctx.fillText(text, x, y);
+             }
+          }
+        }
+
+        // 3. Ultra-fast binary output
+        const resultBlob = await offscreen.convertToBlob({ type: "image/webp", quality: 0.95 });
+        
+        // Post result back to main thread
+        self.postMessage({ type: 'SUCCESS', resultBlob, width, height, id });
+      } finally {
+        imageBitmap?.close();
+        logoBitmap?.close();
+      }
     }
     
     else if (type === 'PROCESS_EDITORIAL') {
       const { blob, filters } = payload;
+      let imageBitmap: ImageBitmap | null = null;
       
-      const imageBitmap = await createImageBitmap(blob);
-      const width = imageBitmap.width;
-      const height = imageBitmap.height;
+      try {
+        imageBitmap = await createImageBitmap(blob);
+        const width = imageBitmap.width;
+        const height = imageBitmap.height;
 
-      const offscreen = new OffscreenCanvas(width, height);
-      const ctx = offscreen.getContext('2d');
-      if (!ctx) throw new Error("Failed to get 2D context");
+        const offscreen = new OffscreenCanvas(width, height);
+        const ctx = offscreen.getContext('2d');
+        if (!ctx) throw new Error("Failed to get 2D context");
 
-      // 1. Standard Filters (Fast)
-      const { 
-        exposure, brightness, contrast, saturation, sepia, invert, hueRotate, blur,
-        temperature, sharpen, vignette, vibrance
-      } = filters;
-      
-      const filterString = `
-        brightness(${100 + exposure + brightness}%)
-        contrast(${100 + contrast}%)
-        saturate(${saturation}%)
-        sepia(${sepia || 0}%)
-        invert(${invert || 0}%)
-        hue-rotate(${hueRotate || 0}deg)
-        blur(${blur || 0}px)
-      `.trim().replace(/\s+/g, ' ');
-
-      ctx.filter = filterString;
-      ctx.drawImage(imageBitmap, 0, 0, width, height);
-      ctx.filter = 'none'; // Clear filter for manual processing
-
-      // 2. Specialized Filters (Manual Canvas manipulation)
-      
-      // Temperature (RGB Balance Shift)
-      if (temperature !== 0) {
-        applyTemperature(ctx, width, height, temperature);
-      }
-
-      // Vibrance (Smart Saturation)
-      if (vibrance !== 0) {
-        applyVibrance(ctx, width, height, vibrance);
-      }
-
-      // Vignette
-      if (vignette > 0) {
-        const gradient = ctx.createRadialGradient(
-          width / 2, height / 2, Math.min(width, height) * 0.2, // inner
-          width / 2, height / 2, Math.max(width, height) * 0.7  // outer
-        );
-        gradient.addColorStop(0, "rgba(0,0,0,0)");
-        gradient.addColorStop(1, `rgba(0,0,0,${vignette / 100})`);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
-      }
-
-      // Sharpen (Balanced Convolution)
-      if (sharpen > 0) {
-        // Map 0-100 to 0-0.3 for professional intensity
-        const intensity = sharpen / 300; 
+        // 1. Standard Filters (Fast)
+        const { 
+          exposure, brightness, contrast, saturation, sepia, invert, hueRotate, blur,
+          temperature, sharpen, vignette, vibrance
+        } = filters;
         
-        // Balanced 3x3 Laplacian Kernel (Sums to exactly 1.0)
-        // [ 0, -i,  0 ]
-        // [ -i, 1+4i, -i ]
-        // [ 0, -i,  0 ]
-        const kernel = [
-          0,          -intensity,  0,
-          -intensity,  1 + (4 * intensity), -intensity,
-          0,          -intensity,  0
-        ];
-        applyConvolution(ctx, width, height, kernel);
-      }
+        const filterString = `
+          brightness(${100 + exposure + brightness}%)
+          contrast(${100 + contrast}%)
+          saturate(${saturation}%)
+          sepia(${sepia || 0}%)
+          invert(${invert || 0}%)
+          hue-rotate(${hueRotate || 0}deg)
+          blur(${blur || 0}px)
+        `.trim().replace(/\s+/g, ' ');
 
-      const resultBlob = await offscreen.convertToBlob({ type: "image/jpeg", quality: 0.98 });
-      self.postMessage({ type: 'SUCCESS', resultBlob });
+        ctx.filter = filterString;
+        ctx.drawImage(imageBitmap, 0, 0, width, height);
+        ctx.filter = 'none'; // Clear filter for manual processing
+
+        // 2. Specialized Filters (Manual Canvas manipulation)
+        
+        // Temperature (RGB Balance Shift)
+        if (temperature !== 0) {
+          applyTemperature(ctx, width, height, temperature);
+        }
+
+        // Vibrance (Smart Saturation)
+        if (vibrance !== 0) {
+          applyVibrance(ctx, width, height, vibrance);
+        }
+
+        // Vignette
+        if (vignette > 0) {
+          const gradient = ctx.createRadialGradient(
+            width / 2, height / 2, Math.min(width, height) * 0.2, // inner
+            width / 2, height / 2, Math.max(width, height) * 0.7  // outer
+          );
+          gradient.addColorStop(0, "rgba(0,0,0,0)");
+          gradient.addColorStop(1, `rgba(0,0,0,${vignette / 100})`);
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, width, height);
+        }
+
+        // Sharpen (Balanced Convolution)
+        if (sharpen > 0) {
+          // Map 0-100 to 0-0.3 for professional intensity
+          const intensity = sharpen / 300; 
+          
+          // Balanced 3x3 Laplacian Kernel (Sums to exactly 1.0)
+          // [ 0, -i,  0 ]
+          // [ -i, 1+4i, -i ]
+          // [ 0, -i,  0 ]
+          const kernel = [
+            0,          -intensity,  0,
+            -intensity,  1 + (4 * intensity), -intensity,
+            0,          -intensity,  0
+          ];
+          applyConvolution(ctx, width, height, kernel);
+        }
+
+        const resultBlob = await offscreen.convertToBlob({ type: "image/jpeg", quality: 0.98 });
+        self.postMessage({ type: 'SUCCESS', resultBlob, id });
+      } finally {
+        imageBitmap?.close();
+      }
     }
     
     else if (type === 'PROCESS_SPLIT') {
       const { blob, columns, rows } = payload;
-      const imageBitmap = await createImageBitmap(blob);
-      const sliceWidth = Math.floor(imageBitmap.width / columns);
-      const sliceHeight = Math.floor(imageBitmap.height / rows);
+      let imageBitmap: ImageBitmap | null = null;
       
-      const slices = [];
-      
-      for (let y = 0; y < rows; y++) {
-         for (let x = 0; x < columns; x++) {
-            const offscreen = new OffscreenCanvas(sliceWidth, sliceHeight);
-            const ctx = offscreen.getContext('2d', { alpha: false });
-            if (ctx) {
-               ctx.drawImage(
-                 imageBitmap,
-                 x * sliceWidth, y * sliceHeight, sliceWidth, sliceHeight,
-                 0, 0, sliceWidth, sliceHeight
-               );
-               const sliceBlob = await offscreen.convertToBlob({ type: "image/jpeg", quality: 0.95 });
-               slices.push({ x, y, blob: sliceBlob });
-            }
-         }
+      try {
+        imageBitmap = await createImageBitmap(blob);
+        const sliceWidth = Math.floor(imageBitmap.width / columns);
+        const sliceHeight = Math.floor(imageBitmap.height / rows);
+        
+        const slices = [];
+        
+        for (let y = 0; y < rows; y++) {
+           for (let x = 0; x < columns; x++) {
+              const offscreen = new OffscreenCanvas(sliceWidth, sliceHeight);
+              const ctx = offscreen.getContext('2d', { alpha: false });
+              if (ctx) {
+                 ctx.drawImage(
+                   imageBitmap,
+                   x * sliceWidth, y * sliceHeight, sliceWidth, sliceHeight,
+                   0, 0, sliceWidth, sliceHeight
+                 );
+                 const sliceBlob = await offscreen.convertToBlob({ type: "image/jpeg", quality: 0.95 });
+                 slices.push({ x, y, blob: sliceBlob });
+              }
+           }
+        }
+        
+        self.postMessage({ type: 'SUCCESS', slices, id });
+      } finally {
+        imageBitmap?.close();
       }
-      
-      self.postMessage({ type: 'SUCCESS', slices });
     }
 
     else if (type === 'PROCESS_STITCH') {
       const { blobs, direction } = payload;
-      // Decode all blobs simultaneously for SPEED
-      const bitmaps = await Promise.all(blobs.map((b: Blob) => createImageBitmap(b)));
+      let bitmaps: ImageBitmap[] = [];
       
-      let finalWidth = 0;
-      let finalHeight = 0;
+      try {
+        // Decode all blobs simultaneously for SPEED
+        bitmaps = await Promise.all(blobs.map((b: Blob) => createImageBitmap(b)));
+        
+        let finalWidth = 0;
+        let finalHeight = 0;
 
-      if (direction === 'vertical') {
-         finalWidth = Math.max(...bitmaps.map(b => b.width));
-         finalHeight = bitmaps.reduce((acc, b) => acc + b.height, 0);
-      } else {
-         finalHeight = Math.max(...bitmaps.map(b => b.height));
-         finalWidth = bitmaps.reduce((acc, b) => acc + b.width, 0);
+        if (direction === 'vertical') {
+           finalWidth = Math.max(...bitmaps.map(b => b.width));
+           finalHeight = bitmaps.reduce((acc, b) => acc + b.height, 0);
+        } else {
+           finalHeight = Math.max(...bitmaps.map(b => b.height));
+           finalWidth = bitmaps.reduce((acc, b) => acc + b.width, 0);
+        }
+
+        const offscreen = new OffscreenCanvas(finalWidth, finalHeight);
+        const ctx = offscreen.getContext('2d', { alpha: false });
+        if (!ctx) throw new Error("Failed to get 2D context");
+        
+        // Fill background in case of uneven images
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, finalWidth, finalHeight);
+
+        let curX = 0;
+        let curY = 0;
+        for (const bmp of bitmaps) {
+           ctx.drawImage(bmp, curX, curY);
+           if (direction === 'vertical') curY += bmp.height;
+           else curX += bmp.width;
+        }
+
+        const resultBlob = await offscreen.convertToBlob({ type: "image/jpeg", quality: 0.95 });
+        self.postMessage({ type: 'SUCCESS', resultBlob, id });
+      } finally {
+        bitmaps.forEach(b => b.close());
       }
-
-      const offscreen = new OffscreenCanvas(finalWidth, finalHeight);
-      const ctx = offscreen.getContext('2d', { alpha: false });
-      if (!ctx) throw new Error("Failed to get 2D context");
-      
-      // Fill background in case of uneven images
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, finalWidth, finalHeight);
-
-      let curX = 0;
-      let curY = 0;
-      for (const bmp of bitmaps) {
-         ctx.drawImage(bmp, curX, curY);
-         if (direction === 'vertical') curY += bmp.height;
-         else curX += bmp.width;
-      }
-
-      const resultBlob = await offscreen.convertToBlob({ type: "image/jpeg", quality: 0.95 });
-      self.postMessage({ type: 'SUCCESS', resultBlob });
     }
 
     else if (type === 'PROCESS_COLLAGE') {
       const { blobs, columns, spacing } = payload;
-      const bitmaps = await Promise.all(blobs.map((b: Blob) => createImageBitmap(b)));
+      let bitmaps: ImageBitmap[] = [];
       
-      const numImages = bitmaps.length;
-      const rows = Math.ceil(numImages / columns);
-      
-      let maxCellWidth = 0;
-      let maxCellHeight = 0;
-      
-      bitmaps.forEach(bmp => {
-         if (bmp.width > maxCellWidth) maxCellWidth = bmp.width;
-         if (bmp.height > maxCellHeight) maxCellHeight = bmp.height;
-      });
+      try {
+        bitmaps = await Promise.all(blobs.map((b: Blob) => createImageBitmap(b)));
+        
+        const numImages = bitmaps.length;
+        const rows = Math.ceil(numImages / columns);
+        
+        let maxCellWidth = 0;
+        let maxCellHeight = 0;
+        
+        bitmaps.forEach(bmp => {
+           if (bmp.width > maxCellWidth) maxCellWidth = bmp.width;
+           if (bmp.height > maxCellHeight) maxCellHeight = bmp.height;
+        });
 
-      const finalWidth = (columns * maxCellWidth) + ((columns + 1) * spacing);
-      const finalHeight = (rows * maxCellHeight) + ((rows + 1) * spacing);
+        const finalWidth = (columns * maxCellWidth) + ((columns + 1) * spacing);
+        const finalHeight = (rows * maxCellHeight) + ((rows + 1) * spacing);
 
-      const offscreen = new OffscreenCanvas(finalWidth, finalHeight);
-      const ctx = offscreen.getContext('2d', { alpha: false });
-      if (!ctx) throw new Error("Failed to get 2D context");
-      
-      ctx.fillStyle = "white"; // Background layer
-      ctx.fillRect(0, 0, finalWidth, finalHeight);
+        const offscreen = new OffscreenCanvas(finalWidth, finalHeight);
+        const ctx = offscreen.getContext('2d', { alpha: false });
+        if (!ctx) throw new Error("Failed to get 2D context");
+        
+        ctx.fillStyle = "white"; // Background layer
+        ctx.fillRect(0, 0, finalWidth, finalHeight);
 
-      bitmaps.forEach((bmp, i) => {
-         const col = i % columns;
-         const row = Math.floor(i / columns);
-         
-         const x = spacing + (col * (maxCellWidth + spacing));
-         const y = spacing + (row * (maxCellHeight + spacing));
-         
-         // Center image within its cell block if uneven
-         const cx = x + (maxCellWidth - bmp.width) / 2;
-         const cy = y + (maxCellHeight - bmp.height) / 2;
+        bitmaps.forEach((bmp, i) => {
+           const col = i % columns;
+           const row = Math.floor(i / columns);
+           
+           const x = spacing + (col * (maxCellWidth + spacing));
+           const y = spacing + (row * (maxCellHeight + spacing));
+           
+           // Center image within its cell block if uneven
+           const cx = x + (maxCellWidth - bmp.width) / 2;
+           const cy = y + (maxCellHeight - bmp.height) / 2;
 
-         ctx.drawImage(bmp, cx, cy);
-      });
+           ctx.drawImage(bmp, cx, cy);
+        });
 
-      const resultBlob = await offscreen.convertToBlob({ type: "image/jpeg", quality: 0.95 });
-      self.postMessage({ type: 'SUCCESS', resultBlob });
+        const resultBlob = await offscreen.convertToBlob({ type: "image/jpeg", quality: 0.95 });
+        self.postMessage({ type: 'SUCCESS', resultBlob, id });
+      } finally {
+        bitmaps.forEach(b => b.close());
+      }
     }
 
     else if (type === 'PROCESS_ERASE') {
@@ -316,24 +346,25 @@ self.addEventListener('message', async (e: MessageEvent<WorkerMessage>) => {
       // unless the user specifically hits the Eraser tool.
       const { removeBackground } = await import('@imgly/background-removal');
 
-      self.postMessage({ type: 'STATUS', message: 'Downloading Neural Net (40MB)' });
+      self.postMessage({ type: 'STATUS', message: 'Downloading ML Model (40MB)', id });
 
       const config = {
         progress: (key: string, current: number, total: number) => {
           self.postMessage({ 
              type: 'PROGRESS', 
-             message: `Loading ML Model: ${Math.round((current / total) * 100)}%` 
+             message: `Loading ML Model: ${Math.round((current / total) * 100)}%`,
+             id 
           });
         }
       };
 
       const resultBlob = await removeBackground(blob, config);
       
-      self.postMessage({ type: 'SUCCESS', resultBlob });
+      self.postMessage({ type: 'SUCCESS', resultBlob, id });
     }
 
   } catch (error) {
-    self.postMessage({ type: 'ERROR', error: (error as Error).message });
+    self.postMessage({ type: 'ERROR', error: (error as Error).message, id });
   }
 });
 

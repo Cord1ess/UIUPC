@@ -58,14 +58,14 @@ const StudioBottomBar: React.FC = () => {
   }, [images.length, setActiveTool]);
 
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center transition-all duration-500 opacity-40 hover:opacity-100">
-      <div className="flex items-center gap-1 p-1 bg-white/80 dark:bg-black/80 backdrop-blur-2xl rounded-2xl border border-black/5 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+    <div className="fixed bottom-6 sm:bottom-8 left-0 right-0 z-50 px-4 flex items-center justify-center transition-all duration-500">
+      <div className="w-full max-w-fit overflow-x-auto no-scrollbar flex items-center gap-1 p-1 bg-white/80 dark:bg-black/80 backdrop-blur-2xl rounded-2xl border border-black/5 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
         {TOOLS.map((tool) => (
           <button
             key={tool.id}
             onClick={() => setActiveTool(tool.id)}
             disabled={images.length === 0}
-            className={`relative px-4 py-2.5 rounded-xl flex items-center gap-2.5 transition-all duration-300 group
+            className={`relative flex-shrink-0 px-4 py-2.5 rounded-xl flex items-center gap-2.5 transition-all duration-300 group
               ${activeToolId === tool.id 
                 ? "bg-zinc-900 dark:bg-white text-white dark:text-black shadow-xl" 
                 : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white disabled:opacity-30 disabled:pointer-events-none"
@@ -86,13 +86,11 @@ const StudioBottomBar: React.FC = () => {
               {tool.label}
             </motion.span>
 
-            {/* Tooltip on hover (not active) */}
-            {activeToolId !== tool.id && (
-              <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-zinc-900 dark:bg-white text-white dark:text-black text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-lg">
-                {tool.label}
-                <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-zinc-900 dark:border-t-white" />
-              </div>
-            )}
+            {/* Tooltip on hover (desktop only) */}
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-zinc-900 dark:bg-white text-white dark:text-black text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-lg hidden lg:block">
+              {tool.label}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-zinc-900 dark:border-t-white" />
+            </div>
 
             {activeToolId === tool.id && (
               <motion.div 
