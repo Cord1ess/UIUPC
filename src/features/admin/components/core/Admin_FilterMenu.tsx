@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaFilter, 
+  FaChevronDown,
   FaChevronRight, 
   FaUniversity, 
   FaIdCard, 
@@ -123,20 +124,19 @@ export const Admin_FilterMenu: React.FC<FilterMenuProps> = ({
     <div className="relative w-full" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-4 bg-zinc-50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 rounded-2xl px-6 py-4 group hover:border-uiupc-orange transition-all duration-300"
+        className="w-full flex items-center justify-between gap-3 group outline-none"
       >
-        <div className="flex items-center gap-4 min-w-0">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isOpen || partsActive ? 'bg-uiupc-orange text-white shadow-lg shadow-uiupc-orange/20' : 'bg-white dark:bg-[#080808] text-zinc-400'}`}>
-            <FaFilter className="text-[12px]" />
-          </div>
-          <div className="flex flex-col items-start min-w-0 text-left">
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-white">Filter By</span>
-            <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest truncate max-w-[120px]">
-              {getActiveLabel()}
-            </span>
-          </div>
+        <div className="flex flex-col items-start min-w-0 text-left">
+          <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${partsActive ? 'text-uiupc-orange' : 'text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white'}`}>
+            Filter Options
+          </span>
+          <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest truncate max-w-[150px]">
+            {getActiveLabel()}
+          </span>
         </div>
-        <FaChevronRight className={`text-[10px] text-zinc-300 transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`} />
+        <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isOpen ? 'bg-zinc-100 dark:bg-zinc-800' : ''}`}>
+          <FaChevronDown className={`text-[10px] text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        </div>
       </button>
 
       <AnimatePresence>
@@ -145,14 +145,14 @@ export const Admin_FilterMenu: React.FC<FilterMenuProps> = ({
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute top-full left-0 mt-3 w-72 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-[2rem] shadow-2xl z-[300] overflow-visible backdrop-blur-xl"
+            className="absolute top-full left-0 mt-3 w-72 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-xl shadow-2xl z-[300] overflow-visible backdrop-blur-xl"
           >
             <div className="p-3">
               {submenus.map((menu) => (
                 <div key={menu.id} className="relative group/item">
                   <button
                     onMouseEnter={() => setActiveSubmenu(menu.id)}
-                    className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all ${activeSubmenu === menu.id ? 'bg-zinc-50 dark:bg-zinc-900/50 text-uiupc-orange' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'}`}
+                    className={`w-full flex items-center justify-between px-5 py-4 rounded-xl transition-all ${activeSubmenu === menu.id ? 'bg-zinc-50 dark:bg-zinc-900/50 text-uiupc-orange' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'}`}
                   >
                     <div className="flex items-center gap-4">
                       <span className={`text-[12px] ${menu.active && menu.id !== 'sort' ? 'text-uiupc-orange' : 'text-zinc-400'}`}>
@@ -172,7 +172,7 @@ export const Admin_FilterMenu: React.FC<FilterMenuProps> = ({
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -10 }}
-                        className="absolute left-full top-0 ml-2 w-64 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-[2rem] shadow-2xl z-[301] p-3 max-h-[400px] overflow-y-auto no-scrollbar backdrop-blur-xl"
+                        className="absolute left-full top-0 ml-2 w-64 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-xl shadow-2xl z-[301] p-3 max-h-[400px] overflow-y-auto no-scrollbar backdrop-blur-xl"
                       >
                         {menu.options.map((opt: any) => {
                           const isSelected = 

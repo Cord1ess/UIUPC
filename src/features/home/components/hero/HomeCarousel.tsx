@@ -13,13 +13,13 @@ import { HeroImage } from '@/types';
 
 const CAROUSEL_IMAGES = [
   {
-    url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg",
+    url: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4", // Photography 1
   },
   {
-    url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1762121158/uiupc_HeroSlider2_cyl1xw.jpg",
+    url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32", // Photography 2
   },
   {
-    url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772527954/Cover_mhro7f.jpg",
+    url: "https://images.unsplash.com/photo-1542038784456-1ea8e935640e", // Photography 3
   }
 ];
 
@@ -74,15 +74,12 @@ const HomeCarousel = () => {
             className="absolute inset-0"
             style={{ willChange: 'transform' }}
           >
-            <Image
-              src={getImageUrl(carouselImages[index].url, 1920, 85)}
+            <img
+              src={getImageUrl(carouselImages[index].url, 1920, 80)}
               alt="UIUPC Hero Slide"
-              fill
-              priority={true}
-              loading="eager"
-              unoptimized={true}
-              className="object-cover"
-              sizes="100vw"
+              fetchPriority="high"
+              decoding="async"
+              className="w-full h-full object-cover"
             />
           </motion.div>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_rgba(0,0,0,0.9)_0%,_rgba(0,0,0,0.4)_40%,_transparent_80%)]" />

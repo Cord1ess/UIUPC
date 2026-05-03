@@ -28,12 +28,6 @@ const nextConfig: NextConfig = {
         hostname: '*.fbcdn.net',
         pathname: '/**',
       },
-      {
-        // Legacy — keep temporarily for transition
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        pathname: '/**',
-      }
     ],
   },
   // Ensure that .css file imports in components don't throw warnings

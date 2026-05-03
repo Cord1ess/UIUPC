@@ -5,14 +5,14 @@
 // ─── Image Pool ───────────────────────────────────────────────
 import { HeroImage, getImageUrl, ImageSize, getRawImageUrl } from "@/types";
 
-export { getImageUrl, getImageUrl as getCloudinaryUrl, ImageSize, getRawImageUrl };
+export { getImageUrl, ImageSize, getRawImageUrl };
 export type { HeroImage };
 
 /** Global registry of URLs that failed to load — never retry these */
 export const failedUrls = new Set<string>();
 
 const FALLBACK_IMAGE: Omit<HeroImage, "id"> = { 
-  url: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1763054814/uiupc_HeroSlider1_d9kprm.jpg", 
+  url: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4", 
   title: "UIUPC Campus", 
   photographer: "UIUPC", 
   isHorizontal: true 

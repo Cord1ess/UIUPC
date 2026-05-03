@@ -8,7 +8,9 @@ interface Admin_DropdownProps {
   options: string[] | { value: string; label: string }[];
   onChange: (value: string) => void;
   label?: string;
+  sublabel?: string;
   className?: string;
+  variant?: 'default' | 'minimal';
 }
 
 export const Admin_Dropdown: React.FC<Admin_DropdownProps> = ({ 
@@ -16,7 +18,9 @@ export const Admin_Dropdown: React.FC<Admin_DropdownProps> = ({
   options, 
   onChange, 
   label,
-  className = "" 
+  sublabel,
+  className = "",
+  variant = 'default'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -39,14 +43,35 @@ export const Admin_Dropdown: React.FC<Admin_DropdownProps> = ({
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
-      {label && <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">{label}</p>}
+      {label && variant === 'default' && <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">{label}</p>}
       
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-3 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-widest hover:border-uiupc-orange transition-all outline-none"
+        className={variant === 'minimal' 
+          ? "w-full flex items-center justify-between gap-3 group outline-none"
+          : "w-full flex items-center justify-between gap-3 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-widest hover:border-uiupc-orange transition-all outline-none"
+        }
       >
-        <span className="truncate dark:text-white">{selectedOption.label}</span>
-        <FaChevronDown className={`text-[10px] text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        {variant === 'minimal' ? (
+          <>
+            <div className="flex flex-col items-start min-w-0 text-left">
+              <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isOpen ? 'text-uiupc-orange' : 'text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white'}`}>
+                {label || 'Select Option'}
+              </span>
+              <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest truncate max-w-[150px]">
+                {sublabel || selectedOption.label}
+              </span>
+            </div>
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isOpen ? 'bg-zinc-100 dark:bg-zinc-800' : ''}`}>
+              <FaChevronDown className={`text-[10px] text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="truncate dark:text-white">{selectedOption.label}</span>
+            <FaChevronDown className={`text-[10px] text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+          </>
+        )}
       </button>
 
       <div className={`absolute top-full left-0 right-0 mt-2 z-[100] border rounded-xl shadow-2xl transition-all origin-top overflow-hidden bg-white dark:bg-neutral-800 border-black/[0.06] dark:border-white/[0.06] ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>

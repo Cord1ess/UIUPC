@@ -36,7 +36,7 @@ const EventDetailPage = async ({ params }: EventDetailPageProps) => {
         "Exclusive Photography Workshops",
         "Networking with professional photographers"
       ],
-      image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1763223291/Blog_7_suqqrn.jpg",
+      image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32",
       contact: {
         coordinator: "Md Mahmudul Hasan",
         email: "photographyclub@dccsa.uiu.ac.bd",

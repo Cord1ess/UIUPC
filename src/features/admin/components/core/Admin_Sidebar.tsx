@@ -20,33 +20,34 @@ import {
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import myLogo from '@/assets/UIUPC Logo.svg';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
 interface Admin_SidebarProps {
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  setActiveTab?: (tab: string) => void;
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (open: boolean) => void;
 }
 
 const ADMIN_TABS = [
-  { id: 'overview', label: 'Overview', icon: <FaThLarge /> },
-  { id: 'membership', label: 'Member List', icon: <FaUsers /> },
-  { id: 'committee', label: 'Committee', icon: <FaUserCircle /> },
-  { id: 'events', label: 'Events List', icon: <FaCalendarAlt /> },
-  { id: 'event_map', label: 'Event Map', icon: <FaMapMarkedAlt /> },
-  { id: 'photos', label: 'Photo Entries', icon: <FaCamera /> },
-  { id: 'archives', label: 'Previous Years', icon: <FaArchive /> },
-  { id: 'gallery', label: 'Public Gallery', icon: <FaImages /> },
-  { id: 'blog', label: 'Blog Posts', icon: <FaNewspaper /> },
-  { id: 'departments', label: 'Departments', icon: <FaLayerGroup /> },
-  { id: 'achievements', label: 'Hall of Fame', icon: <FaAward /> },
+  { id: 'overview', label: 'Overview', icon: <FaThLarge />, href: '/admin' },
+  { id: 'membership', label: 'Member List', icon: <FaUsers />, href: '/admin/members' },
+  { id: 'committee', label: 'Committee', icon: <FaUserCircle />, href: '/admin/committee' },
+  { id: 'events', label: 'Events List', icon: <FaCalendarAlt />, href: '/admin/events' },
+  { id: 'event_map', label: 'Event Map', icon: <FaMapMarkedAlt />, href: '/admin/event_map' },
+  { id: 'photos', label: 'Photo Entries', icon: <FaCamera />, href: '/admin/submissions' },
+  { id: 'archives', label: 'Previous Years', icon: <FaArchive />, href: '/admin/archives' },
+  { id: 'gallery', label: 'Public Gallery', icon: <FaImages />, href: '/admin/gallery' },
+  { id: 'blog', label: 'Blog Posts', icon: <FaNewspaper />, href: '/admin/blog' },
+  { id: 'departments', label: 'Departments', icon: <FaLayerGroup />, href: '/admin/departments' },
+  { id: 'achievements', label: 'Hall of Fame', icon: <FaAward />, href: '/admin/achievements' },
   // CORE only tabs
-  { id: 'finance', label: 'Payment Logs', icon: <FaWallet />, coreOnly: true },
-  { id: 'admins', label: 'Panel Access', icon: <FaShieldAlt />, coreOnly: true },
-  { id: 'audit', label: 'Activity History', icon: <FaHistory />, coreOnly: true },
+  { id: 'finance', label: 'Payment Logs', icon: <FaWallet />, href: '/admin/finances', coreOnly: true },
+  { id: 'admins', label: 'Panel Access', icon: <FaShieldAlt />, href: '/admin/admins', coreOnly: true },
+  { id: 'audit', label: 'Activity History', icon: <FaHistory />, href: '/admin/audit', coreOnly: true },
 ];
 
-export const Admin_Sidebar = memo(({ activeTab, setActiveTab }: Admin_SidebarProps) => {
+export const Admin_Sidebar = memo(({ activeTab }: Admin_SidebarProps) => {
   const { isCore } = useSupabaseAuth();
   const filteredTabs = ADMIN_TABS.filter(tab => !tab.coreOnly || isCore);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -85,9 +86,9 @@ export const Admin_Sidebar = memo(({ activeTab, setActiveTab }: Admin_SidebarPro
           {filteredTabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
-              <button 
+              <Link 
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                href={tab.href}
                 className={`w-full flex items-center text-left gap-4 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] relative group transition-colors duration-200 ${
                   isActive ? 'text-uiupc-orange' : 'text-zinc-500 dark:text-zinc-400'
                 }`}
@@ -113,7 +114,7 @@ export const Admin_Sidebar = memo(({ activeTab, setActiveTab }: Admin_SidebarPro
                   {tab.icon}
                 </span>
                 <span className="truncate z-10">{tab.label}</span>
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -128,10 +129,10 @@ export const Admin_Sidebar = memo(({ activeTab, setActiveTab }: Admin_SidebarPro
           {filteredTabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
-              <button
+              <Link
                 key={tab.id}
+                href={tab.href}
                 data-tab-id={tab.id}
-                onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center justify-center transition-all duration-300 h-full px-8 flex-shrink-0 rounded-2xl ${
                   isActive 
                     ? 'bg-uiupc-orange text-white' 
@@ -152,7 +153,7 @@ export const Admin_Sidebar = memo(({ activeTab, setActiveTab }: Admin_SidebarPro
                     </motion.span>
                   )}
                 </AnimatePresence>
-              </button>
+              </Link>
             );
           })}
           <div className="flex-shrink-0 w-20" />

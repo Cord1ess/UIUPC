@@ -230,7 +230,7 @@ export const Admin_Dashboard = ({ forcedTab }: { forcedTab?: string }) => {
   const moduleInfo = getModuleInfo();
   const isEnabled = dataType === "membership" ? admin_MembersStatus === "enabled" : admin_SubmissionsStatus === "enabled";
 
-  if (authLoading) return <GlobalLoader />;
+  if (authLoading || dataLoading) return <GlobalLoader />;
   if (!user) return null;
 
   return (

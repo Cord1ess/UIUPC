@@ -72,6 +72,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${theme === "dark" ? "dark" : ""} ${dmSans.variable} ${playfairDisplay.variable}`} suppressHydrationWarning data-scroll-behavior="smooth">
+      <head>
+        <link rel="preconnect" href="https://wsrv.nl" />
+        <link rel="dns-prefetch" href="https://wsrv.nl" />
+      </head>
       <body className="font-sans antialiased transition-colors duration-300 relative min-h-screen">
         <ThemeProvider>
           <GlobalPrefetch />

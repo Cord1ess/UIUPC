@@ -15,6 +15,8 @@ export * from './core/Admin_Sidebar';
 export * from './core/Admin_Dropdown';
 export * from './core/Admin_DetailsModal';
 export * from './core/Admin_EmailModal';
+export * from './core/Admin_ModuleHeader';
+export * from './core/Admin_FilterMenu';
 export * from './Admin_DrivePicker';
 
 // Governance Hub

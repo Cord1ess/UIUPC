@@ -26,11 +26,11 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const { user, adminProfile } = useSupabaseAuth();
   const [connectionStatus, setConnectionStatus] = useState<"online" | "offline" | "degraded">("online");
 
-  // Preload primary datasets
+  // Preload primary datasets - DISABLED for massive tables (Moved to Server Components)
   const memOptions = useMemo(() => ({ 
-    limit: 5000, 
-    enabled: !!user && !!adminProfile 
-  }), [user, adminProfile]);
+    limit: 1, 
+    enabled: false 
+  }), []);
   
   const { data: members, isLoading: memLoading, isRefreshing: memRef, refetch: refetchMem } = useSupabaseData("members", memOptions);
 
@@ -41,9 +41,9 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const { data: events, isLoading: evLoading, isRefreshing: evRef, refetch: refetchEvents } = useSupabaseData("events", eventOptions);
 
   const subOptions = useMemo(() => ({ 
-    limit: 5000, 
-    enabled: !!user && !!adminProfile 
-  }), [user, adminProfile]);
+    limit: 1, 
+    enabled: false 
+  }), []);
   
   const { data: submissions, isLoading: subLoading, isRefreshing: subRef, refetch: refetchSub } = useSupabaseData("exhibition_submissions", subOptions);
 
@@ -67,21 +67,22 @@ export const AdminDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const { data: auditLogs, isLoading: auditLoading, isRefreshing: auditRef, refetch: refetchAudit } = useSupabaseData("audit_logs", auditOptions);
 
   const finOptions = useMemo(() => ({ 
-    limit: 1000, 
+    limit: 50, 
     enabled: !!user && !!adminProfile 
   }), [user, adminProfile]);
   
   const { data: finances, isLoading: finLoading, isRefreshing: finRef, refetch: refetchFin } = useSupabaseData("finances", finOptions);
 
   const comOptions = useMemo(() => ({ 
-    limit: 1000, 
-    enabled: !!user && !!adminProfile 
-  }), [user, adminProfile]);
+    limit: 1, 
+    enabled: false 
+  }), []);
   
   const { data: committees, isLoading: comLoading, isRefreshing: comRef, refetch: refetchCom } = useSupabaseData("committees", comOptions);
 
-  const isLoading = memLoading || evLoading || subLoading || deptLoading || achLoading || auditLoading || finLoading || comLoading;
-  const isRefreshing = memRef || evRef || subRef || deptRef || achRef || auditRef || finRef || comRef;
+  // We only wait for small datasets now
+  const isLoading = evLoading || deptLoading || achLoading || auditLoading || finLoading;
+  const isRefreshing = evRef || deptRef || achRef || auditRef || finRef;
 
   const refreshAll = useCallback(async () => {
     try {

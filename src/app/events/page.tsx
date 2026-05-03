@@ -39,7 +39,7 @@ const EventsContent = async () => {
     location: "UIU Campus",
     description: "Start your journey in visual storytelling with UIUPC. We are looking for passionate individuals to join our creative family.",
     status: 'upcoming',
-    image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1772526242/Artboard_1-100_u1jtvp.jpg"
+    image: "https://images.unsplash.com/photo-1542038784456-1ea8e935640e"
   };
 
   const endedEvent = recentlyEnded[0] || {
@@ -49,7 +49,7 @@ const EventsContent = async () => {
     location: "UIU Multipurpose Hall",
     description: "National Photography Exhibition concluded with grand success.",
     status: 'completed',
-    image: "https://res.cloudinary.com/do0e8p5d2/image/upload/v1763223291/Blog_7_suqqrn.jpg"
+    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32"
   };
 
   return (
