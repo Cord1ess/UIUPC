@@ -26,7 +26,7 @@ export async function GET(
 
   // Security: Rate Limiting
   // Limit to 60 image proxy requests per minute per IP to prevent bandwidth abuse
-  const ip = request.headers.get('x-forwarded-for') || request.ip || 'unknown-ip';
+  const ip = request.headers.get('x-forwarded-for') || (request as any).ip || '127.0.0.1';
   const rateLimitResult = checkRateLimit(ip, 60, 60000);
   
   if (!rateLimitResult.success) {
