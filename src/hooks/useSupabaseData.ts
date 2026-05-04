@@ -22,7 +22,7 @@ interface FetcherResult<T> {
 /**
  * Enhanced fetcher with built-in retry logic (exponential backoff)
  */
-const fetcherWithRetry = async <T>(
+export const fetcherWithRetry = async <T>(
   [table, optionsStr]: [string, string], 
   retryCount = 0
 ): Promise<FetcherResult<T>> => {
@@ -108,7 +108,7 @@ export const useSupabaseData = <T = any>(
       revalidateOnReconnect: true,
       shouldRetryOnError: true,
       errorRetryCount: 3,
-      dedupingInterval: 2000, // Dedup requests within 2 seconds
+      dedupingInterval: 60000, // Serve from cache for 60 seconds (Lightning Fast)
       ...swrConfig
     }
   );

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 /**
  * Google Drive Image Proxy
@@ -21,6 +22,22 @@ export async function GET(
 
   if (!fileId) {
     return NextResponse.json({ error: 'Missing fileId' }, { status: 400 });
+  }
+
+  // Security: Rate Limiting
+  // Limit to 60 image proxy requests per minute per IP to prevent bandwidth abuse
+  const ip = request.headers.get('x-forwarded-for') || request.ip || 'unknown-ip';
+  const rateLimitResult = checkRateLimit(ip, 60, 60000);
+  
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
+  // Security: Validate fileId to prevent SSRF or parameter injection
+  // Google Drive IDs are alphanumeric with dashes and underscores, typically 25-35 chars
+  const driveIdRegex = /^[a-zA-Z0-9_-]{15,40}$/;
+  if (!driveIdRegex.test(fileId)) {
+    return NextResponse.json({ error: 'Invalid file ID format' }, { status: 400 });
   }
 
   try {

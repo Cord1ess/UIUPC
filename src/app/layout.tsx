@@ -1,4 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f9f5ea" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
 import { DM_Sans, Playfair_Display } from "next/font/google";
 import "../styles/index.css";
 
@@ -56,22 +63,33 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import GlobalLoader from "@/components/shared/GlobalLoader";
 import DynamicGrid from "@/components/shared/DynamicGrid";
-import { cookies } from "next/headers";
 import PageTransition from "@/components/layout/PageTransition";
 
 import GlobalPrefetch from "@/components/shared/GlobalPrefetch";
+import ConsoleArt from "@/components/shared/ConsoleArt";
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const theme = cookieStore.get("theme")?.value || "light";
-
   return (
-    <html lang="en" className={`${theme === "dark" ? "dark" : ""} ${dmSans.variable} ${playfairDisplay.variable}`} suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" className={`${dmSans.variable} ${playfairDisplay.variable}`} suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.classList.add('dark')
+                } else {
+                  document.documentElement.classList.remove('dark')
+                }
+              } catch (_) {}
+            `,
+          }}
+        />
+        <ConsoleArt />
         <link rel="preconnect" href="https://wsrv.nl" />
         <link rel="dns-prefetch" href="https://wsrv.nl" />
       </head>

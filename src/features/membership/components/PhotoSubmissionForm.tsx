@@ -59,13 +59,16 @@ const PhotoSubmissionForm = () => {
 
   const handleSinglePhotoUpload = (e: any) => {
     const files = Array.from(e.target.files as FileList);
-    const totalFiles = formData.photos.length + files.length;
-    if (totalFiles > 10) {
-      alert(`Maximum 10 photos allowed. You already have ${formData.photos.length} photos selected.`);
+    const validFiles = files.filter(file => file.type.startsWith("image/"));
+    
+    if (validFiles.length !== files.length) {
+      alert("Only image files are allowed.");
       e.target.value = "";
       return;
     }
-    const oversizedFiles = files.filter((file) => file.size > 10 * 1024 * 1024);
+
+    const totalFiles = formData.photos.length + validFiles.length;
+    const oversizedFiles = validFiles.filter((file) => file.size > 10 * 1024 * 1024);
     if (oversizedFiles.length > 0) {
       alert("Some files exceed 10MB limit. Please resize your images.");
       e.target.value = "";
@@ -73,7 +76,7 @@ const PhotoSubmissionForm = () => {
     }
     setFormData((prev: any) => ({
       ...prev,
-      photos: [...prev.photos, ...files],
+      photos: [...prev.photos, ...validFiles],
     }));
     e.target.value = "";
   };

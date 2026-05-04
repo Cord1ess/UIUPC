@@ -3,8 +3,18 @@
 import { revalidatePath } from 'next/cache';
 import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { createClient } from '@/lib/supabaseServer';
 import { hashPassword, verifyPassword } from '@/lib/password';
 import { Member, CommitteeMember, ExhibitionSubmission } from '@/types/admin';
+
+async function requireAdmin() {
+  const supabaseServer = await createClient();
+  const { data: { user }, error } = await supabaseServer.auth.getUser();
+  if (error || !user) {
+    throw new Error('Unauthorized: Admin access required');
+  }
+}
+
 
 // ─── ADMIN PASSWORD ────────────────────────────────────────────────────────
 
@@ -84,6 +94,7 @@ function validateCommitteeInput(data: Record<string, any>): { valid: boolean; er
 // ─── MEMBERS ───────────────────────────────────────────────────────────────
 
 export async function approveMember(id: string) {
+  await requireAdmin();
   const { error } = await supabase
     .from('members')
     .update({ status: 'approved' })
@@ -95,6 +106,7 @@ export async function approveMember(id: string) {
 }
 
 export async function rejectMember(id: string) {
+  await requireAdmin();
   const { error } = await supabase
     .from('members')
     .update({ status: 'rejected' })
@@ -106,6 +118,7 @@ export async function rejectMember(id: string) {
 }
 
 export async function deleteMember(id: string) {
+  await requireAdmin();
   const { error } = await supabase
     .from('members')
     .delete()
@@ -119,6 +132,7 @@ export async function deleteMember(id: string) {
 // ─── COMMITTEE ────────────────────────────────────────────────────────────
 
 export async function upsertCommitteeMember(data: Partial<CommitteeMember>) {
+  await requireAdmin();
   // Validate input before database operation
   const validation = validateCommitteeInput(data as Record<string, any>);
   if (!validation.valid) {
@@ -158,6 +172,7 @@ export async function upsertCommitteeMember(data: Partial<CommitteeMember>) {
  * Password is validated server-side against the encrypted hash in the database.
  */
 export async function deleteCommitteeMemberSecure(id: string, password: string) {
+  await requireAdmin();
   // Validate password server-side
   const pwResult = await validateAdminPassword(password);
   if (!pwResult.valid) {
@@ -181,6 +196,7 @@ export async function deleteCommitteeMemberSecure(id: string, password: string) 
  * Uses Promise.allSettled for partial success reporting.
  */
 export async function bulkDeleteCommitteeMembersSecure(ids: string[], password: string) {
+  await requireAdmin();
   // Validate password once
   const pwResult = await validateAdminPassword(password);
   if (!pwResult.valid) {
@@ -207,6 +223,7 @@ export async function bulkDeleteCommitteeMembersSecure(ids: string[], password: 
 
 // Keep backward-compatible version (used by other modules)
 export async function deleteCommitteeMember(id: string) {
+  await requireAdmin();
   const { error } = await supabase
     .from('committees')
     .delete()
@@ -220,6 +237,7 @@ export async function deleteCommitteeMember(id: string) {
 // ─── SUBMISSIONS ──────────────────────────────────────────────────────────
 
 export async function updateSubmissionStatus(id: string, status: 'selected' | 'rejected' | 'pending') {
+  await requireAdmin();
   const { error } = await supabase
     .from('exhibition_submissions')
     .update({ status })

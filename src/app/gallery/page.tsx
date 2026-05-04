@@ -8,6 +8,8 @@ export const metadata = {
   description: 'Explore the visual legacy of United International University Photography Club.',
 };
 
+export const revalidate = 3600; // 1 hour ISR
+
 const GalleryPage = () => {
   return (
     <main className="min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] transition-colors duration-500 overflow-x-hidden">

@@ -138,6 +138,10 @@ const JoinPage = () => {
     handleFinalSubmit,
   } = useRegistrationForm(initialFormData, GOOGLE_SCRIPT_URL);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     handleInitialSubmit(e, joinStatus === "enabled");
   };
@@ -151,7 +155,7 @@ const JoinPage = () => {
 
   return (
     <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] transition-colors duration-500 pb-32">
-      <div className="max-w-[1440px] mx-auto px-6 pt-32 md:pt-48 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+      <div className="max-w-[1440px] mx-auto px-6 pt-32 md:pt-48 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
         
         {/* ── LEFT: INTRO & PERKS (50%) ──────────────────────────────── */}
         <div className="flex flex-col justify-start">

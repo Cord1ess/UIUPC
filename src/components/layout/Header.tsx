@@ -8,6 +8,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useLoaderStore } from "@/store/useLoaderStore";
 import { IconSun, IconMoon, IconUsers, IconLayerGroup, IconTrophy, IconBookOpen, IconPaintBrush, IconEnvelope, IconArrowRight, IconBars, IconClose } from "@/components/shared/Icons";
 import myLogo from "@/assets/UIUPC Logo.svg";
+import { preload } from "swr";
+import { fetcherWithRetry } from "@/hooks/useSupabaseData";
 import { motion, AnimatePresence } from "motion/react";
 
 // ─── Types ────────────────────────────────────────────────
@@ -75,6 +77,20 @@ const Header: React.FC = memo(() => {
     }
   };
 
+  const handleHover = useCallback((path: string) => {
+    // Aggressive hover prefetching for "Lightning Fast" responsiveness
+    if (path === "/gallery") {
+      const options = JSON.stringify({ orderDesc: true });
+      preload(["exhibition_submissions", options], fetcherWithRetry);
+    } else if (path === "/events") {
+      const options = JSON.stringify({ orderDesc: true });
+      preload(["events", options], fetcherWithRetry);
+    } else if (path === "/members") {
+      const options = JSON.stringify({ orderDesc: true });
+      preload(["members", options], fetcherWithRetry);
+    }
+  }, []);
+
   return (
     <>
       <header
@@ -111,6 +127,7 @@ const Header: React.FC = memo(() => {
               className={`px-3.5 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-all
                 ${isActive(item.path) ? "text-uiupc-orange bg-uiupc-orange/5" : "text-zinc-500 hover:text-uiupc-orange hover:bg-zinc-50 dark:hover:bg-white/5"}`}
               style={itemDelay(i + 1)}
+              onMouseEnter={() => handleHover(item.path)}
             >
               {item.label}
             </Link>
@@ -179,6 +196,7 @@ const Header: React.FC = memo(() => {
                         ? (isSubActive ? 'bg-zinc-100 border-uiupc-orange text-uiupc-orange' : 'bg-zinc-50 border-black/5 text-zinc-500 hover:border-uiupc-orange/30 hover:text-uiupc-orange') 
                         : (isSubActive ? 'bg-white/10 border-uiupc-orange text-uiupc-orange' : 'bg-white/[0.03] border-white/5 text-zinc-400 hover:border-uiupc-orange/30 hover:text-uiupc-orange')
                       }`}
+                    onMouseEnter={() => handleHover(sub.path)}
                   >
                     <Icon className={`text-xl mb-2 transition-all duration-300 group-hover:scale-110 ${isSubActive ? 'text-uiupc-orange' : 'text-zinc-400 group-hover:text-uiupc-orange'}`} />
                     <span className="text-[9px] font-black uppercase tracking-[0.15em] leading-tight">{sub.label}</span>

@@ -41,11 +41,38 @@ export default function AdminLayout({
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0d0d0d] flex items-center justify-center relative overflow-hidden">
+      <div className="min-h-screen bg-white dark:bg-[#0a0a0a] flex flex-col items-center justify-center relative overflow-hidden isolate">
+        {/* Background Texture */}
         <div className="absolute inset-0 bg-grid-zinc-100/50 dark:bg-grid-white/[0.02] -z-10" />
-        <div className="flex flex-col items-center gap-6">
-           <div className="w-16 h-16 border-4 border-zinc-100 dark:border-zinc-800 border-t-uiupc-orange rounded-full animate-spin" />
-           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">Authenticating...</p>
+        
+        {/* Flare */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-uiupc-orange/5 blur-[120px] rounded-full -z-10" />
+
+        <div className="relative">
+          {/* Cinematic pulse rings */}
+          <motion.div 
+            animate={{ scale: [1, 1.6], opacity: [0.3, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+            className="absolute inset-0 rounded-full border-2 border-uiupc-orange"
+          />
+          <motion.div 
+            animate={{ scale: [1, 1.3], opacity: [0.5, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
+            className="absolute inset-0 rounded-full border-2 border-uiupc-orange"
+          />
+          
+          <div className="relative bg-white dark:bg-zinc-900 w-24 h-24 rounded-full flex items-center justify-center shadow-2xl border border-black/5 dark:border-white/5">
+            <div className="w-12 h-12 border-4 border-zinc-100 dark:border-zinc-800 border-t-uiupc-orange rounded-full animate-spin" />
+          </div>
+        </div>
+
+        <div className="mt-12 text-center space-y-3">
+          <h2 className="text-3xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white leading-none">
+            Authenticating
+          </h2>
+          <p className="text-[10px] font-black uppercase tracking-[0.6em] text-zinc-400">
+            Establishing Secure Session
+          </p>
         </div>
       </div>
     );

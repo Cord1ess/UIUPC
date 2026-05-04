@@ -13,6 +13,8 @@ import EventMapWrapper from '@/features/events/components/EventMapWrapper';
 
 import EventSuspense from '@/features/events/components/EventSuspense';
 
+export const revalidate = 3600; // 1 hour ISR
+
 const EventsPage = () => {
   return (
     <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#121212] transition-colors duration-500 pb-20">

@@ -37,7 +37,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] transition-colors duration-500 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] transition-colors duration-500 flex flex-col items-center justify-start pt-24 md:pt-32 p-6 relative overflow-hidden">
       
       {/* Background Cinematic Flare */}
       <div className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-40">

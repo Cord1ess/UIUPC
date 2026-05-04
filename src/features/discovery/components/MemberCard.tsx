@@ -118,4 +118,4 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, priority = false }) => 
   );
 };
 
-export default MemberCard;
+export default React.memo(MemberCard);

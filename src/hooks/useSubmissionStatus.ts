@@ -29,6 +29,19 @@ export const useSubmissionStatus = (scriptUrl: string, actionName: string): Subm
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        // If the script is just "running" or returning a plain message, we assume it's enabled
+        if (text.includes("Form Handler is running") || text.includes("UIU Photography Club")) {
+          setStatus("enabled");
+          setLoading(false);
+          return;
+        }
+        console.error("Non-JSON response received:", text.substring(0, 100));
+        throw new Error("Server returned non-JSON response. Check your Google Script URL.");
+      }
+
       const result = await response.json();
 
       // Handle multiple possible response structures

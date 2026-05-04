@@ -6,6 +6,7 @@ export const metadata = {
   description: "Meet the visionaries, storytellers, and leaders of the UIU Photography Club community.",
 };
 
+export const revalidate = 3600; // 1 hour ISR
 export default function MembersPage() {
   return <MembersView />;
 }

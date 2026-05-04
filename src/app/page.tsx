@@ -5,6 +5,9 @@ import HomeCarousel from '@/features/home/components/hero/HomeCarousel';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
 import { IconUserPlus, IconArrowRight } from '@/components/shared/Icons';
 
+export const revalidate = 3600; // 1 hour ISR
+
+
 // Phase 2: Dynamic Imports for Below-the-Fold components
 // This drastically reduces the initial JS parsing payload.
 const Milestones = dynamic(() => import('@/features/home/components/Milestones'));

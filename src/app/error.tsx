@@ -54,7 +54,7 @@ export default function Error({
         
         <div className="mt-8 pt-8 border-t border-black/5 dark:border-white/5">
           <p className="text-[9px] font-black uppercase tracking-widest text-zinc-300 dark:text-zinc-700">
-            Error Digest: {error.digest || 'Internal Flux Error'}
+             System Encountered an Error
           </p>
         </div>
       </motion.div>
