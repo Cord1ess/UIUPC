@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { FaCalendarAlt, FaMapMarkerAlt, FaMoneyBillWave, FaClock, FaTrophy, FaArrowLeft, FaPhoneAlt, FaEnvelope, FaUser } from 'react-icons/fa';
+import { IconCalendar, IconMapMarker, IconMoneyBillWave, IconClock, IconTrophy, IconArrowLeft, IconPhone, IconEnvelope, IconUser } from '@/components/shared/Icons';
 import { fetchEventById } from '@/lib/fetchers';
 import { getImageUrl } from '@/utils/imageUrl';
 
@@ -56,7 +56,7 @@ const EventDetailPage = async ({ params }: EventDetailPageProps) => {
       {/* Back Button Overlay */}
       <div className="fixed top-24 left-6 z-50">
         <Link href="/events" className="p-3 rounded-full bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-zinc-900 dark:text-white hover:bg-uiupc-orange hover:text-white transition-all flex items-center justify-center shadow-lg">
-          <FaArrowLeft />
+          <IconArrowLeft size={16} />
         </Link>
       </div>
 
@@ -101,10 +101,10 @@ const EventDetailPage = async ({ params }: EventDetailPageProps) => {
             
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 pt-12 border-t border-black/5 dark:border-white/5">
-              <DetailItem icon={<FaCalendarAlt />} title="Registration Dates" value={data.date} />
-              <DetailItem icon={<FaClock />} title="Event Time" value={data.time || "Full Day Access"} />
-              <DetailItem icon={<FaMapMarkerAlt />} title="Venue" value={data.location} />
-              <DetailItem icon={<FaMoneyBillWave />} title="Entry Fee" value={data.entryFee || "Free Entry"} />
+              <DetailItem icon={<IconCalendar size={20} />} title="Registration Dates" value={data.date} />
+              <DetailItem icon={<IconClock size={20} />} title="Event Time" value={data.time || "Full Day Access"} />
+              <DetailItem icon={<IconMapMarker size={20} />} title="Venue" value={data.location} />
+              <DetailItem icon={<IconMoneyBillWave size={20} />} title="Entry Fee" value={data.entryFee || "Free Entry"} />
             </div>
 
             {/* About Section */}
@@ -120,7 +120,7 @@ const EventDetailPage = async ({ params }: EventDetailPageProps) => {
             {/* Highlights Section */}
             <div className="p-8 md:p-16 bg-[#ffffff] dark:bg-[#050505] rounded-2xl border border-black/5 dark:border-white/5 shadow-[0_20px_80px_rgba(0,0,0,0.03)]">
               <h2 className="text-3xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-12 flex items-center gap-4">
-                <FaTrophy className="text-uiupc-orange text-2xl" /> Curator's Highlights
+                <IconTrophy size={24} className="text-uiupc-orange" /> Curator's Highlights
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                 {data.highlights?.map((item: string, idx: number) => (
@@ -167,9 +167,9 @@ const EventDetailPage = async ({ params }: EventDetailPageProps) => {
                 <div className="h-0.5 w-12 bg-uiupc-orange" />
               </div>
               <div className="space-y-8">
-                <ContactItem icon={<FaUser />} label="Coordinator" value={data.contact?.coordinator} />
-                <ContactItem icon={<FaEnvelope />} label="Email" value={data.contact?.email} href={`mailto:${data.contact?.email}`} />
-                <ContactItem icon={<FaPhoneAlt />} label="Phone" value={data.contact?.phone} href={`tel:${data.contact?.phone}`} />
+                <ContactItem icon={<IconUser size={18} />} label="Coordinator" value={data.contact?.coordinator} />
+                <ContactItem icon={<IconEnvelope size={18} />} label="Email" value={data.contact?.email} href={`mailto:${data.contact?.email}`} />
+                <ContactItem icon={<IconPhone size={18} />} label="Phone" value={data.contact?.phone} href={`tel:${data.contact?.phone}`} />
               </div>
             </div>
           </div>

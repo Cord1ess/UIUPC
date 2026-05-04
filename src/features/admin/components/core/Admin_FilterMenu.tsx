@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
-  FaFilter, 
-  FaChevronDown,
-  FaChevronRight, 
-  FaUniversity, 
-  FaIdCard, 
-  FaSortAlphaDown, 
-  FaLink, 
-  FaCheckCircle,
-  FaArrowUp,
-  FaArrowDown
-} from 'react-icons/fa';
+  IconFilter, 
+  IconChevronDown,
+  IconChevronRight, 
+  IconUniversity, 
+  IconIdCard, 
+  IconSortAlphaDown, 
+  IconLink, 
+  IconCheckCircle,
+  IconArrowUp,
+  IconArrowDown
+} from '@/components/shared/Icons';
 
 interface FilterMenuProps {
   currentDept: string;
@@ -71,31 +71,31 @@ export const Admin_FilterMenu: React.FC<FilterMenuProps> = ({
     { 
       id: 'dept', 
       label: 'University Department', 
-      icon: <FaUniversity />, 
+      icon: <IconUniversity size={14} />, 
       active: currentDept !== 'all',
       options: [{ value: 'all', label: 'All Departments' }, ...departments.map(d => ({ value: d, label: d }))] 
     },
     { 
       id: 'role', 
       label: 'Club Designation', 
-      icon: <FaIdCard />, 
+      icon: <IconIdCard size={14} />, 
       active: currentCategory !== 'all',
       options: categories 
     },
     { 
       id: 'sort', 
       label: 'Alphabetical Sort', 
-      icon: <FaSortAlphaDown />, 
+      icon: <IconSortAlphaDown size={14} />, 
       active: true,
       options: [
-        { value: 'asc', label: 'Ascending (A-Z)', icon: <FaArrowUp /> },
-        { value: 'desc', label: 'Descending (Z-A)', icon: <FaArrowDown /> }
+        { value: 'asc', label: 'Ascending (A-Z)', icon: <IconArrowUp size={10} /> },
+        { value: 'desc', label: 'Descending (Z-A)', icon: <IconArrowDown size={10} /> }
       ]
     },
     { 
       id: 'link', 
       label: 'Identity Link', 
-      icon: <FaLink />, 
+      icon: <IconLink size={14} />, 
       active: currentLink !== 'all',
       options: linkOptions 
     }
@@ -135,7 +135,7 @@ export const Admin_FilterMenu: React.FC<FilterMenuProps> = ({
           </span>
         </div>
         <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isOpen ? 'bg-zinc-100 dark:bg-zinc-800' : ''}`}>
-          <FaChevronDown className={`text-[10px] text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+          <IconChevronDown size={10} className={`text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
         </div>
       </button>
 
@@ -151,6 +151,7 @@ export const Admin_FilterMenu: React.FC<FilterMenuProps> = ({
               {submenus.map((menu) => (
                 <div key={menu.id} className="relative group/item">
                   <button
+                    onClick={() => setActiveSubmenu(activeSubmenu === menu.id ? null : menu.id)}
                     onMouseEnter={() => setActiveSubmenu(menu.id)}
                     className={`w-full flex items-center justify-between px-5 py-4 rounded-xl transition-all ${activeSubmenu === menu.id ? 'bg-zinc-50 dark:bg-zinc-900/50 text-uiupc-orange' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'}`}
                   >
@@ -162,17 +163,17 @@ export const Admin_FilterMenu: React.FC<FilterMenuProps> = ({
                     </div>
                     <div className="flex items-center gap-3">
                       {menu.active && menu.id !== 'sort' && <div className="w-1.5 h-1.5 rounded-full bg-uiupc-orange shadow-sm" />}
-                      <FaChevronRight className="text-[8px] text-zinc-300" />
+                      <IconChevronRight size={8} className="text-zinc-300" />
                     </div>
                   </button>
 
                   <AnimatePresence>
                     {activeSubmenu === menu.id && (
                       <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
-                        className="absolute left-full top-0 ml-2 w-64 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-xl shadow-2xl z-[301] p-3 max-h-[400px] overflow-y-auto no-scrollbar backdrop-blur-xl"
+                        initial={{ opacity: 0, x: -10, y: 10 }}
+                        animate={{ opacity: 1, x: 0, y: 0 }}
+                        exit={{ opacity: 0, x: -10, y: 10 }}
+                        className="absolute left-0 sm:left-full top-full sm:top-0 mt-2 sm:mt-0 sm:ml-2 w-full sm:w-64 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl z-[301] p-3 max-h-[400px] overflow-y-auto no-scrollbar backdrop-blur-xl"
                       >
                         {menu.options.map((opt: any) => {
                           const isSelected = 
@@ -191,7 +192,7 @@ export const Admin_FilterMenu: React.FC<FilterMenuProps> = ({
                                 {opt.icon && <span className="text-[10px] opacity-70">{opt.icon}</span>}
                                 <span className="text-[9px] font-black uppercase tracking-widest truncate">{opt.label}</span>
                               </div>
-                              {isSelected && <FaCheckCircle className="text-[10px] shrink-0" />}
+                              {isSelected && <IconCheckCircle size={10} className="shrink-0" />}
                             </button>
                           );
                         })}

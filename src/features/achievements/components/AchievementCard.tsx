@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Achievement } from "@/lib/fetchers";
-import { FaTrophy, FaCalendarAlt, FaTag } from "react-icons/fa";
+import { IconTrophy, IconCalendar, IconTag } from "@/components/shared/Icons";
 
 interface AchievementCardProps {
   achievement: Achievement;
@@ -49,7 +49,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({ achievement, index })
       <div className="w-full lg:w-1/2 space-y-6 lg:px-4">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 px-4 py-2 bg-uiupc-orange/10 rounded-xl">
-             <FaCalendarAlt className="text-uiupc-orange text-xs" />
+             <IconCalendar size={12} className="text-uiupc-orange" />
              <span className="text-uiupc-orange text-[10px] font-black uppercase tracking-widest">
                 {achievement.year} Collection
              </span>

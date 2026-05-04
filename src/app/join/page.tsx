@@ -1,31 +1,31 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
-  FaUser,
-  FaEnvelope,
-  FaIdCard,
-  FaUniversity,
-  FaPhone,
-  FaCamera,
-  FaPaperPlane,
-  FaCheck,
-  FaExclamationTriangle,
-  FaSpinner,
-  FaTrophy,
-  FaHandshake,
-  FaCameraRetro,
-  FaMoneyBillWave,
-  FaCreditCard,
-  FaFacebook,
-  FaArrowRight,
-  FaHistory,
-  FaStar,
-  FaTint,
-  FaChevronDown,
-  FaInfoCircle,
-} from "react-icons/fa";
+  IconUser,
+  IconEnvelope,
+  IconIdCard,
+  IconUniversity,
+  IconPhone,
+  IconCamera,
+  IconPaperPlane,
+  IconCheck,
+  IconExclamationTriangle,
+  IconSpinner,
+  IconTrophy,
+  IconHandshake,
+  IconCameraRetro,
+  IconMoneyBillWave,
+  IconCreditCard,
+  IconFacebook,
+  IconArrowRight,
+  IconHistory,
+  IconStar,
+  IconTint,
+  IconChevronDown,
+  IconInfo,
+} from "@/components/shared/Icons";
 import { useSubmissionStatus } from "@/hooks/useSubmissionStatus";
 import { useRegistrationForm } from "@/hooks/useRegistrationForm";
 import ScrollRevealText from "@/components/motion/ScrollRevealText";
@@ -70,7 +70,7 @@ const EditorialSelect = ({ label, value, options, onChange, placeholder }: {
         <span className={`font-bold transition-colors ${value ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'}`}>
           {value || placeholder}
         </span>
-        <FaChevronDown className={`text-[10px] text-zinc-300 transition-transform duration-300 ${isOpen ? 'rotate-180 text-uiupc-orange' : ''}`} />
+        <IconChevronDown size={10} className={`text-zinc-300 transition-transform duration-300 ${isOpen ? 'rotate-180 text-uiupc-orange' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -143,10 +143,10 @@ const JoinPage = () => {
   };
 
   const benefits = [
-    { icon: <FaStar />, title: "Workshops", desc: "Master the craft with industry visionaries." },
-    { icon: <FaCameraRetro />, title: "Photo Walks", desc: "Explore hidden perspectives in high resolution." },
-    { icon: <FaTrophy />, title: "Exhibit", desc: "Showcase your vision in our premium galleries." },
-    { icon: <FaHandshake />, title: "Network", desc: "Join a community that speaks your language." },
+    { icon: <IconStar size={14} />, title: "Workshops", desc: "Master the craft with industry visionaries." },
+    { icon: <IconCameraRetro size={14} />, title: "Photo Walks", desc: "Explore hidden perspectives in high resolution." },
+    { icon: <IconTrophy size={14} />, title: "Exhibit", desc: "Showcase your vision in our premium galleries." },
+    { icon: <IconHandshake size={14} />, title: "Network", desc: "Join a community that speaks your language." },
   ];
 
   return (
@@ -218,7 +218,7 @@ const JoinPage = () => {
 
              {submitStatus === "error" && (
                 <div className="mb-10 p-6 bg-red-500/10 rounded-2xl border border-red-500/20 flex items-center gap-4 text-red-500 text-xs font-bold uppercase tracking-widest">
-                  <FaExclamationTriangle className="shrink-0" />
+                  <IconExclamationTriangle size={14} className="shrink-0" />
                   <span>{submitMessage}</span>
                 </div>
              )}
@@ -308,7 +308,7 @@ const JoinPage = () => {
                    <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">
                       <div className="flex items-center gap-2 group relative">
                         <span>04. Membership Fee</span>
-                        <FaInfoCircle className="text-zinc-300 hover:text-uiupc-orange transition-colors cursor-help" />
+                        <IconInfo size={14} className="text-zinc-300 hover:text-uiupc-orange transition-colors cursor-help" />
                         
                         {/* Tooltip */}
                         <div className="absolute left-0 bottom-full mb-4 w-64 p-5 bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/10 rounded-2xl shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all z-50">
@@ -327,17 +327,17 @@ const JoinPage = () => {
                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                      <button type="button" onClick={() => handlePaymentMethodChange("cash")} className={`flex items-center justify-between p-6 rounded-2xl border transition-all ${formData.paymentMethod === "cash" ? 'bg-uiupc-orange/5 border-uiupc-orange text-uiupc-orange' : 'bg-transparent border-black/5 dark:border-white/5 text-zinc-500 hover:border-zinc-300'}`}>
                         <div className="flex items-center gap-4">
-                          <FaMoneyBillWave className="text-xl" />
+                          <IconMoneyBillWave size={20} />
                           <span className="text-[10px] font-black uppercase tracking-widest">Cash</span>
                         </div>
-                        {formData.paymentMethod === "cash" && <FaCheck className="text-[10px]" />}
+                        {formData.paymentMethod === "cash" && <IconCheck size={10} />}
                      </button>
                      <button type="button" onClick={() => handlePaymentMethodChange("online")} className={`flex items-center justify-between p-6 rounded-2xl border transition-all ${formData.paymentMethod === "online" ? 'bg-uiupc-orange/5 border-uiupc-orange text-uiupc-orange' : 'bg-transparent border-black/5 dark:border-white/5 text-zinc-500 hover:border-zinc-300'}`}>
                         <div className="flex items-center gap-4">
-                          <FaCreditCard className="text-xl" />
+                          <IconCreditCard size={20} />
                           <span className="text-[10px] font-black uppercase tracking-widest">Online</span>
                         </div>
-                        {formData.paymentMethod === "online" && <FaCheck className="text-[10px]" />}
+                        {formData.paymentMethod === "online" && <IconCheck size={10} />}
                      </button>
                    </div>
 
@@ -366,7 +366,7 @@ const JoinPage = () => {
                      <span className="text-[11px] font-black uppercase tracking-[0.4em]">
                         {isSubmitting ? "Processing..." : "Finish Identity"}
                      </span>
-                     {isSubmitting ? <FaSpinner className="animate-spin" /> : <FaArrowRight className="text-xs group-hover:translate-x-2 transition-transform" />}
+                     {isSubmitting ? <IconSpinner size={14} className="animate-spin" /> : <IconArrowRight size={12} className="group-hover:translate-x-2 transition-transform" />}
                    </button>
                 </div>
              </form>
@@ -380,7 +380,7 @@ const JoinPage = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[5000] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-xl">
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-2xl p-10 md:p-14 shadow-2xl relative overflow-hidden">
                <div className="absolute top-0 right-0 p-12 opacity-5">
-                 <FaHistory className="text-9xl" />
+                 <IconHistory size={90} />
                </div>
                <h3 className="text-3xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white mb-6">Agreement</h3>
                <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mb-10 font-bold uppercase tracking-tight">
@@ -389,7 +389,7 @@ const JoinPage = () => {
                
                <label className="flex items-center gap-4 cursor-pointer group mb-12">
                  <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${agreementAccepted ? 'bg-uiupc-orange border-uiupc-orange' : 'border-zinc-300 dark:border-zinc-700'}`}>
-                   {agreementAccepted && <FaCheck className="text-[10px] text-white" />}
+                   {agreementAccepted && <IconCheck size={10} className="text-white" />}
                    <input type="checkbox" className="hidden" checked={agreementAccepted} onChange={(e) => setAgreementAccepted(e.target.checked)} />
                  </div>
                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-white">I accept the terms</span>
@@ -407,7 +407,7 @@ const JoinPage = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[5000] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-xl">
              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl p-14 text-center shadow-2xl">
                 <div className="w-20 h-20 bg-uiupc-orange rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
-                  <FaCheck className="text-3xl text-white" />
+                  <IconCheck size={30} className="text-white" />
                 </div>
                 <h3 className="text-3xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white mb-4">Identity Sent</h3>
                 <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mb-10 leading-relaxed">Our curation team will review your mission and reach out shortly.</p>

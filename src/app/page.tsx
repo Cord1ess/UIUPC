@@ -3,7 +3,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import HomeCarousel from '@/features/home/components/hero/HomeCarousel';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
-import { FaUserPlus, FaArrowRight } from 'react-icons/fa';
+import { IconUserPlus, IconArrowRight } from '@/components/shared/Icons';
 
 // Phase 2: Dynamic Imports for Below-the-Fold components
 // This drastically reduces the initial JS parsing payload.
@@ -64,7 +64,7 @@ const Home = () => {
                 className="inline-flex items-center gap-4 px-12 py-5 bg-uiupc-orange text-white font-black uppercase tracking-widest rounded-full transition-all hover:scale-105 shadow-xl hover:shadow-uiupc-orange/20 relative z-10"
               >
                 <span>VIEW ALL EVENTS</span>
-                <FaArrowRight className="text-xl" />
+                <IconArrowRight size={20} />
               </Link>
             </div>
           </div>
@@ -109,7 +109,7 @@ const Home = () => {
                 className="inline-flex items-center gap-4 px-12 py-5 bg-uiupc-orange text-white font-black uppercase tracking-widest rounded-full transition-all hover:scale-105 shadow-xl hover:shadow-uiupc-orange/20 relative z-10"
               >
                 <span>BECOME A MEMBER</span>
-                <FaUserPlus className="text-xl" />
+                <IconUserPlus size={20} />
               </Link>
             </div>
           </div>

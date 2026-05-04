@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaFilePdf, FaCheckCircle, FaDownload, FaFileImage } from "react-icons/fa";
-import jsPDF from "jspdf";
+import { IconFilePdf, IconCheckCircle, IconDownload, IconFileImage } from "@/components/shared/Icons";
+
 import { bakeImageToCanvas } from "@/lib/bakeEngine";
 
 const PdfTool: React.FC = () => {
@@ -14,7 +14,7 @@ const PdfTool: React.FC = () => {
   if (images.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-50">
-        <FaFilePdf className="text-4xl text-zinc-500" />
+        <IconFilePdf size={40} className="text-zinc-500" />
         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
           No images in your Studio loop.
         </p>
@@ -25,6 +25,7 @@ const PdfTool: React.FC = () => {
   const handleApply = async () => {
     setIsProcessing(true);
     try {
+      const jsPDF = (await import("jspdf")).default;
       const pdf = new jsPDF({
         orientation: "portrait", 
         unit: "px",
@@ -76,7 +77,7 @@ const PdfTool: React.FC = () => {
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-3 text-zinc-400">
-         <FaFilePdf className="text-uiupc-orange" />
+         <IconFilePdf size={16} className="text-uiupc-orange" />
          <span className="text-[10px] font-black uppercase tracking-[0.2em]">PDF Document Compiler</span>
       </div>
 
@@ -96,7 +97,7 @@ const PdfTool: React.FC = () => {
                  ? "bg-zinc-900 dark:bg-white text-white dark:text-black border-zinc-900 dark:border-white" 
                  : "bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 text-zinc-500 hover:text-zinc-600"}`}
            >
-             <FaFileImage /> A4 (Padded)
+             <IconFileImage size={12} /> A4 (Padded)
            </button>
            <button
              onClick={() => setFormat("original")}
@@ -120,7 +121,7 @@ const PdfTool: React.FC = () => {
         disabled={isProcessing}
         className="w-full py-5 rounded-2xl bg-red-500 text-white text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50 flex items-center justify-center gap-3"
       >
-        {isProcessing ? "Compiling Document..." : <><FaDownload /> Download PDF</>}
+        {isProcessing ? "Compiling Document..." : <><IconDownload size={14} /> Download PDF</>}
       </button>
     </div>
   );

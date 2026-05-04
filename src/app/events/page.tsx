@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { FaTrophy, FaEye, FaArrowRight, FaCalendarAlt, FaMapMarkerAlt, FaHistory, FaStar } from 'react-icons/fa';
+import { IconTrophy, IconEye, IconArrowRight, IconCalendar, IconMapMarker, IconHistory, IconStar } from '@/components/shared/Icons';
 import { fetchAllEvents } from '@/lib/fetchers';
 import { getImageUrl } from '@/utils/imageUrl';
 import CountdownTimer from '@/components/shared/CountdownTimer';
@@ -100,10 +100,10 @@ const EventsContent = async () => {
               />
               <div className="flex flex-wrap justify-center md:justify-start gap-4 mb-8">
                 <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                  <FaCalendarAlt className="text-uiupc-orange" /> {flagship.date}
+                   <IconCalendar size={12} className="text-uiupc-orange" /> {flagship.date}
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                  <FaMapMarkerAlt className="text-uiupc-orange" /> {flagship.location || 'UIU Campus'}
+                   <IconMapMarker size={12} className="text-uiupc-orange" /> {flagship.location || 'UIU Campus'}
                 </div>
               </div>
               
@@ -112,7 +112,7 @@ const EventsContent = async () => {
               </div>
 
               <Link href={`/events/${flagship.id}`} className="px-12 py-5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-uiupc-orange dark:hover:bg-uiupc-orange hover:text-white dark:hover:text-white transition-all shadow-xl group/btn active:scale-95 w-max">
-                Register for Event <FaArrowRight className="inline ml-3 group-hover/btn:translate-x-2 transition-transform" />
+                Register for Event <IconArrowRight size={14} className="inline ml-3 group-hover/btn:translate-x-2 transition-transform" />
               </Link>
             </div>
           </div>
@@ -131,7 +131,7 @@ const EventsContent = async () => {
               />
             </div>
             <Link href="/results" className="group flex items-center gap-4 text-[11px] font-black uppercase tracking-widest text-zinc-500 hover:text-uiupc-orange transition-all">
-              <FaTrophy className="text-uiupc-orange" /> Browse Event Results
+              <IconTrophy size={14} className="text-uiupc-orange" /> Browse Event Results
             </Link>
           </div>
 
@@ -192,7 +192,7 @@ const EventsContent = async () => {
             ))}
             {archive.length === 0 && (
               <div className="lg:col-span-3 text-center py-24 border-2 border-dashed border-zinc-200 dark:border-white/10 rounded-[2.5rem]">
-                <FaHistory className="text-5xl text-zinc-200 dark:text-zinc-800 mx-auto mb-6" />
+                 <IconHistory size={48} className="text-zinc-200 dark:text-zinc-800 mx-auto mb-6" />
                 <p className="text-zinc-400 dark:text-zinc-500 font-black uppercase text-[10px] tracking-[0.3em]">
                   The Archival Vault is being indexed.
                 </p>
@@ -226,17 +226,17 @@ const EventCard = ({ event }: { event: any }) => (
       </h3>
       <div className="flex flex-col gap-3 mb-8">
         <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-          <FaCalendarAlt className="text-uiupc-orange/40" /> {event.date}
+           <IconCalendar size={10} className="text-uiupc-orange/40" /> {event.date}
         </div>
         <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-          <FaMapMarkerAlt className="text-uiupc-orange/40" /> {event.location || 'UIU'}
+           <IconMapMarker size={10} className="text-uiupc-orange/40" /> {event.location || 'UIU'}
         </div>
       </div>
       <div className="mt-auto pt-8 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-uiupc-orange group-hover:translate-x-3 transition-transform">
           Detailed Archive
         </span>
-        <FaArrowRight className="text-uiupc-orange" />
+         <IconArrowRight size={14} className="text-uiupc-orange" />
       </div>
     </div>
   </Link>

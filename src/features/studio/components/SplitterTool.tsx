@@ -2,8 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaTh, FaCheckCircle, FaDownload, FaColumns, FaGripHorizontal } from "react-icons/fa";
-import JSZip from "jszip";
+import { IconTh, IconCheckCircle, IconDownload, IconColumns, IconGripHorizontal } from "@/components/shared/Icons";
 import { bakeImageToCanvas } from "@/lib/bakeEngine";
 
 const PRESET_GRIDS = [
@@ -43,6 +42,7 @@ const SplitterTool: React.FC = () => {
             const slices: { x: number, y: number, blob: Blob }[] = e.data.slices;
             
             // Build ZIP
+            const JSZip = (await import("jszip")).default;
             const zip = new JSZip();
             const folder = zip.folder(`split_${activeImage.file.name}`);
             
@@ -107,7 +107,7 @@ const SplitterTool: React.FC = () => {
          {/* Custom Sliders */}
          <div className="space-y-4">
             <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-               <span className="flex items-center gap-2"><FaColumns /> Columns (X)</span>
+               <span className="flex items-center gap-2"><IconColumns size={10} /> Columns (X)</span>
                <span className="text-uiupc-orange text-xs">{cols}</span>
             </div>
             <input 
@@ -120,7 +120,7 @@ const SplitterTool: React.FC = () => {
 
          <div className="space-y-4">
             <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-               <span className="flex items-center gap-2"><FaGripHorizontal /> Rows (Y)</span>
+               <span className="flex items-center gap-2"><IconGripHorizontal size={10} /> Rows (Y)</span>
                <span className="text-uiupc-orange text-xs">{rows}</span>
             </div>
             <input 
@@ -143,7 +143,7 @@ const SplitterTool: React.FC = () => {
         disabled={isProcessing}
         className="w-full py-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3"
       >
-        {isProcessing ? "Zipping Matrix..." : <><FaDownload /> Extract ZIP Payload</>}
+        {isProcessing ? "Zipping Matrix..." : <><IconDownload size={14} /> Extract ZIP Payload</>}
       </button>
     </div>
   );

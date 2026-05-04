@@ -3,8 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa';
+import { motion } from 'motion/react';
+import { IconCalendar, IconMapMarker, IconArrowRight } from '@/components/shared/Icons';
 import { getImageUrl } from '@/utils/imageUrl';
 import CountdownTimer from '@/components/shared/CountdownTimer';
 
@@ -57,10 +57,10 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
           
           <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-8">
             <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-              <FaCalendarAlt className="text-uiupc-orange" /> {new Date(flagship.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              <IconCalendar size={12} className="text-uiupc-orange" /> {new Date(flagship.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
             <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-              <FaMapMarkerAlt className="text-uiupc-orange" /> {flagship.location || 'UIU Campus'}
+              <IconMapMarker size={12} className="text-uiupc-orange" /> {flagship.location || 'UIU Campus'}
             </div>
           </div>
           
@@ -73,7 +73,7 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
             className="inline-flex items-center gap-4 px-10 py-5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-uiupc-orange dark:hover:bg-uiupc-orange hover:text-white dark:hover:text-white transition-all shadow-xl group/btn active:scale-95 w-max mx-auto lg:mx-0"
           >
             <span>Register for Event</span>
-            <FaArrowRight className="group-hover/btn:translate-x-2 transition-transform" />
+            <IconArrowRight size={12} className="group-hover/btn:translate-x-2 transition-transform" />
           </Link>
         </div>
       </motion.div>

@@ -2,15 +2,15 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "motion/react";
 import {
-  FaTrophy,
-  FaArrowLeft,
-  FaCamera,
-  FaImages,
-  FaSearch,
-  FaChevronRight,
-} from "react-icons/fa";
+  IconTrophy,
+  IconArrowLeft,
+  IconCamera,
+  IconImages,
+  IconSearch,
+  IconChevronRight,
+} from "@/components/shared/Icons";
 import GlobalLoader from "@/components/shared/GlobalLoader";
 import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
@@ -155,7 +155,7 @@ const ResultsView = () => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start justify-between gap-12">
             <div className="flex-1 space-y-8">
                 <div className="flex items-center gap-3">
-                    <FaTrophy className="text-uiupc-orange text-2xl" />
+                    <IconTrophy size={24} className="text-uiupc-orange" />
                     <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">Award Recipients</span>
                 </div>
                 <ScrollRevealText 
@@ -170,7 +170,7 @@ const ResultsView = () => {
                   onClick={() => router.push("/events")}
                   className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-uiupc-orange transition-colors"
                 >
-                  <FaArrowLeft /> Back to Events
+                  <IconArrowLeft size={12} /> Back to Events
                 </button>
             </div>
 
@@ -189,7 +189,7 @@ const ResultsView = () => {
                 `}
             >
                 <div className="relative group border-b border-black/5 dark:border-white/5">
-                    <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 transition-colors group-focus-within:text-uiupc-orange" />
+                    <IconSearch size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 transition-colors group-focus-within:text-uiupc-orange" />
                     <input 
                         type="text"
                         placeholder="Search Name or Institute"
@@ -203,8 +203,8 @@ const ResultsView = () => {
                     <span className="shrink-0 text-[10px] font-black uppercase tracking-widest text-zinc-400 mr-6">Filter:</span>
                     <div className="flex gap-8 py-2">
                         {[
-                            { id: 'single', name: 'Single', icon: FaCamera },
-                            { id: 'stories', name: 'Stories', icon: FaImages }
+                            { id: 'single', name: 'Single', icon: IconCamera },
+                            { id: 'stories', name: 'Stories', icon: IconImages }
                         ].map(cat => (
                             <button
                                 key={cat.id}
@@ -216,7 +216,7 @@ const ResultsView = () => {
                                         ? 'text-uiupc-orange' 
                                         : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
                                 }`}>
-                                    <cat.icon className="text-xs" />
+                                    <cat.icon size={12} />
                                     {cat.name}
                                 </span>
                                 {selectedCategory === cat.id && (
@@ -287,7 +287,7 @@ const ResultsView = () => {
                                     `}>
                                         {item.selected ? "Selected" : "Archived"}
                                     </span>
-                                    <FaChevronRight className="text-zinc-200 dark:text-zinc-800 group-hover:translate-x-1 transition-transform" />
+                                    <IconChevronRight size={12} className="text-zinc-200 dark:text-zinc-800 group-hover:translate-x-1 transition-transform" />
                                 </div>
                             </div>
                         </motion.div>
@@ -297,7 +297,7 @@ const ResultsView = () => {
                 {displayResults.length === 0 && (
                     <div className="py-24 text-center space-y-4">
                          <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center mx-auto">
-                            <FaSearch className="text-zinc-400" />
+                             <IconSearch size={24} className="text-zinc-400" />
                          </div>
                          <h4 className="text-2xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white">No matches found</h4>
                          <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Global search of "{searchQuery}" returned zero entries.</p>

@@ -3,17 +3,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useStudioStore, StudioImage } from "@/store/useStudioStore";
 import { 
-  FaSun, 
-  FaAdjust, 
-  FaTint, 
-  FaMagic, 
-  FaUndo, 
-  FaCheckCircle,
-  FaThermometerHalf,
-  FaEyeDropper,
-  FaImage,
-  FaFire
-} from "react-icons/fa";
+  IconSun, 
+  IconAdjust, 
+  IconTint, 
+  IconMagic, 
+  IconUndo, 
+  IconCheckCircle,
+  IconThermometerHalf,
+  IconEyeDropper,
+  IconImage,
+  IconFire
+} from "@/components/shared/Icons";
 import { WorkerMessage } from "@/workers/imageWorker";
 
 const PRESETS = [
@@ -119,7 +119,7 @@ const EditorialTool: React.FC = () => {
       <div className="space-y-8">
         <div className="flex items-center justify-between">
            <div className="flex items-center gap-3 text-zinc-400">
-              <FaMagic className="text-uiupc-orange" />
+              <IconMagic size={16} className="text-uiupc-orange" />
               <span className="text-[10px] font-black uppercase tracking-[0.2em]">Color Engine</span>
            </div>
            
@@ -128,29 +128,29 @@ const EditorialTool: React.FC = () => {
              onClick={() => handleUpdate(NONE_PRESET)}
              className="text-zinc-500 hover:text-uiupc-orange transition-colors"
            >
-             <FaUndo size={12} />
+             <IconUndo size={12} />
            </button>
         </div>
 
         {/* Color Tones */}
-        {renderSlider("Exposure", <FaSun />, "exposure", -100, 100)}
-        {renderSlider("Contrast", <FaAdjust />, "contrast", -100, 100)}
-        {renderSlider("Saturation", <FaTint />, "saturation", 0, 200, "%")}
-        {renderSlider("Vibrance", <FaMagic />, "vibrance", -100, 100, "%")}
-        {renderSlider("Temperature", <FaThermometerHalf />, "temperature", -100, 100)}
-        {renderSlider("Hue Shift", <FaEyeDropper />, "hueRotate", -180, 180, "°")}
+        {renderSlider("Exposure", <IconSun />, "exposure", -100, 100)}
+        {renderSlider("Contrast", <IconAdjust />, "contrast", -100, 100)}
+        {renderSlider("Saturation", <IconTint />, "saturation", 0, 200, "%")}
+        {renderSlider("Vibrance", <IconMagic />, "vibrance", -100, 100, "%")}
+        {renderSlider("Temperature", <IconThermometerHalf />, "temperature", -100, 100)}
+        {renderSlider("Hue Shift", <IconEyeDropper />, "hueRotate", -180, 180, "°")}
         
         {/* Stylistic */}
         <div className="pt-4 border-t border-black/5 dark:border-white/5 space-y-8">
           <div className="flex items-center gap-3 text-zinc-400">
-             <FaFire className="text-uiupc-orange" />
+             <IconFire size={16} className="text-uiupc-orange" />
              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Stylistic</span>
           </div>
-          {renderSlider("Sepia", <FaThermometerHalf />, "sepia", 0, 100, "%")}
-          {renderSlider("Sharpen", <FaMagic />, "sharpen", 0, 100, "%")}
-          {renderSlider("Vignette", <FaAdjust className="rotate-90" />, "vignette", 0, 100, "%")}
-          {renderSlider("Invert", <FaAdjust className="rotate-180" />, "invert", 0, 100, "%")}
-          {renderSlider("Blur", <FaImage />, "blur", 0, 20, "px")}
+          {renderSlider("Sepia", <IconThermometerHalf />, "sepia", 0, 100, "%")}
+          {renderSlider("Sharpen", <IconMagic />, "sharpen", 0, 100, "%")}
+          {renderSlider("Vignette", <IconAdjust className="rotate-90" />, "vignette", 0, 100, "%")}
+          {renderSlider("Invert", <IconAdjust className="rotate-180" />, "invert", 0, 100, "%")}
+          {renderSlider("Blur", <IconImage />, "blur", 0, 20, "px")}
         </div>
 
         {/* LUT Presets */}
@@ -181,7 +181,7 @@ const EditorialTool: React.FC = () => {
         disabled={isProcessing}
         className="w-full py-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3"
       >
-        {isProcessing ? "Processing..." : <><FaCheckCircle /> Apply Adjustments</>}
+        {isProcessing ? "Processing..." : <><IconCheckCircle size={14} /> Apply Adjustments</>}
       </button>
     </div>
   );

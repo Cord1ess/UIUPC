@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useStudioStore, StudioImage } from "@/store/useStudioStore";
 import { 
-  FaStamp,
-  FaCheckCircle,
-  FaImage,
-  FaTh
-} from "react-icons/fa";
+  IconStamp,
+  IconCheckCircle,
+  IconImage,
+  IconTh
+} from "@/components/shared/Icons";
 import { WorkerMessage } from "@/workers/imageWorker";
 
 const TransformerTool: React.FC = () => {
@@ -100,7 +100,7 @@ const TransformerTool: React.FC = () => {
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-3 text-zinc-400">
-         <FaStamp className="text-uiupc-orange" />
+         <IconStamp size={16} className="text-uiupc-orange" />
          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Watermark Engine</span>
       </div>
 
@@ -120,7 +120,7 @@ const TransformerTool: React.FC = () => {
         })}
         className="w-full py-4 rounded-xl bg-uiupc-orange/10 border border-uiupc-orange/30 text-uiupc-orange text-[10px] font-black uppercase tracking-[0.2em] hover:bg-uiupc-orange hover:text-white transition-all flex items-center justify-center gap-3 group"
       >
-        <FaStamp className="group-hover:rotate-12 transition-transform" />
+        <IconStamp size={12} className="group-hover:rotate-12 transition-transform" />
         One-Click UIUPC Branding
       </button>
 
@@ -178,7 +178,7 @@ const TransformerTool: React.FC = () => {
              onClick={() => fileInputRef.current?.click()}
              className="w-full p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-dashed border-zinc-500/30 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:border-uiupc-orange hover:text-uiupc-orange transition-all flex items-center justify-center gap-2"
            >
-             <FaImage /> {transformer.watermark.imageUri ? "Change Logo File" : "Upload Logo (PNG/SVG)"}
+             <IconImage size={12} /> {transformer.watermark.imageUri ? "Change Logo File" : "Upload Logo (PNG/SVG)"}
            </button>
            {transformer.watermark.imageUri && (
              <img src={transformer.watermark.imageUri} className="h-10 object-contain mx-auto opacity-50" />
@@ -224,7 +224,7 @@ const TransformerTool: React.FC = () => {
                    : 'bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 text-zinc-400'}`}
                title="Tile across image"
             >
-               <FaTh />
+               <IconTh size={16} />
             </button>
          </div>
 
@@ -267,7 +267,7 @@ const TransformerTool: React.FC = () => {
         disabled={isProcessing || (!transformer.watermark.text && transformer.watermark.type === "text") || (!transformer.watermark.imageUri && transformer.watermark.type === "image")}
         className="w-full py-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3"
       >
-        {isProcessing ? "Burning Watermark..." : <><FaCheckCircle /> Apply Watermark</>}
+        {isProcessing ? "Burning Watermark..." : <><IconCheckCircle size={14} /> Apply Watermark</>}
       </button>
     </div>
   );

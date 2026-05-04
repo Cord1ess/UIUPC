@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
-  FaEnvelope, 
-  FaSync, 
-  FaCheckCircle, 
-  FaExclamationCircle, 
-  FaPenNib, 
-  FaTimes,
-  FaUserCircle,
-  FaPaperPlane,
-  FaFileSignature,
-  FaInfoCircle
-} from 'react-icons/fa';
+  IconEnvelope, 
+  IconSync, 
+  IconCheckCircle, 
+  IconExclamationCircle, 
+  IconPenNib, 
+  IconClose,
+  IconUserCircle,
+  IconPaperPlane,
+  IconFileSignature,
+  IconInfo
+} from '@/components/shared/Icons';
 import { getProperty } from '@/utils/adminHelpers';
 
 interface Admin_EmailModalProps {
@@ -58,7 +58,7 @@ export const Admin_EmailModal: React.FC<Admin_EmailModalProps> = ({
               </div>
               <div className="relative z-10 text-center space-y-8">
                 <div className="w-32 h-32 bg-white dark:bg-zinc-800 rounded-[2.5rem] shadow-2xl flex items-center justify-center text-5xl text-uiupc-orange mx-auto group">
-                   <FaEnvelope className="group-hover:scale-110 transition-transform duration-500" />
+                   <IconEnvelope size={64} className="group-hover:scale-110 transition-transform duration-500" />
                 </div>
                 <div className="space-y-3">
                    <h4 className="text-2xl font-black uppercase tracking-tighter dark:text-white">Email</h4>
@@ -66,7 +66,7 @@ export const Admin_EmailModal: React.FC<Admin_EmailModalProps> = ({
                 </div>
                 <div className="pt-8 space-y-4">
                    <div className="p-4 bg-white dark:bg-zinc-800 rounded-2xl border border-black/5 dark:border-white/5 flex items-center gap-4 text-left">
-                      <FaUserCircle className="text-uiupc-orange text-2xl shrink-0" />
+                      <IconUserCircle size={24} className="text-uiupc-orange shrink-0" />
                       <div className="min-w-0">
                          <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Recipient</p>
                          <p className="text-[11px] font-bold dark:text-white truncate">{recipientName}</p>
@@ -84,7 +84,7 @@ export const Admin_EmailModal: React.FC<Admin_EmailModalProps> = ({
                   <h3 className="text-4xl font-black uppercase tracking-tighter dark:text-white">Send Email</h3>
                 </div>
                 <button onClick={onClose} className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-zinc-400 hover:text-red-500 transition-all flex items-center justify-center group">
-                  <FaTimes className="group-hover:rotate-90 transition-transform" />
+                  <IconClose size={16} className="group-hover:rotate-90 transition-transform" />
                 </button>
               </div>
 
@@ -92,7 +92,7 @@ export const Admin_EmailModal: React.FC<Admin_EmailModalProps> = ({
                 {/* Template Grid */}
                 <div className="space-y-6">
                   <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
-                    <FaSync /> Templates
+                    <IconSync size={12} /> Templates
                   </h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <button 
@@ -101,7 +101,7 @@ export const Admin_EmailModal: React.FC<Admin_EmailModalProps> = ({
                       className="p-6 text-left rounded-[2rem] bg-zinc-50 dark:bg-zinc-900 border border-black/5 dark:border-white/5 hover:border-uiupc-orange/30 transition-all group relative overflow-hidden"
                     >
                       <div className="relative z-10 space-y-3">
-                         <FaCheckCircle className="text-uiupc-orange text-xl" />
+                         <IconCheckCircle size={20} className="text-uiupc-orange" />
                          <h6 className="text-[11px] font-black uppercase tracking-widest dark:text-white group-hover:text-uiupc-orange transition-colors">Confirmation Email</h6>
                          <p className="text-[10px] text-zinc-500 font-medium leading-relaxed">Confirms receipt and provides details.</p>
                       </div>
@@ -113,7 +113,7 @@ export const Admin_EmailModal: React.FC<Admin_EmailModalProps> = ({
                       className="p-6 text-left rounded-[2rem] bg-zinc-50 dark:bg-zinc-900 border border-black/5 dark:border-white/5 hover:border-uiupc-orange/30 transition-all group relative overflow-hidden"
                     >
                       <div className="relative z-10 space-y-3">
-                         <FaFileSignature className="text-uiupc-orange text-xl" />
+                         <IconFileSignature size={20} className="text-uiupc-orange" />
                          <h6 className="text-[11px] font-black uppercase tracking-widest dark:text-white group-hover:text-uiupc-orange transition-colors">Rename Request</h6>
                          <p className="text-[10px] text-zinc-500 font-medium leading-relaxed">Asks member to rename their file.</p>
                       </div>
@@ -124,7 +124,7 @@ export const Admin_EmailModal: React.FC<Admin_EmailModalProps> = ({
                 {/* Custom Message Area */}
                 <div className="space-y-6">
                   <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
-                    <FaPenNib /> Custom Message
+                    <IconPenNib size={12} /> Custom Message
                   </h5>
                   <div className="relative">
                     <textarea 
@@ -134,7 +134,7 @@ export const Admin_EmailModal: React.FC<Admin_EmailModalProps> = ({
                       className="w-full p-8 bg-zinc-50 dark:bg-zinc-900 border-2 border-black/5 dark:border-white/5 rounded-[2.5rem] text-sm font-medium outline-none focus:border-uiupc-orange/30 dark:text-white transition-all min-h-[180px] resize-none"
                     />
                     <div className="absolute bottom-6 right-8">
-                       <FaPenNib className="text-zinc-200 dark:text-zinc-800 text-2xl" />
+                       <IconPenNib size={24} className="text-zinc-200 dark:text-zinc-800" />
                     </div>
                   </div>
                   <button 
@@ -142,14 +142,14 @@ export const Admin_EmailModal: React.FC<Admin_EmailModalProps> = ({
                     disabled={sending || !customText.trim()}
                     className="w-full py-6 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl hover:translate-y-[-2px] active:translate-y-0 transition-all shadow-xl shadow-uiupc-orange/20 disabled:opacity-30 flex items-center justify-center gap-3"
                   >
-                    {sending ? <FaSync className="animate-spin" /> : <FaPaperPlane />}
+                    {sending ? <IconSync size={14} className="animate-spin" /> : <IconPaperPlane size={14} />}
                     {sending ? "Sending..." : "Send Email"}
                   </button>
                 </div>
 
                 {/* Info Alert */}
                 <div className="p-5 bg-blue-500/5 border border-blue-500/10 rounded-2xl flex items-start gap-4">
-                   <FaInfoCircle className="text-blue-500 mt-1" />
+                   <IconInfo size={16} className="text-blue-500 mt-1" />
                    <p className="text-[10px] text-blue-500/80 font-bold uppercase tracking-widest leading-relaxed">
                      All emails are logged and visible to core admin staff.
                    </p>

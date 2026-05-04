@@ -2,8 +2,8 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { FaSearch, FaHistory, FaSpinner } from 'react-icons/fa';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'motion/react';
+import { IconSearch, IconHistory, IconSync } from '@/components/shared/Icons';
 import MemberCard from './MemberCard';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
@@ -101,7 +101,7 @@ const MembersView: React.FC = () => {
   if (isLoading && archiveYears.length === 0) {
     return (
       <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] flex items-center justify-center">
-        <FaSpinner className="animate-spin text-4xl text-uiupc-orange" />
+        <IconSync size={40} className="animate-spin text-uiupc-orange" />
       </div>
     );
   }
@@ -138,7 +138,7 @@ const MembersView: React.FC = () => {
           >
             {/* Search Input (No bottom margin) */}
             <div className="relative group border-b border-black/5 dark:border-white/5">
-              <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 transition-colors group-focus-within:text-uiupc-orange" />
+              <IconSearch size={14} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 transition-colors group-focus-within:text-uiupc-orange" />
               <input 
                 type="text"
                 placeholder="Search"
@@ -217,7 +217,7 @@ const MembersView: React.FC = () => {
                 {/* YEAR HERO (Only for archives) */}
                 {activeYear !== archiveYears[0] && (
                   <div className="flex flex-col items-center text-center space-y-3 mb-20">
-                    <FaHistory className="text-uiupc-orange text-3xl opacity-20" />
+                    <IconHistory size={30} className="text-uiupc-orange opacity-20" />
                     <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white">
                       UIUPC Previous Committee
                     </h2>

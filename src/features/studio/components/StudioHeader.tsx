@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaCloudUploadAlt, FaTrash, FaDownload, FaImages, FaSyncAlt } from "react-icons/fa";
+import { IconCloudUpload, IconTrash, IconDownload, IconImages, IconSync } from "@/components/shared/Icons";
 import Link from "next/link";
 import { useState } from "react";
 import ExportModal from "./export/ExportModal";
@@ -34,7 +34,7 @@ const StudioHeader: React.FC = () => {
         <div className="h-8 w-[1px] bg-black/5 dark:bg-white/5" />
 
         <div className="flex items-center gap-2 px-3 py-1.5 bg-black/5 dark:bg-white/5 rounded-md h-[34px]">
-           <FaImages className="text-[10px] text-zinc-400" />
+           <IconImages size={10} className="text-zinc-400" />
            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
              {images.length} / {maxImages}
            </span>
@@ -46,7 +46,7 @@ const StudioHeader: React.FC = () => {
             className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 text-red-500 rounded-md h-[34px] text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
             title="Clear Studio"
           >
-            <FaTrash className="text-[10px]" />
+            <IconTrash size={10} />
             <span className="hidden sm:inline">Clear</span>
           </button>
         )}
@@ -73,7 +73,7 @@ const StudioHeader: React.FC = () => {
               className="h-10 w-10 rounded-md bg-zinc-900/5 dark:bg-white/5 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-all flex items-center justify-center"
               title="Force Restart Engine"
             >
-              <FaSyncAlt className="text-xs" />
+              <IconSync size={12} />
             </button>
           </>
         )}
@@ -83,7 +83,7 @@ const StudioHeader: React.FC = () => {
           disabled={images.length >= maxImages}
           className="h-10 px-6 rounded-md bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-uiupc-orange/20 disabled:opacity-50 flex items-center gap-2"
         >
-          <FaCloudUploadAlt className="text-sm" />
+          <IconCloudUpload size={14} />
           <span className="hidden sm:inline">Upload</span>
         </button>
 
@@ -93,7 +93,7 @@ const StudioHeader: React.FC = () => {
             className="h-10 w-10 sm:w-auto sm:px-6 rounded-md bg-zinc-900 dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
             title="Export Center"
           >
-            <FaDownload className="text-xs" />
+            <IconDownload size={12} />
             <span className="hidden sm:inline">Export</span>
           </button>
         )}

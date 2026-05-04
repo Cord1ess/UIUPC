@@ -2,7 +2,7 @@
 
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { UIUPCEvent } from '@/types';
 import { useLoaderStore } from '@/store/useLoaderStore';
 import { usePageStore } from '@/store/usePageStore';
@@ -30,12 +30,13 @@ export default function EventMapWrapper({ events }: EventMapWrapperProps) {
   // We want the UI to be ready to animate instantly
   const [isReady, setIsReady] = React.useState(alreadyVisited);
   const [mapLoaded, setMapLoaded] = React.useState(alreadyVisited);
+  const [isActivated, setIsActivated] = React.useState(alreadyVisited);
 
   React.useEffect(() => {
-    if (isAnimationComplete && mapLoaded && !isReady) {
+    if (isAnimationComplete && (mapLoaded || !isActivated) && !isReady) {
       setIsReady(true);
     }
-  }, [isAnimationComplete, mapLoaded, isReady]);
+  }, [isAnimationComplete, mapLoaded, isReady, isActivated]);
 
   return (
     <motion.div 
@@ -52,11 +53,27 @@ export default function EventMapWrapper({ events }: EventMapWrapperProps) {
         style={{ willChange: 'transform' }}
         className="w-full h-full"
       >
-        <MapComponent 
-          events={events} 
-          isAdminMode={false} 
-          onReady={() => setMapLoaded(true)}
-        />
+        {isActivated ? (
+          <MapComponent 
+            events={events} 
+            isAdminMode={false} 
+            onReady={() => setMapLoaded(true)}
+          />
+        ) : (
+          <div className="w-full h-full relative group">
+            {/* High-end static backdrop (Placeholder) */}
+            <div className="absolute inset-0 bg-[url('https://basemaps.cartocdn.com/rastertiles/voyager_nolabels/14/12101/7118.png')] bg-cover bg-center grayscale opacity-30 dark:opacity-20" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
+               <button 
+                 onClick={() => setIsActivated(true)}
+                 className="px-8 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all group-hover:bg-uiupc-orange group-hover:text-white"
+               >
+                 Launch Interactive Map
+               </button>
+               <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest opacity-50">Exploration portal • 42MB Engine</p>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Zero-lag overlay for smoother hydration */}

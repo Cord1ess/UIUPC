@@ -1,22 +1,15 @@
 'use client';
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { 
-  FaUsers, 
-  FaCamera, 
-  FaShieldAlt,
-  FaCalendarAlt,
-  FaEnvelope,
-  FaClock,
-  FaChartLine,
-  FaHistory,
-  FaDatabase,
-  FaSync
-} from "react-icons/fa";
-import ScrollRevealText from "@/components/motion/ScrollRevealText";
-import { motion } from "framer-motion";
+  IconUsers, IconCamera, IconCalendar, IconDatabase, IconChartLine, IconHistory, IconCheck, IconLock, IconSync, IconShield 
+} from "@/components/shared/Icons";
+import { motion } from "motion/react";
 import { Member, ExhibitionSubmission } from "@/types/admin";
+import { 
+  Admin_ModuleHeader, Admin_StatCard, Admin_ErrorBoundary 
+} from "@/features/admin/components";
 
 interface OverviewContainerProps {
   members: Member[];
@@ -32,13 +25,12 @@ export function OverviewContainer({
   auditLogs
 }: OverviewContainerProps) {
   const { user, adminProfile } = useSupabaseAuth();
-  const [isSyncing, setIsSyncing] = useState(false);
 
   const analytics = useMemo(() => {
     const now = new Date();
     const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const newMembers = members.filter(m => new Date(m.created_at) > last7Days).length;
-    const newPhotos = photos.filter(p => new Date(p.submitted_at || p.created_at) > last7Days).length;
+    const newPhotos = photos.filter(p => new Date(p.submitted_at) > last7Days).length;
 
     const timeline: Record<string, { members: number, photos: number }> = {};
     for (let i = 13; i >= 0; i--) {
@@ -53,7 +45,7 @@ export function OverviewContainer({
       if (timeline[date]) timeline[date].members++;
     });
     photos.forEach(p => {
-      const date = (p.submitted_at || p.created_at || "").split('T')[0];
+      const date = (p.submitted_at || "").split('T')[0];
       if (timeline[date]) timeline[date].photos++;
     });
 
@@ -69,119 +61,129 @@ export function OverviewContainer({
   if (!user || !adminProfile) return null;
 
   return (
-    <div className="w-full space-y-16 min-w-0 pb-20">
-      <div className="space-y-4">
-        <ScrollRevealText 
-          text="Dashboard" 
-          className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none text-zinc-900 dark:text-white"
-        />
-        <div className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-2">
-           <div className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-uiupc-orange">
-              <FaShieldAlt className="text-xs" />
-              <span>{adminProfile.role} Administrator</span>
-           </div>
-           <div className="flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-              <FaEnvelope className="text-xs text-zinc-300" />
-              <span>{user.email}</span>
-           </div>
-           <div className="flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-              <FaClock className="text-xs text-zinc-300" />
-              <span>Session: Active</span>
-           </div>
-        </div>
-      </div>
+    <div className="pt-16 md:pt-24 pb-12 px-6 md:px-12 w-full max-w-[1600px] mx-auto space-y-12 relative z-10 isolate">
+      {/* ── MODULE HEADER ───────────────────────────────────── */}
+      <Admin_ModuleHeader 
+        title="Overview"
+        description="System metrics and operational activity hub."
+      >
+        <Admin_StatCard label="Total Membership" value={analytics.totalMembers} icon={<IconUsers size={20} />} />
+        <Admin_StatCard label="Exhibition Entries" value={analytics.totalPhotos} icon={<IconCamera size={20} />} />
+        <Admin_StatCard label="Active Events" value={eventsCount} icon={<IconCalendar size={20} />} />
+        <Admin_StatCard label="Sync Health" value="Secure" icon={<IconCheck size={20} />} color="text-green-500" />
+      </Admin_ModuleHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-         {[
-           { label: "Club Members", value: analytics.totalMembers, sub: `+${analytics.newMembers} new`, icon: <FaUsers />, color: 'orange' },
-           { label: "Submissions", value: analytics.totalPhotos, sub: `+${analytics.newPhotos} new`, icon: <FaCamera />, color: 'orange' },
-           { label: "Active Events", value: eventsCount, sub: "Live Session", icon: <FaCalendarAlt />, color: 'green' },
-           { label: "Database", value: "Synced", sub: isSyncing ? "Syncing..." : "Live Data", icon: <FaDatabase />, color: 'green', isDb: true },
-         ].map((stat, i) => (
-           <motion.div
-             key={stat.label}
-             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-             className={`p-8 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-[2.5rem] flex flex-col justify-between shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-500 group relative ${stat.color === 'green' ? 'hover:border-green-500/20' : 'hover:border-uiupc-orange/20'}`}
-           >
-             <div className="flex items-center justify-between mb-8">
-                <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">{stat.label}</p>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ${stat.color === 'green' ? 'bg-green-500/10 text-green-500' : 'bg-uiupc-orange/10 text-uiupc-orange'}`}>
-                   {stat.icon}
-                </div>
-             </div>
-             
-             <div className="flex items-end justify-between">
-                <div className="space-y-1">
-                   <p className="text-4xl font-black tracking-tighter dark:text-white leading-none">
-                     {stat.value === "Synced" ? (isSyncing ? "..." : "Live") : stat.value}
-                   </p>
-                   <p className={`text-[9px] font-black uppercase tracking-widest ${stat.color === 'green' ? 'text-green-500' : 'text-uiupc-orange'}`}>
-                      {stat.sub}
-                   </p>
-                </div>
-             </div>
-           </motion.div>
-         ))}
-      </div>
-
+      {/* ── BENTO ANALYTICS ─────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-         <div className="lg:col-span-2 p-10 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-[2.5rem] shadow-sm space-y-10">
-            <div className="flex items-center justify-between">
-               <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-uiupc-orange/10 rounded-xl flex items-center justify-center text-uiupc-orange">
-                     <FaChartLine />
+         {/* Growth Chart */}
+         <div className="lg:col-span-2 p-10 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-12">
+               <div className="flex items-center gap-5">
+                  <div className="w-12 h-12 bg-zinc-50 dark:bg-[#1a1a1a] rounded-2xl flex items-center justify-center text-uiupc-orange border border-zinc-200 dark:border-zinc-800 shadow-inner">
+                     <IconChartLine size={20} />
                   </div>
                   <div>
-                     <h3 className="text-lg font-black uppercase tracking-tight dark:text-white">Registration Timeline</h3>
-                     <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Growth metrics over last 14 days</p>
+                     <h3 className="text-xl font-black uppercase tracking-tight dark:text-white leading-none">Membership Growth</h3>
+                     <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mt-2">14-day engagement analysis</p>
+                  </div>
+               </div>
+               <div className="hidden sm:flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-uiupc-orange" />
+                    <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Members</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-zinc-200 dark:bg-zinc-800" />
+                    <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Entries</span>
                   </div>
                </div>
             </div>
             
-            <div className="h-64 w-full flex items-end justify-between gap-1 px-4 relative">
+            <div className="h-64 w-full flex items-end justify-between gap-2 px-4">
                {analytics.timeline.map((day) => {
                  const maxVal = Math.max(...analytics.timeline.map(d => d.members + d.photos), 1);
                  const mHeight = (day.members / maxVal) * 100;
                  const pHeight = (day.photos / maxVal) * 100;
 
                  return (
-                   <div key={day.date} className="flex-1 flex flex-col items-center gap-1 group relative">
-                      <div className="w-full flex flex-col items-center justify-end h-48 gap-0.5">
-                         <motion.div initial={{ height: 0 }} animate={{ height: `${mHeight}%` }} className="w-full max-w-[12px] bg-uiupc-orange rounded-t-md" />
-                         <motion.div initial={{ height: 0 }} animate={{ height: `${pHeight}%` }} className="w-full max-w-[12px] bg-zinc-100 dark:bg-zinc-800 rounded-t-md" />
+                   <div key={day.date} className="flex-1 flex flex-col items-center gap-3 group h-full justify-end">
+                      <div className="w-full flex flex-col items-center justify-end h-full gap-1">
+                         <div className="relative w-full max-w-[12px] h-full flex flex-col justify-end">
+                            <motion.div initial={{ height: 0 }} animate={{ height: `${pHeight}%` }} className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-t-md transition-colors group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700" />
+                            <motion.div initial={{ height: 0 }} animate={{ height: `${mHeight}%` }} className="w-full bg-uiupc-orange rounded-t-md shadow-sm group-hover:brightness-110" />
+                         </div>
                       </div>
+                      <span className="text-[7px] font-black text-zinc-400 dark:text-zinc-600 uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
+                         {new Date(day.date).toLocaleDateString(undefined, { weekday: 'short' })}
+                      </span>
                    </div>
                  );
                })}
             </div>
          </div>
 
-         <div className="p-10 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-[2.5rem] shadow-sm space-y-8">
-            <div className="flex items-center gap-4">
-               <div className="w-10 h-10 bg-zinc-50 dark:bg-zinc-900 rounded-xl flex items-center justify-center text-zinc-400">
-                  <FaHistory />
+         {/* Activity Log */}
+         <div className="p-10 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] shadow-sm flex flex-col">
+            <div className="flex items-center gap-5 mb-10">
+               <div className="w-12 h-12 bg-zinc-50 dark:bg-[#1a1a1a] rounded-2xl flex items-center justify-center text-zinc-400 border border-zinc-200 dark:border-zinc-800 shadow-inner">
+                  <IconHistory size={20} />
                </div>
-               <h3 className="text-lg font-black uppercase tracking-tight dark:text-white">Live Pulse</h3>
+               <h3 className="text-xl font-black uppercase tracking-tight dark:text-white leading-none">Security Feed</h3>
             </div>
 
-            <div className="space-y-8">
-               {auditLogs.map((log: any, i: number) => (
-                 <div key={i} className="flex gap-4 group">
-                    <div className="flex flex-col items-center">
-                       <div className="w-2 h-2 bg-uiupc-orange rounded-full group-hover:scale-125 transition-transform" />
-                       <div className="flex-1 w-px bg-black/5 dark:bg-white/5 mt-2" />
-                    </div>
+            <div className="space-y-8 flex-1 overflow-y-auto no-scrollbar py-2 min-h-[300px]">
+               {auditLogs.length === 0 ? (
+                 <div className="h-full flex flex-col items-center justify-center text-center gap-4 opacity-30">
+                    <IconSync size={20} className="animate-spin text-zinc-400" />
+                    <p className="text-[9px] font-black uppercase tracking-widest">Polling Activity...</p>
+                 </div>
+               ) : auditLogs.map((log: any, i: number) => (
+                 <div key={i} className="flex gap-5 group items-start">
+                    <div className="w-2 h-2 bg-uiupc-orange rounded-full mt-1.5 shrink-0 shadow-[0_0_8px_rgba(255,102,0,0.3)]" />
                     <div className="flex-1 min-w-0">
-                       <p className="text-[10px] font-black uppercase tracking-tighter dark:text-zinc-200 truncate">
+                       <p className="text-[10px] font-black uppercase tracking-tighter dark:text-zinc-200 truncate group-hover:text-uiupc-orange transition-colors">
                           {log.action.replace(/_/g, ' ')}
                        </p>
-                       <p className="text-[9px] text-zinc-500 font-medium mt-0.5 truncate">
-                          by {log.admin_email.split('@')[0]}
-                       </p>
+                       <div className="flex items-center justify-between mt-1">
+                          <p className="text-[8px] text-zinc-400 font-bold uppercase tracking-widest">
+                             {log.admin_email?.split('@')[0] || "System"}
+                          </p>
+                          <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-tighter">
+                             {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                       </div>
                     </div>
                  </div>
                ))}
             </div>
+            
+            <button className="mt-10 w-full h-12 bg-zinc-50 dark:bg-[#1a1a1a] rounded-2xl text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-uiupc-orange transition-all border border-zinc-200 dark:border-zinc-800/50 shadow-sm">
+               View Full Ledger
+            </button>
+         </div>
+      </div>
+
+      {/* ── QUICK ACCESS FOOTER ────────────────────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-80 hover:opacity-100 transition-opacity duration-500">
+         <div className="p-8 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] flex items-center justify-between group cursor-pointer hover:border-uiupc-orange/20">
+            <div className="flex items-center gap-5">
+               <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-[#1a1a1a] flex items-center justify-center text-zinc-400 group-hover:text-uiupc-orange transition-colors"><IconShield size={18} /></div>
+               <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest dark:text-white">Access Governance</p>
+                  <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-500 mt-1">Manage administrative permissions</p>
+               </div>
+            </div>
+            <IconLock size={18} className="text-zinc-200 dark:text-zinc-800" />
+         </div>
+         <div className="p-8 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] flex items-center justify-between group cursor-pointer hover:border-uiupc-orange/20">
+            <div className="flex items-center gap-5">
+               <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-[#1a1a1a] flex items-center justify-center text-zinc-400 group-hover:text-uiupc-orange transition-colors"><IconDatabase size={18} /></div>
+               <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest dark:text-white">System Integrity</p>
+                  <p className="text-[8px] font-bold uppercase tracking-widest text-zinc-500 mt-1">Database health & synchronization</p>
+               </div>
+            </div>
+            <IconCheck size={18} className="text-zinc-200 dark:text-zinc-800" />
          </div>
       </div>
     </div>

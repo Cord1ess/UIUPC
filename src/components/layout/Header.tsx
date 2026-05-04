@@ -3,16 +3,12 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-import { useAuth } from "@/contexts/AuthContext";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useLoaderStore } from "@/store/useLoaderStore";
-import { FiSun, FiMoon } from "react-icons/fi";
-import { FaUsers, FaLayerGroup, FaTrophy, FaBookOpen, FaPalette, FaEnvelope } from "react-icons/fa";
+import { IconSun, IconMoon, IconUsers, IconLayerGroup, IconTrophy, IconBookOpen, IconPaintBrush, IconEnvelope, IconArrowRight, IconBars, IconClose } from "@/components/shared/Icons";
 import myLogo from "@/assets/UIUPC Logo.svg";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 
 // ─── Types ────────────────────────────────────────────────
 interface NavItem {
@@ -26,12 +22,12 @@ const PRIMARY_LINKS: NavItem[] = [
 ];
 
 const EXPLORE_SUBMENU = [
-  { path: "/members", label: "Members", icon: FaUsers },
-  { path: "/departments", label: "Departments", icon: FaLayerGroup },
-  { path: "/achievements", label: "Achievements", icon: FaTrophy },
-  { path: "/blog", label: "Blog", icon: FaBookOpen },
-  { path: "/studio", label: "Studio", icon: FaPalette },
-  { path: "/contact", label: "Contact", icon: FaEnvelope },
+  { path: "/members", label: "Members", icon: IconUsers },
+  { path: "/departments", label: "Departments", icon: IconLayerGroup },
+  { path: "/achievements", label: "Achievements", icon: IconTrophy },
+  { path: "/blog", label: "Blog", icon: IconBookOpen },
+  { path: "/studio", label: "Studio", icon: IconPaintBrush },
+  { path: "/contact", label: "Contact", icon: IconEnvelope },
 ];
 
 const ALL_EXPLORE_PATHS = EXPLORE_SUBMENU.map((i) => i.path);
@@ -55,7 +51,6 @@ const Header: React.FC = memo(() => {
 
   const isActive = useCallback((path: string) => pathname === path, [pathname]);
   const isExploreActive = ALL_EXPLORE_PATHS.includes(pathname);
-  const isAdminPage = pathname.startsWith('/admin');
 
   const openExplore = useCallback(() => {
     if (exploreTimeoutRef.current) clearTimeout(exploreTimeoutRef.current);
@@ -140,7 +135,7 @@ const Header: React.FC = memo(() => {
             onClick={(e) => toggleTheme(e)}
             className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${theme === 'light' ? 'bg-zinc-100 hover:bg-zinc-200' : 'bg-white/5 hover:bg-white/10'}`}
           >
-            {theme === "light" ? <FiMoon className="text-black" /> : <FiSun className="text-white" />}
+            {theme === "light" ? <IconMoon className="text-black" /> : <IconSun className="text-white" />}
           </button>
 
           <div className="hidden lg:block">
@@ -155,10 +150,8 @@ const Header: React.FC = memo(() => {
             )}
           </div>
 
-          <button className="lg:hidden flex flex-col justify-center items-center w-8 h-8 gap-[5px]" onClick={() => setMobileOpen((p) => !p)}>
-            <span className={`block w-5 h-[1.5px] rounded-full transition-all ${mobileOpen ? "rotate-45 translate-y-[6.5px]" : ""} bg-current`} />
-            <span className={`block w-5 h-[1.5px] rounded-full transition-all ${mobileOpen ? "opacity-0" : ""} bg-current`} />
-            <span className={`block w-5 h-[1.5px] rounded-full transition-all ${mobileOpen ? "-rotate-45 -translate-y-[6.5px]" : ""} bg-current`} />
+          <button className="lg:hidden flex flex-col justify-center items-center w-10 h-10" onClick={() => setMobileOpen((p) => !p)}>
+            {mobileOpen ? <IconClose size={24} /> : <IconBars size={24} />}
           </button>
         </div>
 

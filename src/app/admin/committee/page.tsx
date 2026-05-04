@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabaseServer";
 import { CommitteeContainer } from "./CommitteeContainer";
 import { CommitteeMember } from "@/types/admin";
 
@@ -7,15 +7,32 @@ export default async function CommitteePage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const supabase = await createClient();
   const params = await searchParams;
   const page = Number(params.page) || 0;
   const search = (params.search as string) || "";
-  const year = (params.year as string) || "all";
   const dept = (params.dept as string) || "all";
   const category = (params.category as string) || "all";
   const link = (params.link as string) || "all";
   const sort = (params.sort as string) || "asc";
   const pageSize = 12;
+
+  // Fetch available years first to determine default
+  const { data: yearData } = await supabase
+    .from("committees")
+    .select("year")
+    .not("year", "is", null);
+
+  
+  const availableYears = Array.from(new Set((yearData || []).map(d => d.year))).sort((a, b) => b.localeCompare(a));
+  const year = (params.year as string) || availableYears[0] || "all";
+
+  // Fetch all unique departments for the global filter
+  const { data: deptData } = await supabase
+    .from("committees")
+    .select("department")
+    .not("department", "is", null);
+  const allDepartments = Array.from(new Set((deptData || []).map(d => d.department))).filter(Boolean).sort();
 
   // 1. Fetch filtered data from Supabase (Server Side)
   let query = supabase
@@ -48,14 +65,6 @@ export default async function CommitteePage({
     console.error("Error fetching committee:", error.message || error);
   }
 
-  // 2. Fetch unique years for the filter dropdown
-  const { data: yearData } = await supabase
-    .from("committees")
-    .select("year")
-    .not("year", "is", null);
-  
-  const availableYears = Array.from(new Set((yearData || []).map(d => d.year))).sort((a, b) => b.localeCompare(a));
-
   return (
     <CommitteeContainer 
       initialData={(data as CommitteeMember[]) || []}
@@ -68,6 +77,7 @@ export default async function CommitteePage({
       filterLink={link}
       sortOrder={sort as "asc" | "desc"}
       availableYears={availableYears}
+      allDepartments={allDepartments}
     />
   );
 }

@@ -2,8 +2,8 @@
 
 import React from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { FaCalendar, FaEye, FaEdit, FaTrash, FaFacebook, FaCamera } from "react-icons/fa";
+import { motion } from "motion/react";
+import { IconCalendar, IconEye, IconEdit, IconTrash, IconFacebook, IconCamera } from "@/components/shared/Icons";
 
 interface GalleryPhoto {
   id: string;
@@ -76,7 +76,7 @@ const GalleryList: React.FC<GalleryListProps> = ({
 
             <div className="absolute bottom-6 left-6 right-6 z-10">
                <div className="flex items-center gap-2 text-white/70 mb-1">
-                 <FaCamera className="text-[10px] text-uiupc-orange" />
+                  <IconCamera size={10} className="text-uiupc-orange" />
                  <span className="text-[9px] font-black uppercase tracking-widest">{photo.uploaded_by || photo.uploadedBy || "Staff Member"}</span>
                </div>
                <h3 className="text-xl font-black uppercase tracking-tighter text-white line-clamp-1 group-hover:text-uiupc-orange transition-colors">{photo.title}</h3>
@@ -91,7 +91,7 @@ const GalleryList: React.FC<GalleryListProps> = ({
 
             <div className="mt-auto flex items-center justify-between gap-4">
               <div className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-black/5 dark:border-white/5">
-                <FaCalendar className="text-[10px] text-zinc-400" />
+                <IconCalendar size={10} className="text-zinc-400" />
                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">
                   {new Date(photo.created_at || photo.uploadedAt || photo.timestamp || Date.now()).toLocaleDateString()}
                 </span>
@@ -103,14 +103,14 @@ const GalleryList: React.FC<GalleryListProps> = ({
                   className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-uiupc-orange hover:text-white flex items-center justify-center transition-all shadow-sm"
                   title="View Photo"
                 >
-                  <FaEye className="text-xs" />
+                  <IconEye size={12} />
                 </button>
                 <button
                   onClick={() => onEdit(photo)}
                   className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black flex items-center justify-center transition-all shadow-sm"
                   title="Edit"
                 >
-                  <FaEdit className="text-xs" />
+                  <IconEdit size={12} />
                 </button>
                 {(photo.facebook_post || photo.facebookPost) && (
                   <button
@@ -118,7 +118,7 @@ const GalleryList: React.FC<GalleryListProps> = ({
                     className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all shadow-sm"
                     title="Facebook Post"
                   >
-                    <FaFacebook className="text-xs" />
+                    <IconFacebook size={12} />
                   </button>
                 )}
                 <button
@@ -126,7 +126,7 @@ const GalleryList: React.FC<GalleryListProps> = ({
                   className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all shadow-sm"
                   title="Delete"
                 >
-                  <FaTrash className="text-xs" />
+                  <IconTrash size={12} />
                 </button>
               </div>
             </div>

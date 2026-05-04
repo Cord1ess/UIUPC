@@ -16,9 +16,9 @@ Never use `"use client"` unless a component explicitly requires:
 
 ### Rule 2: Server-Side Data Fetching Bypasses Loading Spinners
 We no longer fetch initialization sets via `useSWR` in pure Client components if we can avoid it.
-- Before rendering data-dense cards (like `FeaturedGallery` or `UpcomingEvents`), execute `async/await` Firebase functions directly inside a Server Component wrapper.
-- Export your raw fetchers inside `/lib/fetchers.ts` strictly keeping them detached from `useSWR` modules.
-- Feed the pre-fetched objects natively into the purely-visual Client UI (`<EventList events={preloadedData} />`). This mathematically eliminates the Firebase Client SDK cost, streaming populated HTML to the device on frame 1.
+- Before rendering data-dense cards (like `FeaturedGallery` or `UpcomingEvents`), execute `async/await` Supabase queries directly inside a Server Component wrapper.
+- Export your raw fetchers inside `/lib/fetchers.ts`.
+- Feed the pre-fetched objects natively into the purely-visual Client UI (`<EventList events={preloadedData} />`). This mathematically eliminates the Client SDK cost, streaming populated HTML to the device on frame 1.
 
 ---
 
@@ -50,30 +50,27 @@ Always write color variants explicitly:
 ```
 
 ### Rule 2: The `ScrollRevealText` Bug Fix Standard
-If chaining `framer-motion` reveal sequences with Theme values, never rely on `key={theme}`. Standardize the component using the `hasAnimated` `useState` technique mapped onto `IntersectionObserver`, allowing framer motion to unlock static HTML structures after playing once. This prevents animation thrashing toggles.
+If chaining `motion/react` reveal sequences with Theme values, never rely on `key={theme}`. Standardize the component using the `hasAnimated` `useState` technique mapped onto `IntersectionObserver`, allowing motion to unlock static HTML structures after playing once. This prevents animation thrashing toggles.
 
 ---
 
 ## 4. DOM Asset Distribution
 
 ### Rule 1: Dynamic Import Fences
-If you drop a heavy dependency (like `framer-motion`) below the user's initial screen scroll (the "Fold"), import it lazily in your `page.tsx` matrix:
+If you drop a heavy dependency (like `motion`) below the user's initial screen scroll (the "Fold"), import it lazily in your `page.tsx` matrix:
 ```tsx
 const ComplexInteractive = dynamic(() => import('@/com/ComplexInteractive'));
 ```
 The browser will only download that chunk when the user hits the trigger, maintaining a perfect 100/100 initial PageSpeed Insights score.
 
-### Rule 3: Cloudinary Dynamic Transcoding
-For all Cloudinary-sourced images, **always** implement next-gen format transcoding. This slashed LCP from 11.1s to <2s on the homepage.
-- **`f_auto`**: Automatically deliver AVIF or WebP based on user browser support.
-- **`q_auto`**: Automatically optimize compression without visible quality loss.
-- **`c_scale,w_XXX`**: Always request a specific width to prevent wasteful full-res downloads.
+### Rule 3: Supabase Storage CDN
+For all media, use the Supabase Storage CDN which provides automatic optimization via transformation parameters if configured. Avoid full-res raw downloads for thumbnails.
 
 **Standard URL helper pattern:**
+Use `@/utils/imageUrl` to generate scoped thumbnails:
 ```tsx
-const getCloudinaryUrl = (baseUrl, width) => {
-  return baseUrl.replace('/upload/', `/upload/c_scale,w_${width},q_auto,f_auto/`);
-};
+import { getImageUrl } from "@/utils/imageUrl";
+const src = getImageUrl(imagePath, 800);
 ```
 
 *Note: Ensure any new image hostnames (like Unsplash or Drive) are whitelisted in `next.config.ts`.*

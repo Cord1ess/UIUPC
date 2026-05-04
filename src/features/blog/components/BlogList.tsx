@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { FaCalendar, FaTag, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { IconCalendar, IconTag, IconEye, IconEdit, IconTrash } from "@/components/shared/Icons";
 
 interface Media {
   type: string;
@@ -63,7 +63,7 @@ const BlogList: React.FC<BlogListProps> = ({
             </div>
           ) : (
              <div className="relative w-full h-48 bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
-               <FaEye className="text-4xl text-zinc-300 dark:text-zinc-700" />
+                <IconEye size={40} className="text-zinc-300 dark:text-zinc-700" />
              </div>
           )}
 
@@ -75,11 +75,11 @@ const BlogList: React.FC<BlogListProps> = ({
 
             <div className="flex flex-wrap gap-2 mb-6">
               <span className="px-3 py-1 bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center gap-2">
-                <FaCalendar /> {new Date(post.date).toLocaleDateString()}
+                <IconCalendar size={12} /> {new Date(post.date).toLocaleDateString()}
               </span>
               {post.tags && (
                 <span className="px-3 py-1 bg-uiupc-orange/10 text-uiupc-orange text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center gap-2">
-                  <FaTag /> {post.tags}
+                  <IconTag size={12} /> {post.tags}
                 </span>
               )}
             </div>
@@ -95,21 +95,21 @@ const BlogList: React.FC<BlogListProps> = ({
                   className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-all"
                   title="Preview Post"
                 >
-                  <FaEye className="text-xs" />
+                   <IconEye size={12} />
                 </button>
                 <button
                   onClick={() => onEdit(post)}
                   className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 hover:bg-uiupc-orange hover:text-white flex items-center justify-center transition-all"
                   title="Edit Post"
                 >
-                  <FaEdit className="text-xs" />
+                   <IconEdit size={12} />
                 </button>
                 <button
                   onClick={() => onDelete(post.id)}
                   className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all"
                   title="Delete Post"
                 >
-                  <FaTrash className="text-xs" />
+                   <IconTrash size={12} />
                 </button>
               </div>
             </div>

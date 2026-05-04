@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaSync, FaExclamationTriangle, FaTrophy, FaMoneyBillWave, FaCheck, FaEnvelope, FaSearch, FaSpinner } from "react-icons/fa";
+import { IconSync, IconExclamationTriangle, IconTrophy, IconMoneyBillWave, IconCheck, IconEnvelope, IconSearch } from "@/components/shared/Icons";
 
 import { Result, Payment } from "@/types";
 import ResultsTable from "./ResultsTable";
@@ -221,7 +221,7 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
   if (loading && !results.length) {
     return (
       <div className="w-full py-32 flex items-center justify-center">
-        <FaSpinner className="animate-spin text-4xl text-uiupc-orange" />
+        <IconSync size={40} className="animate-spin text-uiupc-orange" />
       </div>
     );
   }
@@ -232,7 +232,7 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
       <div className="w-full bg-zinc-100 dark:bg-[#050505] p-4 md:p-6 rounded-3xl border border-black/5 dark:border-white/5">
         <div className="flex flex-col lg:flex-row gap-6 items-stretch lg:items-center justify-between">
         <div className="relative flex-1">
-          <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+          <IconSearch size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
           <input 
             type="text" 
             placeholder="Search..." 
@@ -267,7 +267,7 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
             onClick={() => setRefreshTrigger(p => p + 1)} 
             className="h-10 px-4 rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-600 dark:text-zinc-300 hover:text-uiupc-orange dark:hover:text-uiupc-orange transition-all flex items-center gap-2 text-xs font-bold"
           >
-            <FaSync /> Update Data
+            <IconSync size={12} /> Update Data
           </button>
         </div>
         </div>
@@ -276,14 +276,14 @@ const ResultsManagement: React.FC<ResultsManagementProps> = ({ scripts, user, on
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-6 bg-zinc-100 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-2xl flex flex-col justify-center">
           <div className="flex items-center gap-3 mb-2">
-            <FaTrophy className="text-uiupc-orange text-xl" />
+            <IconTrophy size={20} className="text-uiupc-orange" />
             <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Total Entries</h3>
           </div>
           <p className="text-3xl font-black">{results.length}</p>
         </div>
         <div className="p-6 bg-zinc-100 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-2xl flex flex-col justify-center">
           <div className="flex items-center gap-3 mb-2">
-            <FaMoneyBillWave className="text-green-500 text-xl" />
+            <IconMoneyBillWave size={20} className="text-green-500" />
             <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Paid Accounts</h3>
           </div>
           <p className="text-3xl font-black">{payments.length}</p>

@@ -3,11 +3,11 @@
 import React, { useMemo, useRef, useCallback, useEffect } from "react";
 import Cropper from "react-easy-crop";
 import { useStudioStore } from "@/store/useStudioStore";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { getSmartScale } from "@/lib/imageUtils";
 
 const StudioCanvas: React.FC = () => {
-  const { images, activeImageId, activeToolId, retouchMode, brushSize, updateImageEdits } = useStudioStore();
+  const { images, activeImageId, activeToolId, updateImageEdits } = useStudioStore();
   const activeImage = images.find((img) => img.id === activeImageId);
   const { transformer } = activeImage?.edits || {};
   const watermark = transformer?.watermark || { enabled: false, type: 'text', text: 'UIUPC' };
@@ -21,9 +21,6 @@ const StudioCanvas: React.FC = () => {
   const dragStart = useRef({ x: 0, y: 0 });
   const panStart = useRef({ x: 0, y: 0 });
 
-  const maskCanvasRef = useRef<HTMLCanvasElement>(null);
-  const isPainting = useRef(false);
-  const lastDrawPos = useRef({ x: 0, y: 0 });
 
   const rafRef = useRef<number | null>(null);
 
@@ -46,24 +43,19 @@ const StudioCanvas: React.FC = () => {
     panRef.current = { x: 0, y: 0 };
     originRef.current = { x: 50, y: 50 };
     applyTransform();
-    if (maskCanvasRef.current) {
-      const ctx = maskCanvasRef.current.getContext('2d');
-      ctx?.clearRect(0, 0, maskCanvasRef.current.width, maskCanvasRef.current.height);
-    }
   }, [applyTransform]);
 
+
   const syncMaskSize = useCallback(() => {
-    if (maskCanvasRef.current && imgElRef.current) {
-      maskCanvasRef.current.width = imgElRef.current.naturalWidth || 800;
-      maskCanvasRef.current.height = imgElRef.current.naturalHeight || 600;
-    }
   }, []);
+
 
   // Sync mask canvas size and reset when switching images or tools
   useEffect(() => {
     resetView();
     syncMaskSize();
-  }, [activeImage?.workingUrl, activeToolId, retouchMode, resetView, syncMaskSize]);
+  }, [activeImage?.workingUrl, activeToolId, resetView, syncMaskSize]);
+
 
   // Editorial CSS filters for real-time preview
   const previewStyle = useMemo(() => {
@@ -131,65 +123,33 @@ const StudioCanvas: React.FC = () => {
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    if (activeToolId === "retouch" && retouchMode === "inpaint") {
-      isPainting.current = true;
-      if (imgElRef.current) {
-         lastDrawPos.current = getMappedCoordinates(e, imgElRef.current);
-         // Draw initial dot
-         const ctx = maskCanvasRef.current?.getContext('2d');
-         if (ctx) {
-           ctx.beginPath();
-           ctx.arc(lastDrawPos.current.x, lastDrawPos.current.y, brushSize / 2, 0, Math.PI * 2);
-           ctx.fillStyle = 'rgba(255, 102, 0, 0.6)';
-           ctx.fill();
-         }
-      }
-      return;
-    }
+
 
     if (zoomRef.current <= 1) return;
     isDragging.current = true;
     dragStart.current = { x: e.clientX, y: e.clientY };
     panStart.current = { ...panRef.current };
     if (containerRef.current) containerRef.current.style.cursor = "grabbing";
-  }, [activeToolId, retouchMode, brushSize]);
+  }, [activeToolId]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (activeToolId === "retouch" && retouchMode === "inpaint" && isPainting.current && imgElRef.current) {
-       const currentPos = getMappedCoordinates(e, imgElRef.current);
-       const ctx = maskCanvasRef.current?.getContext('2d');
-       if (ctx) {
-         ctx.beginPath();
-         ctx.moveTo(lastDrawPos.current.x, lastDrawPos.current.y);
-         ctx.lineTo(currentPos.x, currentPos.y);
-         ctx.strokeStyle = 'rgba(255, 102, 0, 0.6)';
-         ctx.lineWidth = brushSize;
-         ctx.lineCap = 'round';
-         ctx.lineJoin = 'round';
-         ctx.stroke();
-         lastDrawPos.current = currentPos;
-       }
-       return;
-    }
+
 
     if (!isDragging.current) return;
     const dx = e.clientX - dragStart.current.x;
     const dy = e.clientY - dragStart.current.y;
     panRef.current = { x: panStart.current.x + dx, y: panStart.current.y + dy };
     applyTransform();
-  }, [activeToolId, retouchMode, brushSize, applyTransform]);
+  }, [applyTransform]);
 
   const handleMouseUp = useCallback(() => {
-    if (activeToolId === "retouch" && retouchMode === "inpaint") {
-      isPainting.current = false;
-      return;
-    }
+
 
     isDragging.current = false;
     if (containerRef.current) {
       containerRef.current.style.cursor = zoomRef.current > 1 ? "grab" : "zoom-in";
     }
-  }, [activeToolId, retouchMode]);
+  }, []);
 
   // Double-click to reset
   const handleDoubleClick = useCallback(() => {
@@ -263,14 +223,7 @@ const StudioCanvas: React.FC = () => {
                   onLoad={syncMaskSize}
                 />
                 
-                {/* Inpainting Drawing Overlay */}
-                <canvas 
-                  id="inpaint-mask-canvas"
-                  ref={maskCanvasRef}
-                  className={`absolute max-h-full w-auto max-w-full select-none will-change-transform pointer-events-none transition-opacity duration-300
-                    ${activeToolId === "retouch" && retouchMode === "inpaint" ? "opacity-100 z-20" : "opacity-0 -z-10"}
-                  `}
-                />
+
                 {/* Real-time Vignette Preview */}
                 {(activeImage.edits.editorial?.vignette ?? 0) > 0 && (
                   <div 

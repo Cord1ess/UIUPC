@@ -1,8 +1,10 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabaseServer";
 import { OverviewContainer } from "./OverviewContainer";
 import { Member, ExhibitionSubmission } from "@/types/admin";
 
 export default async function AdminPage() {
+  const supabase = await createClient();
+
   // Fetch key metrics on the server for instant dashboard load
   const [
     { data: members },
@@ -15,6 +17,7 @@ export default async function AdminPage() {
     supabase.from("events").select("*", { count: "exact", head: true }),
     supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(10)
   ]);
+
 
   return (
     <OverviewContainer 

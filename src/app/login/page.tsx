@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { FaEnvelope, FaLock, FaSpinner, FaArrowLeft, FaShieldAlt, FaArrowRight } from 'react-icons/fa';
+import { IconEnvelope, IconLock, IconSpinner, IconArrowLeft, IconShield, IconArrowRight } from '@/components/shared/Icons';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
 
 const LoginPage = () => {
@@ -52,7 +52,7 @@ const LoginPage = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-uiupc-orange/10 border border-uiupc-orange/20 text-uiupc-orange text-[10px] font-black uppercase tracking-[0.3em] mb-8"
             >
-              <FaShieldAlt /> Restricted Access
+              <IconShield size={12} /> Restricted Access
             </motion.div>
             
             <ScrollRevealText 
@@ -88,7 +88,7 @@ const LoginPage = () => {
             <div className="space-y-8">
               <div className="space-y-3 group">
                 <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-                  <FaEnvelope className="text-xs" /> Email Address
+                  <IconEnvelope size={12} /> Email Address
                 </label>
                 <input
                   type="email"
@@ -103,7 +103,7 @@ const LoginPage = () => {
 
               <div className="space-y-3 group">
                 <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-                  <FaLock className="text-xs" /> Password
+                  <IconLock size={12} /> Password
                 </label>
                 <input
                   type="password"
@@ -126,7 +126,7 @@ const LoginPage = () => {
                 <span className="text-[11px] font-black uppercase tracking-[0.4em]">
                   {loading ? 'Signing in...' : 'Sign In'}
                 </span>
-                {loading ? <FaSpinner className="animate-spin" /> : <FaArrowRight className="text-xs group-hover:translate-x-2 transition-transform" /> }
+                {loading ? <IconSpinner size={14} className="animate-spin" /> : <IconArrowRight size={12} className="group-hover:translate-x-2 transition-transform" /> }
               </div>
             </button>
           </form>
@@ -134,7 +134,7 @@ const LoginPage = () => {
 
         <div className="mt-12 text-center">
             <Link href="/" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 hover:text-uiupc-orange transition-colors">
-              <FaArrowLeft className="text-xs" /> Go Home
+              <IconArrowLeft size={12} /> Go Home
             </Link>
         </div>
       </div>

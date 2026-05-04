@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { FaArrowLeft, FaCamera, FaSearch } from 'react-icons/fa';
+import { motion } from 'motion/react';
+import { IconArrowLeft, IconCamera, IconSearch } from '@/components/shared/Icons';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
 
 export default function NotFound() {
@@ -28,7 +28,7 @@ export default function NotFound() {
           animate={{ opacity: 1, scale: 1 }}
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-[0.3em] mb-12"
         >
-          <FaSearch /> Error 404
+          <IconSearch size={12} /> Error 404
         </motion.div>
 
         <div className="mb-12">
@@ -69,7 +69,7 @@ export default function NotFound() {
       </div>
 
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-20 flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">
-        <FaCamera /> UIUPC Photography Club
+        <IconCamera size={14} /> UIUPC Photography Club
       </div>
     </div>
   );

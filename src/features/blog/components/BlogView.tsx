@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { FaSearch, FaFilter, FaNewspaper, FaFacebookMessenger, FaBullhorn } from 'react-icons/fa';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'motion/react';
+import { IconSearch, IconFilter, IconNewspaper, IconMessenger, IconBullhorn } from '@/components/shared/Icons';
 import BlogCard from './BlogCard';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
 
@@ -50,9 +50,9 @@ const BlogView: React.FC<BlogViewProps> = ({ initialPosts }) => {
   }, [initialPosts, activeTab, searchQuery]);
 
   const tabs = [
-    { id: "all", label: "All Stories", icon: <FaNewspaper /> },
-    { id: "news", label: "Official News", icon: <FaBullhorn /> },
-    { id: "social", label: "Social Feed", icon: <FaFacebookMessenger /> },
+    { id: "all", label: "All Stories", icon: <IconNewspaper size={12} /> },
+    { id: "news", label: "Official News", icon: <IconBullhorn size={12} /> },
+    { id: "social", label: "Social Feed", icon: <IconMessenger size={12} /> },
   ];
 
   return (
@@ -87,7 +87,7 @@ const BlogView: React.FC<BlogViewProps> = ({ initialPosts }) => {
           >
             {/* Search Input */}
             <div className="relative group border-b border-black/5 dark:border-white/5">
-              <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 transition-colors group-focus-within:text-uiupc-orange" />
+              <IconSearch size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 transition-colors group-focus-within:text-uiupc-orange" />
               <input 
                 type="text"
                 placeholder="Search stories..."
@@ -106,7 +106,7 @@ const BlogView: React.FC<BlogViewProps> = ({ initialPosts }) => {
                     onClick={() => setActiveTab(tab.id)}
                     className="relative py-3 group flex items-center gap-2 whitespace-nowrap"
                   >
-                    <span className={`text-[10px] transition-colors duration-300 ${activeTab === tab.id ? 'text-uiupc-orange' : 'text-zinc-400'}`}>
+                    <span className={`transition-colors duration-300 ${activeTab === tab.id ? 'text-uiupc-orange' : 'text-zinc-400'}`}>
                       {tab.icon}
                     </span>
                     <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${
@@ -148,7 +148,7 @@ const BlogView: React.FC<BlogViewProps> = ({ initialPosts }) => {
                 ))
               ) : (
                 <div className="py-32 text-center space-y-4">
-                  <FaFilter className="mx-auto text-4xl text-zinc-200 dark:text-zinc-800" />
+                  <IconFilter size={40} className="mx-auto text-zinc-200 dark:text-zinc-800" />
                   <p className="text-zinc-400 font-bold uppercase tracking-widest text-xs">No matching posts found</p>
                 </div>
               )}

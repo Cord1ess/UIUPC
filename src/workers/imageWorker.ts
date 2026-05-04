@@ -3,8 +3,7 @@ export type WorkerMessage =
   | { type: 'PROCESS_EDITORIAL'; payload: any }
   | { type: 'PROCESS_SPLIT'; payload: any }
   | { type: 'PROCESS_STITCH'; payload: any }
-  | { type: 'PROCESS_COLLAGE'; payload: any }
-  | { type: 'PROCESS_ERASE'; payload: any };
+  | { type: 'PROCESS_COLLAGE'; payload: any };
 
 self.addEventListener('message', async (e: MessageEvent<WorkerMessage & { id: string }>) => {
   const { type, payload, id } = e.data;
@@ -338,31 +337,6 @@ self.addEventListener('message', async (e: MessageEvent<WorkerMessage & { id: st
         bitmaps.forEach(b => b.close());
       }
     }
-
-    else if (type === 'PROCESS_ERASE') {
-      const { blob } = payload;
-      
-      // We dynamically import here so it doesn't inflate the general worker size
-      // unless the user specifically hits the Eraser tool.
-      const { removeBackground } = await import('@imgly/background-removal');
-
-      self.postMessage({ type: 'STATUS', message: 'Downloading ML Model (40MB)', id });
-
-      const config = {
-        progress: (key: string, current: number, total: number) => {
-          self.postMessage({ 
-             type: 'PROGRESS', 
-             message: `Loading ML Model: ${Math.round((current / total) * 100)}%`,
-             id 
-          });
-        }
-      };
-
-      const resultBlob = await removeBackground(blob, config);
-      
-      self.postMessage({ type: 'SUCCESS', resultBlob, id });
-    }
-
   } catch (error) {
     self.postMessage({ type: 'ERROR', error: (error as Error).message, id });
   }

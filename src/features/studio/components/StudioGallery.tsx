@@ -2,8 +2,8 @@
 
 import React from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaPlus, FaTimes, FaCheckCircle } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { IconPlus, IconClose, IconCheckCircle } from "@/components/shared/Icons";
+import { motion, AnimatePresence } from "motion/react";
 
 const StudioGallery: React.FC = () => {
   const { images, activeImageId, setActiveImage, removeImage } = useStudioStore();
@@ -21,7 +21,7 @@ const StudioGallery: React.FC = () => {
          >
             <div className={`w-6 h-1 rounded-full bg-zinc-200 dark:bg-zinc-800 transition-all ${isCollapsed ? 'translate-y-1' : ''}`} />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-               {isCollapsed ? <FaPlus className="text-[10px]" /> : <FaTimes className="text-[10px]" />}
+               {isCollapsed ? <IconPlus size={10} /> : <IconClose size={10} />}
             </div>
          </button>
       </div>
@@ -49,7 +49,7 @@ const StudioGallery: React.FC = () => {
               
               {image.history.length > 1 && (
                 <div className="absolute top-1 right-1 p-0.5 bg-uiupc-orange rounded-full">
-                   <FaCheckCircle className="text-[8px] text-white" />
+                   <IconCheckCircle size={8} className="text-white" />
                 </div>
               )}
 
@@ -60,7 +60,7 @@ const StudioGallery: React.FC = () => {
                 }}
                 className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
-                <FaTimes className="text-white text-sm" />
+                <IconClose size={14} className="text-white" />
               </button>
             </motion.div>
           ))}
@@ -68,7 +68,7 @@ const StudioGallery: React.FC = () => {
 
         {images.length > 0 && images.length < 20 && (
            <div className="shrink-0 w-20 h-20 rounded-lg border-2 border-dashed border-black/10 dark:border-white/10 flex flex-col items-center justify-center text-zinc-400 hover:border-uiupc-orange hover:text-uiupc-orange transition-all cursor-pointer bg-black/5 dark:bg-white/5">
-              <FaPlus className="text-sm" />
+              <IconPlus size={14} />
            </div>
         )}
       </div>

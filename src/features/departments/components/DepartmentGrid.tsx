@@ -1,18 +1,18 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import Link from 'next/link';
-import { FaPalette, FaCamera, FaUsers, FaGlobe, FaCalendarCheck, FaClipboardList } from 'react-icons/fa';
+import { IconPalette, IconCamera, IconUsers, IconGlobe, IconCalendarCheck, IconClipboardList } from '@/components/shared/Icons';
 import { Department } from '@/types';
 
 const departmentIcons: Record<string, any> = {
-  design: FaPalette,
-  visual: FaCamera,
-  hr: FaUsers,
-  pr: FaGlobe,
-  event: FaCalendarCheck,
-  organizing: FaClipboardList,
+  design: IconPalette,
+  visual: IconCamera,
+  hr: IconUsers,
+  pr: IconGlobe,
+  event: IconCalendarCheck,
+  organizing: IconClipboardList,
 };
 
 const departmentColors: Record<string, string> = {
@@ -28,7 +28,7 @@ export const DepartmentGrid = ({ departments }: { departments: Department[] }) =
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-12">
       {departments.map((dept, index) => {
-        const Icon = departmentIcons[dept.name] || FaUsers;
+        const Icon = departmentIcons[dept.name] || IconUsers;
         return (
           <motion.div
             key={dept.id}
@@ -45,7 +45,7 @@ export const DepartmentGrid = ({ departments }: { departments: Department[] }) =
               
               <div className="relative z-10">
                 <div className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-uiupc-orange group-hover:text-white transition-all duration-500">
-                  <Icon className="text-2xl" />
+                  <Icon size={24} />
                 </div>
                 
                 <h3 className="text-2xl font-black uppercase tracking-tight mb-3 dark:text-white group-hover:text-uiupc-orange transition-colors">

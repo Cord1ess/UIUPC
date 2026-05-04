@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes, FaHistory, FaUserTie, FaCrown } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'motion/react';
+import { IconClose, IconHistory, IconUserTie, IconCrown } from '@/components/shared/Icons';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { getImageUrl } from '@/utils/imageUrl';
 
@@ -38,7 +38,7 @@ export const Admin_MemberTrajectory: React.FC<Admin_MemberTrajectoryProps> = ({ 
             <div className="p-8 md:p-10 border-b border-black/5 dark:border-white/5 flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-uiupc-orange/10 flex items-center justify-center text-uiupc-orange">
-                  <FaHistory className="text-xl" />
+                   <IconHistory size={20} />
                 </div>
                 <div>
                   <h3 className="text-2xl font-black uppercase tracking-tighter dark:text-white">Role History</h3>
@@ -46,7 +46,7 @@ export const Admin_MemberTrajectory: React.FC<Admin_MemberTrajectoryProps> = ({ 
                 </div>
               </div>
               <button onClick={onClose} className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:text-red-500 transition-all flex items-center justify-center group">
-                <FaTimes className="group-hover:rotate-90 transition-transform" />
+                 <IconClose size={16} className="group-hover:rotate-90 transition-transform" />
               </button>
             </div>
 
@@ -67,7 +67,7 @@ export const Admin_MemberTrajectory: React.FC<Admin_MemberTrajectoryProps> = ({ 
               ) : !history || history.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
                   <div className="w-16 h-16 rounded-[2rem] bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-zinc-300 dark:text-zinc-600 mb-4">
-                    <FaHistory size={20} />
+                     <IconHistory size={20} />
                   </div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">No History Found</p>
                   <p className="text-[9px] text-zinc-500 mt-2">This student ID has no recorded committee roles.</p>
@@ -95,7 +95,7 @@ export const Admin_MemberTrajectory: React.FC<Admin_MemberTrajectoryProps> = ({ 
                             </div>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-zinc-300 dark:text-zinc-600">
-                              <FaUserTie size={24} />
+                               <IconUserTie size={24} />
                             </div>
                           )}
                         </div>
@@ -108,7 +108,7 @@ export const Admin_MemberTrajectory: React.FC<Admin_MemberTrajectoryProps> = ({ 
                           </div>
                           <h4 className="text-xl font-black uppercase tracking-tight dark:text-white">{role.member_name}</h4>
                           <div className="flex items-center gap-2 mt-1 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-                            <FaCrown className="text-uiupc-orange text-[10px]" /> {role.designation}
+                             <IconCrown size={10} className="text-uiupc-orange" /> {role.designation}
                           </div>
                         </div>
                       </div>

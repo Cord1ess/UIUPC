@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { FaLinkedin, FaInstagram, FaGlobe, FaFacebook } from 'react-icons/fa';
+import { motion } from 'motion/react';
+import { IconLinkedin, IconInstagram, IconGlobe, IconFacebook, IconEnvelope } from '@/components/shared/Icons';
 import { getImageUrl } from '@/utils/imageUrl';
 
 interface MemberCardProps {
@@ -13,6 +13,7 @@ interface MemberCardProps {
     role: string;
     department?: string;
     profileImage?: string;
+    email?: string;
     facebook?: string;
     instagram?: string;
     linkedin?: string;
@@ -60,22 +61,22 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, priority = false }) => 
         {/* Social Overlay - High Fidelity Action */}
         <div className="absolute inset-0 flex flex-col items-center justify-end p-8 gap-4 translate-y-8 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-700 ease-[0.16, 1, 0.3, 1]">
           <div className="flex gap-4">
+            {member.email && (
+              <motion.a 
+                whileHover={{ y: -4, scale: 1.1 }}
+                href={`mailto:${member.email}`}
+                className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-uiupc-orange hover:border-uiupc-orange transition-all"
+              >
+                <IconEnvelope size={18} />
+              </motion.a>
+            )}
             {member.facebook && (
               <motion.a 
                 whileHover={{ y: -4, scale: 1.1 }}
                 href={member.facebook} target="_blank" rel="noopener noreferrer" 
                 className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-uiupc-orange hover:border-uiupc-orange transition-all"
               >
-                <FaFacebook className="text-lg" />
-              </motion.a>
-            )}
-            {member.instagram && (
-              <motion.a 
-                whileHover={{ y: -4, scale: 1.1 }}
-                href={member.instagram} target="_blank" rel="noopener noreferrer" 
-                className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-uiupc-orange hover:border-uiupc-orange transition-all"
-              >
-                <FaInstagram className="text-lg" />
+                <IconFacebook size={18} />
               </motion.a>
             )}
             {member.linkedin && (
@@ -84,16 +85,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, priority = false }) => 
                 href={member.linkedin} target="_blank" rel="noopener noreferrer" 
                 className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-uiupc-orange hover:border-uiupc-orange transition-all"
               >
-                <FaLinkedin className="text-lg" />
-              </motion.a>
-            )}
-            {member.website && (
-              <motion.a 
-                whileHover={{ y: -4, scale: 1.1 }}
-                href={member.website} target="_blank" rel="noopener noreferrer" 
-                className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-uiupc-orange hover:border-uiupc-orange transition-all"
-              >
-                <FaGlobe className="text-lg" />
+                <IconLinkedin size={18} />
               </motion.a>
             )}
           </div>
@@ -109,6 +101,11 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, priority = false }) => 
           <h3 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white leading-[0.9] uppercase tracking-tighter">
             {member.name}
           </h3>
+          {member.email && (
+            <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 lowercase mt-1">
+              {member.email}
+            </p>
+          )}
         </div>
         
         <div className="h-[1px] w-12 bg-black/5 dark:bg-white/5 mx-auto transition-all duration-700 group-hover:w-24 group-hover:bg-uiupc-orange/30" />

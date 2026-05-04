@@ -3,8 +3,8 @@
 import React, { useState, useCallback } from "react";
 import Cropper, { Area, Point } from "react-easy-crop";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaCrop, FaUndo, FaSync, FaCheckCircle, FaExclamationTriangle, FaExpandArrowsAlt } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { IconCrop, IconUndo, IconSync, IconCheckCircle, IconWarning, IconExpandArrows } from "@/components/shared/Icons";
+import { motion, AnimatePresence } from "motion/react";
 import { getSmartScale } from "@/lib/imageUtils";
 
 const ASPECT_RATIOS = [
@@ -28,7 +28,7 @@ const CropperTool: React.FC = () => {
 
   if (!activeImage) return (
     <div className="flex flex-col items-center justify-center p-12 text-center space-y-4">
-       <FaExclamationTriangle className="text-2xl text-zinc-300" />
+       <IconWarning size={24} className="text-zinc-300" />
        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-black">No Image Selected</p>
     </div>
   );
@@ -171,14 +171,14 @@ const CropperTool: React.FC = () => {
             disabled={isProcessing}
             className="w-full py-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-50"
           >
-            {isProcessing ? "Processing..." : <><FaCrop /> Apply Crop</>}
+            {isProcessing ? "Processing..." : <><IconCrop size={14} /> Apply Crop</>}
           </button>
           
           <button 
             onClick={() => handleUpdate({ crop: { x: 0, y: 0 }, zoom: 1, rotation: 0, aspect: undefined })}
             className="w-full py-3 rounded-xl border border-black/5 dark:border-white/5 text-zinc-400 text-[9px] font-black uppercase tracking-widest hover:bg-black/5 transition-all flex items-center justify-center gap-2"
           >
-            <FaUndo /> Reset
+            <IconUndo size={12} /> Reset
           </button>
       </div>
     </div>

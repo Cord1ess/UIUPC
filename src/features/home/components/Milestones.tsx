@@ -1,13 +1,13 @@
 "use client";
 import React, { useRef } from "react";
 import {
-  FaUsers,
-  FaCalendarAlt,
-  FaTrophy,
-  FaPhotoVideo,
-} from "react-icons/fa";
-import { IconType } from "react-icons";
-import { motion } from "framer-motion";
+  IconUsers,
+  IconCalendar,
+  IconTrophy,
+  IconPhotoVideo,
+  IconType,
+} from "@/components/shared/Icons";
+import { motion } from "motion/react";
 import ScrollRevealText from "@/components/motion/ScrollRevealText";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -24,7 +24,7 @@ const milestones: MilestoneItem[] = [
   {
     number: "100",
     label: "Active Members",
-    icon: FaUsers,
+    icon: IconUsers,
     color: "#f58920",
     suffix: "+",
     description: "University Students",
@@ -32,7 +32,7 @@ const milestones: MilestoneItem[] = [
   {
     number: "50",
     label: "Events Organized",
-    icon: FaCalendarAlt,
+    icon: IconCalendar,
     color: "#2196F3",
     suffix: "+",
     description: "Annually Held",
@@ -40,7 +40,7 @@ const milestones: MilestoneItem[] = [
   {
     number: "25",
     label: "Awards Won",
-    icon: FaTrophy,
+    icon: IconTrophy,
     color: "#FFC107",
     suffix: "+",
     description: "National Scale",
@@ -48,7 +48,7 @@ const milestones: MilestoneItem[] = [
   {
     number: "100",
     label: "Skill Workshops",
-    icon: FaPhotoVideo,
+    icon: IconPhotoVideo,
     color: "#9C27B0",
     suffix: "+",
     description: "Training Sessions",
@@ -67,7 +67,7 @@ const Milestones: React.FC = () => {
       y: 0, 
       transition: { duration: 0.6, ease: "easeOut" } 
     }
-  };
+  } as any;
 
   // Icon animation variants for scroll-trigger (Mobile) and hover (Desktop)
   const iconVariants = {
@@ -82,7 +82,7 @@ const Milestones: React.FC = () => {
       opacity: 1,
       transition: { duration: 0.4 } 
     }
-  };
+  } as any;
 
   return (
     <section className="px-6 pt-4 pb-12" ref={containerRef}>
@@ -149,7 +149,7 @@ const Milestones: React.FC = () => {
                   whileHover="active"
                   className="flex-shrink-0 relative z-10 text-zinc-400/20 dark:text-white/5 lg:group-hover:text-uiupc-orange lg:group-hover:scale-110 transition-all duration-300"
                 >
-                  <Icon className="text-5xl md:text-6xl" />
+                  <Icon size={48} />
                 </motion.div>
 
                 {/* Mobile Glow Overlay (triggered by whileInView on icon) */}

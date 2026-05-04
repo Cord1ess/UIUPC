@@ -2,30 +2,27 @@
 
 import React, { useState, useEffect } from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-// @ts-ignore
-import piexif from "piexifjs";
-import ExifReader from "exifreader";
 import { 
-  FaCheckCircle,
-  FaUserEdit,
-  FaCopyright,
-  FaTag,
-  FaFingerprint,
-  FaInfoCircle,
-  FaEdit,
-  FaImage,
-  FaRulerCombined,
-  FaFile,
-  FaCalendarAlt,
-  FaCamera,
-  FaMicrochip,
-  FaLayerGroup,
-  FaSlidersH,
-  FaCrosshairs,
-  FaClock,
-  FaBullseye,
-  FaAdjust
-} from "react-icons/fa";
+  IconCheckCircle,
+  IconUserEdit,
+  IconCopyright,
+  IconTag,
+  IconFingerprint,
+  IconInfoCircle,
+  IconEdit,
+  IconImage,
+  IconRulerCombined,
+  IconFile,
+  IconCalendarAlt,
+  IconCamera,
+  IconMicrochip,
+  IconLayerGroup,
+  IconSlidersH,
+  IconCrosshairs,
+  IconClock,
+  IconBullseye,
+  IconAdjust
+} from "@/components/shared/Icons";
 
 const MetadataTool: React.FC = () => {
   const { images, activeImageId, updateImageEdits, applyProcessedImage } = useStudioStore();
@@ -56,6 +53,7 @@ const MetadataTool: React.FC = () => {
     // Load deep EXIF using ExifReader (More comprehensive than piexif)
     const loadExif = async () => {
       try {
+        const ExifReader = (await import("exifreader")).default;
         const tags = await ExifReader.load(activeImage.workingUrl);
         const groups: Record<string, Record<string, string>> = {
           "Technical Settings": {},
@@ -138,6 +136,7 @@ const MetadataTool: React.FC = () => {
       const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.95);
 
       let finalDataUrl = jpegDataUrl;
+      const piexif = (await import("piexifjs")).default;
 
       // Apply EXIF Modifications via piexifjs
       if (metadataSettings.stripExif) {
@@ -180,19 +179,19 @@ const MetadataTool: React.FC = () => {
   };
 
   const INFO_ICONS: Record<string, React.ReactNode> = {
-    "Dimensions": <FaRulerCombined />,
-    "Aspect Ratio": <FaImage />,
-    "File Size": <FaFile />,
-    "Format": <FaFile />,
-    "Manufacturer": <FaCamera />,
-    "Model": <FaMicrochip />,
-    "Captured": <FaCalendarAlt />,
-    "Shutter": <FaClock />,
-    "Aperture": <FaBullseye />,
-    "ISO": <FaAdjust />,
-    "Focal Length": <FaCrosshairs />,
-    "Lens": <FaLayerGroup />,
-    "Software": <FaEdit />
+    "Dimensions": <IconRulerCombined size={10} />,
+    "Aspect Ratio": <IconImage size={10} />,
+    "File Size": <IconFile size={10} />,
+    "Format": <IconFile size={10} />,
+    "Manufacturer": <IconCamera size={10} />,
+    "Model": <IconMicrochip size={10} />,
+    "Captured": <IconCalendarAlt size={10} />,
+    "Shutter": <IconClock size={10} />,
+    "Aperture": <IconBullseye size={10} />,
+    "ISO": <IconAdjust size={10} />,
+    "Focal Length": <IconCrosshairs size={10} />,
+    "Lens": <IconLayerGroup size={10} />,
+    "Software": <IconEdit size={10} />
   };
 
   return (
@@ -206,7 +205,7 @@ const MetadataTool: React.FC = () => {
               ? "bg-zinc-900 dark:bg-white text-white dark:text-black border-zinc-900 dark:border-white" 
               : "bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 text-zinc-400 hover:text-zinc-600"}`}
         >
-          <FaInfoCircle className="inline mr-2" />View Info
+          <IconInfoCircle size={10} className="inline mr-2" />View Info
         </button>
         <button 
           onClick={() => setActiveTab("modify")}
@@ -215,7 +214,7 @@ const MetadataTool: React.FC = () => {
               ? "bg-zinc-900 dark:bg-white text-white dark:text-black border-zinc-900 dark:border-white" 
               : "bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 text-zinc-400 hover:text-zinc-600"}`}
         >
-          <FaEdit className="inline mr-2" />Modify EXIF
+          <IconEdit size={10} className="inline mr-2" />Modify EXIF
         </button>
       </div>
 
@@ -223,7 +222,7 @@ const MetadataTool: React.FC = () => {
         /* === VIEW TAB === */
         <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
           <div className="flex items-center gap-2 mb-2">
-            <FaFingerprint className="text-uiupc-orange text-xs" />
+            <IconFingerprint size={12} className="text-uiupc-orange" />
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Payload Integrity</span>
           </div>
 
@@ -231,7 +230,7 @@ const MetadataTool: React.FC = () => {
             {Object.entries(imageInfo).map(([key, value]) => (
               <div key={key} className="flex items-center justify-between py-4 px-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5">
                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
-                  {INFO_ICONS[key] || <FaInfoCircle />} {key}
+                  {INFO_ICONS[key] || <IconInfoCircle size={10} />} {key}
                 </span>
                 <span className="text-[10px] font-mono text-zinc-800 dark:text-zinc-200">{value}</span>
               </div>
@@ -253,7 +252,7 @@ const MetadataTool: React.FC = () => {
                       {Object.entries(content).map(([key, value]) => (
                         <div key={key} className="flex items-center justify-between py-4 px-5 rounded-2xl bg-black/4 dark:bg-white/4 border border-black/5 dark:border-white/5">
                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
-                             {INFO_ICONS[key] || <FaInfoCircle />} {key}
+                             {INFO_ICONS[key] || <IconInfoCircle size={10} />} {key}
                            </span>
                            <span className="text-[10px] font-mono text-zinc-800 dark:text-zinc-200 truncate max-w-[140px]">{value}</span>
                         </div>
@@ -268,7 +267,7 @@ const MetadataTool: React.FC = () => {
         /* === MODIFY TAB === */
         <div className="space-y-8">
           <div className="flex items-center gap-2 mb-2">
-            <FaFingerprint className="text-uiupc-orange text-xs" />
+            <IconFingerprint size={12} className="text-uiupc-orange" />
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Modify Data</span>
           </div>
 
@@ -295,9 +294,9 @@ const MetadataTool: React.FC = () => {
           {!metadataSettings.stripExif && (
             <div className="space-y-6">
                {[
-                 { key: "Author", label: "Author Override", icon: <FaUserEdit />, placeholder: "e.g. Jonayed" },
-                 { key: "Copyright", label: "Copyright Override", icon: <FaCopyright />, placeholder: "e.g. © 2026 UIUPC" },
-                 { key: "Keywords", label: "Software Tag", icon: <FaTag />, placeholder: "e.g. Edited with UIUPC Studio" },
+                 { key: "Author", label: "Author Override", icon: <IconUserEdit size={10} />, placeholder: "e.g. Jonayed" },
+                 { key: "Copyright", label: "Copyright Override", icon: <IconCopyright size={10} />, placeholder: "e.g. © 2026 UIUPC" },
+                 { key: "Keywords", label: "Software Tag", icon: <IconTag size={10} />, placeholder: "e.g. Edited with UIUPC Studio" },
                ].map((field) => (
                  <div key={field.key} className="space-y-3">
                     <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
@@ -320,7 +319,7 @@ const MetadataTool: React.FC = () => {
             disabled={isProcessing}
             className="w-full py-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3"
           >
-            {isProcessing ? "Recompiling Hex..." : <><FaCheckCircle /> Commit Modifications</>}
+            {isProcessing ? "Recompiling Hex..." : <><IconCheckCircle size={14} /> Commit Modifications</>}
           </button>
         </div>
       )}

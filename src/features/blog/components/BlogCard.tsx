@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaShareAlt, FaFacebook, FaClock, FaTag, FaArrowRight } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'motion/react';
+import { IconShareAlt, IconFacebook, IconClock, IconTag, IconArrowRight } from '@/components/shared/Icons';
 import BlogCarousel from './BlogCarousel';
 
 interface BlogCardProps {
@@ -102,7 +102,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
             >
               <div className="w-8 h-[2px] bg-uiupc-orange transition-all group-hover/btn:w-16" />
               <span>{isExpanded ? "Show Less" : "Read More"}</span>
-              <FaArrowRight className={`text-[8px] transition-transform ${isExpanded ? '-rotate-90' : 'group-hover/btn:translate-x-2'}`} />
+              <IconArrowRight size={10} className={`transition-transform ${isExpanded ? '-rotate-90' : 'group-hover/btn:translate-x-2'}`} />
             </button>
           )}
         </div>
@@ -117,7 +117,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
               rel="noopener noreferrer"
               className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] text-zinc-900 dark:text-white hover:text-uiupc-orange transition-all"
             >
-              <FaFacebook className="text-lg" />
+              <IconFacebook size={18} />
               <span>Facebook</span>
             </motion.a>
           )}
@@ -127,7 +127,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
             onClick={handleShare}
             className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
           >
-            <FaShareAlt className="text-lg" />
+            <IconShareAlt size={18} />
             <span>Share</span>
           </motion.button>
         </div>

@@ -2,14 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaTimes, FaDownload, FaArchive, FaListUl, FaCog, FaImages, FaSlidersH } from "react-icons/fa";
-import JSZip from "jszip";
-import ExhibitionBuilder from "./ExhibitionBuilder";
+import { IconClose, IconDownload, IconArchive, IconListUl, IconCog, IconImages, IconSlidersH } from "@/components/shared/Icons";
 import { createPortal } from "react-dom";
-// @ts-ignore
-import UTIF from "utif";
-import { GifWriter } from "omggif";
 import { bakeImageToCanvas } from "@/lib/bakeEngine";
+
+import ExhibitionBuilder from "./ExhibitionBuilder";
 
 const LOSSLESS_FORMATS = ["image/png", "image/bmp", "image/gif", "image/tiff"];
 
@@ -83,6 +80,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
         const imgData = ctx.getImageData(0, 0, exportWidth, exportHeight).data;
         const { palette, indices } = generatePaletteAndIndices(imgData);
         const buffer = new Uint8Array(exportWidth * exportHeight * 4 + 1024); 
+        const { GifWriter } = await import("omggif");
         const gifWriter = new GifWriter(buffer as any, exportWidth, exportHeight, { loop: 0 });
         gifWriter.addFrame(0, 0, exportWidth, exportHeight, indices as any, { palette: palette as any });
         return new Blob([buffer.subarray(0, gifWriter.end())], { type: "image/gif" });
@@ -90,6 +88,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
 
      if (targetMime === "image/tiff") {
         const imgData = ctx.getImageData(0, 0, exportWidth, exportHeight).data;
+        // @ts-ignore
+        const UTIF = (await import("utif")).default;
         const outBuffer = UTIF.encodeImage(imgData, exportWidth, exportHeight);
         return new Blob([outBuffer], { type: "image/tiff" });
      }
@@ -174,6 +174,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
 
   const handleZipAll = async () => {
      setIsProcessing(true);
+     const JSZip = (await import("jszip")).default;
      const zip = new JSZip();
      const extension = getExtension(format);
      const folder = zip.folder(`UIUPC_Studio_Export_${Date.now()}`);
@@ -206,7 +207,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
         <div className="flex items-center justify-between p-6 border-b border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-zinc-900/50">
            <div className="flex items-center gap-4">
               <div className="p-3 bg-uiupc-orange/10 text-uiupc-orange rounded-xl">
-                 <FaDownload className="text-xl" />
+                 <IconDownload size={20} />
               </div>
               <div>
                  <h2 className="text-xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white leading-none">Export Hub</h2>
@@ -215,14 +216,14 @@ const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
            </div>
            
            <button onClick={onClose} className="p-3 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-             <FaTimes className="text-zinc-500" />
+             <IconClose size={16} className="text-zinc-500" />
            </button>
         </div>
 
         {/* Shared Output Settings Bar */}
         <div className="px-6 py-4 border-b border-black/5 dark:border-white/5 bg-zinc-50/50 dark:bg-zinc-900/30 space-y-4">
           <div className="flex items-center gap-2 mb-3">
-            <FaSlidersH className="text-[10px] text-zinc-400" />
+            <IconSlidersH size={10} className="text-zinc-400" />
             <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Output Settings</span>
           </div>
 
@@ -290,14 +291,14 @@ const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
              className={`px-6 py-3 rounded-t-xl text-xs font-black uppercase tracking-widest transition-all
                ${activeTab === "standard" ? "bg-black/5 dark:bg-white/5 text-zinc-900 dark:text-white border-t border-x border-black/5 dark:border-white/5" : "text-zinc-400 hover:text-zinc-600"}`}
            >
-             <div className="flex items-center gap-2"><FaCog /> Standard Pipeline</div>
+             <div className="flex items-center gap-2"><IconCog size={12} /> Standard Pipeline</div>
            </button>
            <button 
              onClick={() => setActiveTab("exhibition")}
              className={`px-6 py-3 rounded-t-xl text-xs font-black uppercase tracking-widest transition-all
                ${activeTab === "exhibition" ? "bg-uiupc-orange/10 text-uiupc-orange border-t border-x border-uiupc-orange/20" : "text-zinc-400 hover:text-zinc-600"}`}
            >
-             <div className="flex items-center gap-2"><FaListUl /> Exhibition Mode</div>
+             <div className="flex items-center gap-2"><IconListUl size={12} /> Exhibition Mode</div>
            </button>
         </div>
 
@@ -318,7 +319,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
                         disabled={isProcessing}
                         className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all disabled:opacity-50"
                       >
-                         <FaDownload className="text-2xl text-zinc-400" />
+                         <IconDownload size={24} className="text-zinc-400" />
                          <span className="text-[10px] font-black uppercase tracking-widest">Active Only</span>
                       </button>
 
@@ -327,7 +328,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
                         disabled={isProcessing}
                         className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all disabled:opacity-50"
                       >
-                         <FaImages className="text-2xl text-zinc-400" />
+                         <IconImages size={24} className="text-zinc-400" />
                          <span className="text-[10px] font-black uppercase tracking-widest text-center mt-auto">Batch Output<br/>(<span className="text-uiupc-orange">{images.length} files</span>)</span>
                       </button>
 
@@ -336,7 +337,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
                         disabled={isProcessing}
                         className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-uiupc-orange text-white hover:scale-105 active:scale-95 shadow-[0_10px_30px_rgba(255,107,0,0.3)] transition-all disabled:opacity-50"
                       >
-                         <FaArchive className="text-2xl" />
+                         <IconArchive size={24} />
                          <span className="text-[10px] font-black uppercase tracking-widest text-center mt-auto">Package ZIP<br/><span className="opacity-80">{images.length} files</span></span>
                       </button>
 

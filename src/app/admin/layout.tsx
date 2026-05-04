@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { AdminDataProvider } from "@/contexts/AdminDataContext";
 import { Admin_Sidebar } from '@/features/admin/components/core/Admin_Sidebar';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function AdminLayout({
   children,
@@ -15,18 +16,22 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  // Determine active tab from pathname (e.g., /admin/members -> membership)
-  const getActiveTab = () => {
+  const activeTab = useMemo(() => {
     if (pathname === '/admin') return 'overview';
     if (pathname.startsWith('/admin/members')) return 'membership';
     if (pathname.startsWith('/admin/committee')) return 'committee';
     if (pathname.startsWith('/admin/submissions')) return 'photos';
     if (pathname.startsWith('/admin/events')) return 'events';
+    if (pathname.startsWith('/admin/blog')) return 'blog';
+    if (pathname.startsWith('/admin/gallery')) return 'gallery';
+    if (pathname.startsWith('/admin/departments')) return 'departments';
+    if (pathname.startsWith('/admin/achievements')) return 'achievements';
     if (pathname.startsWith('/admin/finances')) return 'finance';
+    if (pathname.startsWith('/admin/audit')) return 'audit';
+    if (pathname.startsWith('/admin/admins')) return 'admins';
+    if (pathname.startsWith('/admin/event_map')) return 'event_map';
     return 'overview';
-  };
-
-  const activeTab = getActiveTab();
+  }, [pathname]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -36,36 +41,42 @@ export default function AdminLayout({
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-12 h-12 border-[3px] border-black/10 dark:border-white/10 border-t-uiupc-orange rounded-full animate-spin" />
+      <div className="min-h-screen bg-white dark:bg-[#0d0d0d] flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-zinc-100/50 dark:bg-grid-white/[0.02] -z-10" />
+        <div className="flex flex-col items-center gap-6">
+           <div className="w-16 h-16 border-4 border-zinc-100 dark:border-zinc-800 border-t-uiupc-orange rounded-full animate-spin" />
+           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">Authenticating...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <AdminDataProvider>
-      <div className="flex min-h-screen bg-[#f9f5ea] dark:bg-[#0a0a0a] transition-colors duration-500 pt-0 overflow-hidden">
+      <div className="flex min-h-screen bg-[#fcfcfc] dark:bg-[#0d0d0d] transition-colors duration-500 relative isolate">
+        
+        {/* Background Texture */}
+        <div className="fixed inset-0 bg-grid-zinc-100/50 dark:bg-grid-white/[0.02] pointer-events-none -z-10" />
+        
         <Admin_Sidebar 
           activeTab={activeTab} 
-          setActiveTab={(tab) => {
-            // This is just for backward compatibility during transition
-            const routes: Record<string, string> = {
-              overview: '/admin',
-              membership: '/admin/members',
-              committee: '/admin/committee',
-              photos: '/admin/submissions',
-              events: '/admin/events',
-              finance: '/admin/finances'
-            };
-            if (routes[tab]) router.push(routes[tab]);
-          }} 
           isMobileMenuOpen={false} 
           setIsMobileMenuOpen={() => {}} 
         />
         
-        <main className="flex-1 lg:ml-72 min-w-0 overflow-y-auto no-scrollbar h-screen">
-          <div className="p-8">
-            {children}
+        <main className="flex-1 lg:ml-72 min-w-0 h-screen overflow-y-auto custom-scrollbar relative">
+          <div>
+            <AnimatePresence mode="wait">
+               <motion.div
+                 key={pathname}
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 exit={{ opacity: 0, y: -10 }}
+                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+               >
+                 {children}
+               </motion.div>
+            </AnimatePresence>
           </div>
         </main>
       </div>

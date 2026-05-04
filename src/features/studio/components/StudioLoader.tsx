@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
-import { FaSyncAlt } from "react-icons/fa";
+import { motion } from "motion/react";
+import { IconSync } from "@/components/shared/Icons";
 
 const StudioLoader: React.FC = () => {
   return (
@@ -13,7 +13,7 @@ const StudioLoader: React.FC = () => {
         transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
         className="text-uiupc-orange"
       >
-        <FaSyncAlt className="text-2xl" />
+        <IconSync size={24} />
       </motion.div>
 
       {/* Basic Text Info */}

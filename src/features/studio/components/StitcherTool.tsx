@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaLayerGroup, FaCheckCircle, FaArrowsAltV, FaArrowsAltH, FaTrash } from "react-icons/fa";
+import { IconLayerGroup, IconCheckCircle, IconArrowsAltV, IconArrowsAltH, IconTrash } from "@/components/shared/Icons";
 import { WorkerMessage } from "@/workers/imageWorker";
 
 const StitcherTool: React.FC = () => {
@@ -24,7 +24,7 @@ const StitcherTool: React.FC = () => {
   if (images.length < 2) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-50">
-        <FaLayerGroup className="text-4xl text-zinc-500" />
+        <IconLayerGroup size={40} className="text-zinc-500" />
         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
           Stitcher requires at least 2 images.
         </p>
@@ -93,7 +93,7 @@ const StitcherTool: React.FC = () => {
                ? "bg-zinc-900 dark:bg-white text-white dark:text-black border-zinc-900 dark:border-white" 
                : "bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 text-zinc-500 hover:text-zinc-600"}`}
          >
-           <FaArrowsAltV /> Vertical
+           <IconArrowsAltV size={14} /> Vertical
          </button>
          <button
            onClick={() => setDirection("horizontal")}
@@ -102,7 +102,7 @@ const StitcherTool: React.FC = () => {
                ? "bg-zinc-900 dark:bg-white text-white dark:text-black border-zinc-900 dark:border-white" 
                : "bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 text-zinc-500 hover:text-zinc-600"}`}
          >
-           <FaArrowsAltH /> Horizontal
+           <IconArrowsAltH size={14} /> Horizontal
          </button>
       </div>
 
@@ -149,7 +149,7 @@ const StitcherTool: React.FC = () => {
         disabled={isProcessing || selectedImageIds.length < 2}
         className="w-full py-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3"
       >
-        {isProcessing ? "Stitching Blocks..." : <><FaCheckCircle /> Fuse Selected ({selectedImageIds.length})</>}
+        {isProcessing ? "Stitching Blocks..." : <><IconCheckCircle size={14} /> Fuse Selected ({selectedImageIds.length})</>}
       </button>
 
       <p className="text-[8px] text-zinc-400 uppercase tracking-widest text-center mt-2">Outputs fused image directly into first matrix</p>

@@ -18,7 +18,7 @@
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import DynamicGrid from '@/components/shared/DynamicGrid';
 import ImagePreviewModal from "./ImagePreviewModal";
 import { useLoaderStore } from "@/store/useLoaderStore";

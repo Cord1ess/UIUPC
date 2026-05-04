@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabaseServer";
 import { SubmissionsContainer } from "./SubmissionsContainer";
 import { ExhibitionSubmission } from "@/types/admin";
 
@@ -7,6 +7,7 @@ export default async function SubmissionsPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const supabase = await createClient();
   const params = await searchParams;
   const page = Number(params.page) || 0;
   const search = (params.search as string) || "";
@@ -14,12 +15,13 @@ export default async function SubmissionsPage({
   const pageSize = 12;
 
   let query = supabase
+
     .from("exhibition_submissions")
     .select("*", { count: "exact" });
 
   if (category !== "all") query = query.eq("category", category);
   if (search) {
-    query = query.or(`participant_name.ilike.%${search}%,institution.ilike.%${search}%`);
+    query = query.or(`participant_name.ilike.%${search}%,institute.ilike.%${search}%`);
   }
 
   const { data, count, error } = await query
@@ -27,7 +29,12 @@ export default async function SubmissionsPage({
     .range(page * pageSize, (page + 1) * pageSize - 1);
 
   if (error) {
-    console.error("Error fetching submissions:", error);
+    console.error("Error fetching submissions:", {
+      message: error.message,
+      hint: error.hint,
+      details: error.details,
+      code: error.code
+    });
   }
 
   return (

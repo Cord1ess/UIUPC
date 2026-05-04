@@ -2,12 +2,12 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'motion/react';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { getImageUrl } from '@/utils/imageUrl';
 import ImagePreviewModal from '@/features/home/components/hero/ImagePreviewModal';
 import ScrollRevealText from '@/components/motion/ScrollRevealText';
-import { FaFilter, FaExpandAlt, FaFacebook, FaThLarge, FaColumns, FaSearch, FaChevronDown } from 'react-icons/fa';
+import { IconFilter, IconExpandAlt, IconFacebook, IconThLarge, IconColumns, IconSearch, IconChevronDown } from '@/components/shared/Icons';
 
 const CATEGORIES = [
   { id: 'all', name: 'All Photos' },
@@ -164,7 +164,7 @@ const GalleryView: React.FC = () => {
         >
           {/* Row 1: Search */}
           <div className="relative group border-b border-black/5 dark:border-white/5">
-            <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 transition-colors group-focus-within:text-uiupc-orange" />
+            <IconSearch size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 transition-colors group-focus-within:text-uiupc-orange" />
             <input 
               type="text"
               placeholder="Search moments..."
@@ -210,14 +210,14 @@ const GalleryView: React.FC = () => {
                 onClick={() => setLayoutMode('square')}
                 className={`flex items-center gap-2 px-3 md:px-4 py-1.5 rounded-xl transition-all ${layoutMode === 'square' ? 'bg-white dark:bg-zinc-800 text-uiupc-orange shadow-sm' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'}`}
               >
-                <FaThLarge className="text-xs" />
+                <IconThLarge size={12} />
                 <span className="text-[10px] font-black uppercase tracking-widest">Square</span>
               </button>
               <button 
                 onClick={() => setLayoutMode('masonry')}
                 className={`flex items-center gap-2 px-3 md:px-4 py-1.5 rounded-xl transition-all ${layoutMode === 'masonry' ? 'bg-white dark:bg-zinc-800 text-uiupc-orange shadow-sm' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'}`}
               >
-                <FaColumns className="text-xs" />
+                <IconColumns size={12} />
                 <span className="text-[10px] font-black uppercase tracking-widest">Masonry</span>
               </button>
             </div>
@@ -268,7 +268,7 @@ const GalleryView: React.FC = () => {
 
               {/* Expand Icon Control */}
               <div className="absolute top-4 right-4 w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-[-10px] group-hover:translate-y-0">
-                <FaExpandAlt className="text-xs" />
+                <IconExpandAlt size={12} />
               </div>
 
               {/* Facebook Link (if exists) */}
@@ -280,7 +280,7 @@ const GalleryView: React.FC = () => {
                   onClick={(e) => e.stopPropagation()}
                   className="absolute top-4 left-4 w-10 h-10 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-uiupc-orange"
                 >
-                  <FaFacebook className="text-sm" />
+                  <IconFacebook size={14} />
                 </a>
               )}
             </motion.div>
@@ -292,7 +292,7 @@ const GalleryView: React.FC = () => {
       {sortedPhotos.length === 0 && (
         <div className="py-32 text-center">
           <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-6">
-            <FaFilter className="text-zinc-400" />
+            <IconFilter size={24} className="text-zinc-400" />
           </div>
           <h3 className="text-2xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-2">No Moments Found</h3>
           <p className="text-zinc-500 dark:text-zinc-400 text-[10px] font-black uppercase tracking-widest">Adjust your search or category filters.</p>
@@ -310,7 +310,7 @@ const GalleryView: React.FC = () => {
             className="group flex flex-col items-center gap-4 transition-all active:scale-95"
           >
             <div className="w-16 h-16 bg-white dark:bg-zinc-900 rounded-full flex items-center justify-center border border-black/5 dark:border-white/5 shadow-xl group-hover:border-uiupc-orange transition-all">
-               <FaChevronDown className="text-zinc-400 group-hover:text-uiupc-orange transition-colors group-hover:animate-bounce" />
+               <IconChevronDown size={14} className="text-zinc-400 group-hover:text-uiupc-orange transition-colors group-hover:animate-bounce" />
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-uiupc-orange">Explore More moments</span>
           </button>

@@ -11,9 +11,9 @@
 "use client";
 
 import React, { useEffect, useCallback, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { createPortal } from "react-dom";
-import { IoPause, IoPlay, IoChevronBack, IoChevronForward, IoShareOutline, IoDownloadOutline } from "react-icons/io5";
+import { IconPause, IconPlay, IconChevronLeft, IconChevronRight, IconShare, IconDownload } from "@/components/shared/Icons";
 import { getImageUrl } from "@/utils/imageUrl";
 import type { HeroImage } from "./utils/constants";
 
@@ -165,7 +165,7 @@ const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
             onClick={(e) => { e.stopPropagation(); isFirstRender.current = false; onPrev(); }}
             className="fixed left-4 md:left-12 z-50 p-4 text-white/30 hover:text-white transition-all group"
           >
-            <IoChevronBack className="text-4xl md:text-6xl group-active:scale-90 transition-transform" />
+            <IconChevronLeft size={60} className="group-active:scale-90 transition-transform" />
           </button>
 
           {/* Navigation: Right */}
@@ -173,7 +173,7 @@ const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
             onClick={(e) => { e.stopPropagation(); isFirstRender.current = false; onNext(); }}
             className="fixed right-4 md:right-12 z-50 p-4 text-white/30 hover:text-white transition-all group"
           >
-            <IoChevronForward className="text-4xl md:text-6xl group-active:scale-90 transition-transform" />
+            <IconChevronRight size={60} className="group-active:scale-90 transition-transform" />
           </button>
 
 
@@ -200,7 +200,7 @@ const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
                     : 'bg-black/20 backdrop-blur-md text-white/80 hover:bg-black/50'
                 }`}
               >
-                {isPaused ? <IoPlay className="text-lg ml-0.5" /> : <IoPause className="text-lg" />}
+                {isPaused ? <IconPlay size={18} className="ml-0.5" /> : <IconPause size={18} />}
               </button>
 
               <img
@@ -225,7 +225,7 @@ const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
                   onClick={handleShare}
                   className="px-6 py-3 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-3 hover:bg-white/10 hover:border-white/20 transition-all active:scale-95"
                 >
-                  <IoShareOutline className="text-sm" /> 
+                  <IconShare size={14} /> 
                   {shareStatus === 'success' ? 'Link Copied' : 'Share moment'}
                 </button>
                 
@@ -237,7 +237,7 @@ const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
                     onClick={(e) => e.stopPropagation()}
                     className="px-6 py-3 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-white text-[9px] font-black uppercase tracking-widest flex items-center gap-3 hover:bg-uiupc-orange hover:border-uiupc-orange transition-all active:scale-95"
                   >
-                    <IoPlay className="rotate-[-45deg] text-[8px]" /> View on Facebook
+                    <IconPlay size={8} className="rotate-[-45deg]" /> View on Facebook
                   </a>
                 )}
               </div>

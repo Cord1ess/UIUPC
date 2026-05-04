@@ -3,8 +3,8 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaPlus, FaMinus, FaSearch, FaMapMarkerAlt, FaCompass, FaTimes, FaExternalLinkAlt, FaCalendarAlt, FaMountain } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'motion/react';
+import { IconPlus, IconMinus, IconSearch, IconMapMarkerAlt, IconCompass, IconClose, IconExternalLinkAlt, IconCalendarAlt, IconMountain } from '@/components/shared/Icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { UIUPCEvent } from '@/types';
 import { getImageUrl } from '@/utils/imageUrl';
@@ -173,14 +173,16 @@ export const InteractiveEventMap: React.FC<InteractiveEventMapProps> = ({
       map.on('click', 'clusters', (e) => {
         const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
         const clusterId = features[0].properties.cluster_id;
-        (map.getSource('events-source') as maplibregl.GeoJSONSource).getClusterExpansionZoom(clusterId, (err, zoom) => {
-          if (err) return;
-          map.flyTo({
-            center: (features[0].geometry as any).coordinates,
-            zoom: zoom || 15,
-            duration: 1500
-          });
-        });
+        (map.getSource('events-source') as maplibregl.GeoJSONSource)
+          .getClusterExpansionZoom(clusterId)
+          .then((zoom: number) => {
+            map.flyTo({
+              center: (features[0].geometry as any).coordinates,
+              zoom: zoom || 15,
+              duration: 1500
+            });
+          })
+          .catch((err: any) => console.error("Cluster zoom error:", err));
       });
 
       // Interaction: Click on unclustered point (Popup)
@@ -291,7 +293,7 @@ export const InteractiveEventMap: React.FC<InteractiveEventMapProps> = ({
           >
             <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md p-2 rounded-2xl border border-black/10 dark:border-white/10 shadow-xl flex items-center gap-3">
               <div className="w-10 h-10 flex items-center justify-center text-zinc-400">
-                <FaSearch />
+                <IconSearch size={16} />
               </div>
               <input 
                 type="text" 
@@ -302,7 +304,7 @@ export const InteractiveEventMap: React.FC<InteractiveEventMapProps> = ({
               />
               {searchQuery && (
                 <button onClick={() => setSearchQuery("")} className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-[#f58920] transition-colors">
-                  <FaTimes />
+                  <IconClose size={16} />
                 </button>
               )}
             </div>
@@ -325,18 +327,18 @@ export const InteractiveEventMap: React.FC<InteractiveEventMapProps> = ({
               className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center shadow-xl transition-all active:scale-95 border border-black/10 dark:border-white/10 backdrop-blur-md ${is3D ? 'bg-[#f58920] text-white' : 'bg-white/90 dark:bg-zinc-900/90 text-zinc-900 dark:text-white hover:bg-[#f58920]/10'}`}
               title="Toggle 3D Perspective"
             >
-              <FaMountain className="text-lg" />
+              <IconMountain size={18} />
               <span className="text-[7px] font-black uppercase mt-1">3D</span>
             </button>
 
             <button onClick={() => handleZoom(1)} className="w-12 h-12 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-black/10 dark:border-white/10 rounded-xl flex items-center justify-center text-zinc-900 dark:text-white shadow-xl hover:bg-[#f58920] hover:text-white transition-all active:scale-95">
-              <FaPlus />
+              <IconPlus size={16} />
             </button>
             <button onClick={() => handleZoom(-1)} className="w-12 h-12 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-black/10 dark:border-white/10 rounded-xl flex items-center justify-center text-zinc-900 dark:text-white shadow-xl hover:bg-[#f58920] hover:text-white transition-all active:scale-95">
-              <FaMinus />
+              <IconMinus size={16} />
             </button>
             <button onClick={handleRecenter} className="w-12 h-12 bg-[#f58920] text-white rounded-xl flex items-center justify-center shadow-xl hover:brightness-110 transition-all active:scale-95">
-              <FaCompass />
+              <IconCompass size={18} />
             </button>
           </motion.div>
         )}

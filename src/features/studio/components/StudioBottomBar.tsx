@@ -3,30 +3,26 @@
 import React, { useEffect } from "react";
 import { useStudioStore } from "@/store/useStudioStore";
 import { 
-  FaCompressArrowsAlt, 
-  FaCrop, 
-  FaAdjust, 
-  FaShieldAlt, 
-  FaStamp,
-  FaObjectGroup 
-} from "react-icons/fa";
-import {
-  FaFilePdf,
-  FaEraser,
-  FaWandMagicSparkles
-} from "react-icons/fa6";
-import { motion } from "framer-motion";
+  IconOptimizer, 
+  IconCrop, 
+  IconAdjust, 
+  IconShield, 
+  IconStamp,
+  IconObjectGroup,
+  IconFilePdf,
+  IconEraser,
+  IconWand
+} from "@/components/shared/Icons";
+import { motion } from "motion/react";
 
 const TOOLS = [
-  { id: "optimizer", label: "Transform", icon: FaCompressArrowsAlt },
-  { id: "cropper", label: "Crop", icon: FaCrop },
-  { id: "editor", label: "Edit", icon: FaAdjust },
-  { id: "metadata", label: "EXIF", icon: FaShieldAlt },
-  { id: "transformer", label: "Watermark", icon: FaStamp },
-  { id: "compose", label: "Compose", icon: FaObjectGroup },
-  { id: "pdf", label: "PDF", icon: FaFilePdf },
-  { id: "retouch", label: "AI Retouch", icon: FaEraser },
-  { id: "enhance", label: "AI Enhance", icon: FaWandMagicSparkles },
+  { id: "optimizer", label: "Transform", icon: IconOptimizer },
+  { id: "cropper", label: "Crop", icon: IconCrop },
+  { id: "editor", label: "Edit", icon: IconAdjust },
+  { id: "metadata", label: "EXIF", icon: IconShield },
+  { id: "transformer", label: "Watermark", icon: IconStamp },
+  { id: "compose", label: "Compose", icon: IconObjectGroup },
+  { id: "pdf", label: "PDF", icon: IconFilePdf },
 ];
 
 const StudioBottomBar: React.FC = () => {
@@ -43,9 +39,7 @@ const StudioBottomBar: React.FC = () => {
         '4': 'metadata',
         '5': 'transformer',
         '6': 'compose',
-        '7': 'pdf',
-        '8': 'retouch',
-        '9': 'enhance'
+        '7': 'pdf'
       };
 
       if (keyMap[e.key] && images.length > 0) {
@@ -71,7 +65,7 @@ const StudioBottomBar: React.FC = () => {
                 : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white disabled:opacity-30 disabled:pointer-events-none"
               }`}
           >
-            <tool.icon className={`${activeToolId === tool.id ? 'scale-110' : 'scale-100'} transition-transform duration-200`} />
+            <tool.icon size={18} className={`${activeToolId === tool.id ? 'scale-110' : 'scale-100'} transition-transform duration-200`} />
             
             {/* Smooth expandable label for active tool */}
             <motion.span 

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FaMoneyBillWave, FaEye, FaCheck, FaTimes, FaEnvelope, FaChevronLeft, FaChevronRight, FaDownload } from "react-icons/fa";
+import { IconMoneyBillWave, IconEye, IconCheck, IconClose, IconEnvelope, IconChevronLeft, IconChevronRight, IconDownload } from "@/components/shared/Icons";
 import { Payment } from "@/types";
 
 interface PaymentsTableProps {
@@ -40,7 +40,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
-          <FaChevronLeft />
+          <IconChevronLeft size={12} />
         </button>
         <span className="pagination-info">Page {currentPage} of {totalPages}</span>
         <button
@@ -48,7 +48,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
-          <FaChevronRight />
+          <IconChevronRight size={12} />
         </button>
       </div>
     );
@@ -58,11 +58,11 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-black uppercase tracking-tighter dark:text-white flex items-center gap-2">
-          <FaMoneyBillWave className="text-green-500" /> Payment Records <span className="text-zinc-400 text-sm">({payments.length})</span>
+          <IconMoneyBillWave size={16} className="text-green-500" /> Payment Records <span className="text-zinc-400 text-sm">({payments.length})</span>
         </h3>
         <div className="flex items-center gap-3">
           <button onClick={onExport} disabled={payments.length === 0} className="px-6 h-10 flex items-center gap-2 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-600 dark:text-zinc-300 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-uiupc-orange disabled:opacity-50 transition-all">
-            <FaDownload /> Download List
+            <IconDownload size={12} /> Download List
           </button>
         </div>
       </div>
@@ -104,14 +104,14 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                     </td>
                     <td className="px-6 py-5 bg-white dark:bg-[#080808] border-y border-r border-black/5 dark:border-white/5 rounded-r-2xl text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => onViewDetails(payment)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-uiupc-orange hover:text-white transition-all" title="View Details"><FaEye className="text-xs" /></button>
+                        <button onClick={() => onViewDetails(payment)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-uiupc-orange hover:text-white transition-all" title="View Details"><IconEye size={12} /></button>
                         {status !== "verified" && status !== "confirmed" && (
-                          <button onClick={() => onVerify(payment.id)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all" title="Verify Payment"><FaCheck className="text-xs" /></button>
+                          <button onClick={() => onVerify(payment.id)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all" title="Verify Payment"><IconCheck size={12} /></button>
                         )}
                         {status !== "rejected" && (
-                          <button onClick={() => onReject(payment.id)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all" title="Reject"><FaTimes className="text-xs" /></button>
+                          <button onClick={() => onReject(payment.id)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all" title="Reject"><IconClose size={12} /></button>
                         )}
-                        <button onClick={() => onSendEmail(payment.id, payment)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all" title="Send Confirmation Email"><FaEnvelope className="text-xs" /></button>
+                        <button onClick={() => onSendEmail(payment.id, payment)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all" title="Send Confirmation Email"><IconEnvelope size={12} /></button>
                       </div>
                     </td>
                   </tr>
@@ -149,7 +149,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                 {status !== "rejected" && (
                   <button onClick={() => onReject(payment.id)} className="flex-1 py-2 text-center rounded-lg bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Reject</button>
                 )}
-                <button onClick={() => onSendEmail(payment.id, payment)} className="w-8 py-2 text-center rounded-lg bg-blue-500/10 text-blue-500 text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all flex items-center justify-center"><FaEnvelope /></button>
+                <button onClick={() => onSendEmail(payment.id, payment)} className="w-8 py-2 text-center rounded-lg bg-blue-500/10 text-blue-500 text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all flex items-center justify-center"><IconEnvelope size={12} /></button>
               </div>
             </div>
           );
@@ -160,8 +160,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         <div className="flex items-center justify-between pt-4">
           <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Page {currentPage} of {totalPages}</p>
           <div className="flex items-center gap-2">
-            <button disabled={currentPage === 1} onClick={() => onPageChange(currentPage - 1)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-30 hover:border-uiupc-orange hover:text-uiupc-orange transition-all"><FaChevronLeft className="text-xs" /></button>
-            <button disabled={currentPage === totalPages} onClick={() => onPageChange(currentPage + 1)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-30 hover:border-uiupc-orange hover:text-uiupc-orange transition-all"><FaChevronRight className="text-xs" /></button>
+            <button disabled={currentPage === 1} onClick={() => onPageChange(currentPage - 1)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-30 hover:border-uiupc-orange hover:text-uiupc-orange transition-all"><IconChevronLeft size={12} /></button>
+            <button disabled={currentPage === totalPages} onClick={() => onPageChange(currentPage + 1)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-30 hover:border-uiupc-orange hover:text-uiupc-orange transition-all"><IconChevronRight size={12} /></button>
           </div>
         </div>
       )}

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { FaSync, FaPlus, FaImage } from "react-icons/fa";
+import React, { useState, useCallback } from "react";
+import { IconSync, IconPlus, IconImage, IconClose } from "@/components/shared/Icons";
+import { motion, AnimatePresence } from "motion/react";
 import { Admin_DrivePicker } from "@/features/admin/components";
 import { getImageUrl } from "@/utils/imageUrl";
 
@@ -32,178 +33,132 @@ interface Admin_BlogPostModalProps {
 }
 
 const Admin_BlogPostModal: React.FC<Admin_BlogPostModalProps> = ({
-  formData,
-  editingPost,
-  uploading,
-  onClose,
-  onSubmit,
-  onInputChange,
-  onMediaChange,
-  onAddMedia,
-  onRemoveMedia,
+  formData, editingPost, uploading, onClose, onSubmit, onInputChange, onMediaChange, onAddMedia, onRemoveMedia
 }) => {
   const [pickerIndex, setPickerIndex] = useState<number | null>(null);
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in">
-      <div className="bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-        <div className="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between bg-zinc-50/50 dark:bg-white/[0.02]">
-          <h3 className="text-xl font-black uppercase tracking-tighter dark:text-white">
-            {editingPost ? "Edit Blog Post" : "New Post"}
-          </h3>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:bg-uiupc-orange hover:text-white transition-all text-xl" disabled={uploading}>
-            ×
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 md:p-10">
+      <motion.div 
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/80 backdrop-blur-2xl"
+        onClick={onClose}
+      />
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0, y: 40 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 40 }}
+        className="relative w-full max-w-3xl bg-white dark:bg-[#0d0d0d] rounded-[3rem] border border-zinc-200 dark:border-zinc-800 shadow-3xl flex flex-col overflow-hidden max-h-[90vh]"
+      >
+        {/* Header */}
+        <div className="p-8 md:p-12 border-b border-zinc-100 dark:border-zinc-800/50 flex items-center justify-between bg-zinc-50 dark:bg-[#0a0a0a] shrink-0">
+          <div className="space-y-1">
+            <span className="text-uiupc-orange text-[10px] font-black uppercase tracking-[0.4em] block">Journalism</span>
+            <h3 className="text-3xl font-black uppercase tracking-tighter dark:text-white leading-none">
+              {editingPost ? "Edit Article" : "New Article"}
+            </h3>
+          </div>
+          <button onClick={onClose} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-[#1a1a1a] text-zinc-400 hover:text-red-500 hover:bg-red-500/5 transition-all shadow-sm border border-zinc-200 dark:border-zinc-800">
+            <IconClose size={20} />
           </button>
         </div>
 
         <form onSubmit={onSubmit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Title *</label>
+          <div className="p-8 md:p-12 overflow-y-auto flex-1 custom-scrollbar space-y-10 bg-white dark:bg-[#0d0d0d]">
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Headline</label>
               <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={onInputChange}
-                placeholder="Enter blog post title"
-                required
-                className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-xl text-sm outline-none focus:border-uiupc-orange transition-all"
+                type="text" name="title" value={formData.title} onChange={onInputChange} required
+                className="w-full bg-transparent border-b-2 border-zinc-100 dark:border-zinc-800 py-4 outline-none focus:border-uiupc-orange dark:text-white text-2xl font-black transition-all"
+                placeholder="Enter article headline..."
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Description *</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Publication Date</label>
+                <input
+                  type="date" name="date" value={formData.date} onChange={onInputChange} required
+                  className="w-full bg-zinc-100 dark:bg-[#1a1a1a] p-4 rounded-xl outline-none focus:border-uiupc-orange dark:text-white font-bold text-sm"
+                />
+              </div>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Tags</label>
+                <input
+                  type="text" name="tags" value={formData.tags} onChange={onInputChange}
+                  className="w-full bg-zinc-100 dark:bg-[#1a1a1a] p-4 rounded-xl outline-none focus:border-uiupc-orange dark:text-white font-bold text-sm"
+                  placeholder="e.g. news, events, workshop"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Content Overview</label>
               <textarea
-                name="description"
-                value={formData.description}
-                onChange={onInputChange}
-                placeholder="Enter blog post description"
-                rows={4}
-                required
-                className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-xl text-sm outline-none focus:border-uiupc-orange transition-all resize-y"
+                name="description" value={formData.description} onChange={onInputChange} required rows={6}
+                className="w-full bg-zinc-100 dark:bg-[#1a1a1a] p-5 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold resize-none text-sm transition-all"
+                placeholder="Write the article content..."
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Publish Date *</label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={onInputChange}
-                required
-                className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-xl text-sm outline-none focus:border-uiupc-orange transition-all"
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Tags</label>
-              <input
-                type="text"
-                name="tags"
-                value={formData.tags}
-                onChange={onInputChange}
-                placeholder="tag1, tag2, tag3"
-                className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-xl text-sm outline-none focus:border-uiupc-orange transition-all"
-              />
-              <small className="text-xs text-zinc-400">Separate tags with commas</small>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Media</label>
-              <div className="space-y-4">
+            <div className="space-y-6">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Media Assets</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {formData.media.map((media, index) => (
-                  <div key={index} className="p-4 bg-zinc-50 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-2xl space-y-4">
-                    <div className="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-3">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Media {index + 1}</span>
+                  <div key={index} className="p-6 bg-zinc-50 dark:bg-[#1a1a1a] border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-4 relative group">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Asset {index + 1}</span>
                       {formData.media.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => onRemoveMedia(index)}
-                          className="px-3 py-1 rounded-lg bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
-                        >
-                          Remove
-                        </button>
+                        <button type="button" onClick={() => onRemoveMedia(index)} className="text-red-500 hover:text-red-600 transition-colors"><IconClose size={12} /></button>
                       )}
                     </div>
 
-                    <select
-                      value={media.type}
-                      onChange={(e) => onMediaChange(index, "type", e.target.value)}
-                      className="w-full p-3 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-xl text-sm outline-none focus:border-uiupc-orange transition-all"
-                    >
-                      <option value="image">Image</option>
-                      <option value="video">Video</option>
-                    </select>
-
-                    <div className="flex gap-3 items-center">
-                      {media.type === 'image' && media.url && (
-                        <div className="w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-zinc-100 dark:bg-white/5 border border-black/5 dark:border-white/5">
-                          <img src={getImageUrl(media.url, 100, 60)} alt="Preview" className="w-full h-full object-cover" />
+                    <div className="flex gap-4">
+                      {media.url && (
+                        <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                          <img src={getImageUrl(media.url, 150, 150)} alt="Preview" className="w-full h-full object-cover" />
                         </div>
                       )}
-                      <input
-                        type="url"
-                        placeholder="Enter media URL or Drive ID"
-                        value={media.url}
-                        onChange={(e) => onMediaChange(index, "url", e.target.value)}
-                        className="flex-1 p-3 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-xl text-sm outline-none focus:border-uiupc-orange transition-all min-w-0"
-                      />
-                      <button 
-                        type="button"
-                        onClick={() => setPickerIndex(index)}
-                        className="px-4 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-uiupc-orange hover:bg-uiupc-orange/10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0"
-                      >
-                        Browse
-                      </button>
+                      <div className="flex-1 space-y-2">
+                        <div className="flex gap-2">
+                          <input
+                            type="text" placeholder="Drive ID..." value={media.url}
+                            onChange={(e) => onMediaChange(index, "url", e.target.value)}
+                            className="flex-1 p-3 bg-white dark:bg-[#0d0d0d] border border-transparent rounded-lg text-[10px] font-bold outline-none focus:border-uiupc-orange transition-all"
+                          />
+                          <button type="button" onClick={() => setPickerIndex(index)} className="px-3 py-2 bg-zinc-200 dark:bg-zinc-800 text-zinc-500 hover:text-uiupc-orange rounded-lg text-[8px] font-black uppercase tracking-widest transition-all">Pick</button>
+                        </div>
+                        <input
+                          type="text" placeholder="Caption..." value={media.caption || ""}
+                          onChange={(e) => onMediaChange(index, "caption", e.target.value)}
+                          className="w-full p-3 bg-white dark:bg-[#0d0d0d] border border-transparent rounded-lg text-[10px] font-bold outline-none focus:border-uiupc-orange transition-all"
+                        />
+                      </div>
                     </div>
-
-                    <input
-                      type="text"
-                      placeholder="Caption (optional)"
-                      value={media.caption || ""}
-                      onChange={(e) => onMediaChange(index, "caption", e.target.value)}
-                      className="w-full p-3 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-xl text-sm outline-none focus:border-uiupc-orange transition-all"
-                    />
                   </div>
                 ))}
+                <button 
+                  type="button" onClick={onAddMedia} 
+                  className="p-6 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl text-zinc-400 text-[10px] font-black uppercase tracking-widest hover:border-uiupc-orange hover:text-uiupc-orange transition-all flex flex-col items-center justify-center gap-2"
+                >
+                  <IconPlus size={20} /> Add Asset
+                </button>
               </div>
-
-              <button 
-                type="button" 
-                onClick={onAddMedia} 
-                className="w-full p-4 border border-dashed border-black/10 dark:border-white/10 rounded-2xl text-zinc-500 dark:text-zinc-400 text-sm font-bold hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-uiupc-orange hover:border-uiupc-orange transition-all flex items-center justify-center gap-2"
-              >
-                <FaPlus /> Add Another Media
-              </button>
             </div>
           </div>
 
-          <div className="p-6 border-t border-black/5 dark:border-white/5 flex items-center justify-end gap-3 bg-zinc-50/50 dark:bg-white/[0.02]">
+          <div className="p-8 md:p-12 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-end gap-4 bg-zinc-50 dark:bg-[#0a0a0a] shrink-0">
             <button
-              type="button"
-              onClick={onClose}
-              disabled={uploading}
-              className="px-6 h-12 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-300 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 dark:hover:bg-white/10 transition-all"
+              type="button" onClick={onClose} disabled={uploading}
+              className="px-8 h-14 rounded-2xl bg-zinc-200 dark:bg-zinc-800 text-zinc-500 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-all"
             >
-              Cancel
+              Discard
             </button>
-            <button type="submit" disabled={uploading} className="px-6 h-12 flex items-center gap-2 rounded-xl bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-uiupc-orange/10 disabled:opacity-50">
-              {uploading ? (
-                <>
-                  <FaSync className="animate-spin text-sm" />
-                  {editingPost ? "Updating..." : "Publishing..."}
-                </>
-              ) : (
-                <>
-                  <FaPlus className="text-sm" />
-                  {editingPost ? "Save Changes" : "Publish"}
-                </>
-              )}
+            <button type="submit" disabled={uploading} className="px-10 h-14 rounded-2xl bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 transition-all shadow-xl shadow-uiupc-orange/20 disabled:opacity-50 flex items-center gap-3">
+              {uploading ? <IconSync size={14} className="animate-spin" /> : <IconPlus size={14} />}
+              {uploading ? "Processing..." : (editingPost ? "Save Changes" : "Publish Article")}
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
       
       <Admin_DrivePicker
         isOpen={pickerIndex !== null}
@@ -214,7 +169,7 @@ const Admin_BlogPostModal: React.FC<Admin_BlogPostModalProps> = ({
             setPickerIndex(null);
           }
         }}
-        title="Select Blog Image"
+        title="Select Article Media"
       />
     </div>
   );

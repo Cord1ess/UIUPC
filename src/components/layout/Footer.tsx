@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FaArrowRight } from "react-icons/fa";
+import { IconArrowRight } from "@/components/shared/Icons";
 import myLogo from "@/assets/UIUPC Logo.svg";
 
 const Footer: React.FC = () => {
@@ -118,7 +118,7 @@ const Footer: React.FC = () => {
             onClick={scrollToTop}
             aria-label="Back to top"
           >
-            <FaArrowRight className="text-xs transition-transform -rotate-90 group-hover:-translate-y-1" />
+            <IconArrowRight size={12} className="-rotate-90 group-hover:-translate-y-1 transition-transform" />
           </button>
         </div>
       </div>

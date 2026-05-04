@@ -2,16 +2,16 @@
 
 import React from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaCompressArrowsAlt, FaCrop, FaAdjust, FaShieldAlt, FaWeightHanging, FaEraser, FaMagic } from "react-icons/fa";
+import { IconOptimizer, IconCrop, IconAdjust, IconShield, IconWeightHanging, IconEraser, IconMagic } from "@/components/shared/Icons";
 
 const TOOLS = [
-  { id: "optimizer", label: "Optimize", icon: FaCompressArrowsAlt },
-  { id: "cropper", label: "Crop", icon: FaCrop },
-  { id: "editor", label: "Edit", icon: FaAdjust },
-  { id: "retouch", label: "AI Retouch", icon: FaEraser },
-  { id: "enhance", label: "AI Enhance", icon: FaMagic },
-  { id: "metadata", label: "EXIF", icon: FaShieldAlt },
-  { id: "transformer", label: "Transform", icon: FaWeightHanging },
+  { id: "optimizer", label: "Optimize", icon: IconOptimizer },
+  { id: "cropper", label: "Crop", icon: IconCrop },
+  { id: "editor", label: "Edit", icon: IconAdjust },
+  { id: "retouch", label: "AI Retouch", icon: IconEraser },
+  { id: "enhance", label: "AI Enhance", icon: IconMagic },
+  { id: "metadata", label: "EXIF", icon: IconShield },
+  { id: "transformer", label: "Transform", icon: IconWeightHanging },
 ];
 
 const StudioSidebar: React.FC = () => {
@@ -30,7 +30,7 @@ const StudioSidebar: React.FC = () => {
               : "text-zinc-400 hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none"
             }`}
         >
-          <tool.icon className="text-lg sm:text-xl" />
+          <tool.icon size={20} />
           <span className="text-[7px] font-black uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {tool.label}
           </span>

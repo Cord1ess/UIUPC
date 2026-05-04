@@ -2,8 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { FaArrowLeft } from "react-icons/fa";
+import { motion } from "motion/react";
+import { IconArrowLeft } from "@/components/shared/Icons";
 
 interface ToolLayoutProps {
   title: string;
@@ -28,7 +28,7 @@ const ToolLayout: React.FC<ToolLayoutProps> = ({ title, description, children })
             className="inline-flex items-center gap-2 text-zinc-500 hover:text-uiupc-orange transition-colors group"
           >
             <div className="p-2 rounded-lg bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 group-hover:bg-uiupc-orange group-hover:text-white transition-all">
-                <FaArrowLeft className="text-xs" />
+                <IconArrowLeft size={12} />
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest child">Back to Hub</span>
           </Link>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FaObjectGroup, FaTh, FaLayerGroup, FaBorderAll } from "react-icons/fa";
+import { IconObjectGroup, IconTh, IconLayerGroup, IconBorderAll } from "@/components/shared/Icons";
 import dynamic from "next/dynamic";
 import StudioLoader from "./StudioLoader";
 
@@ -10,9 +10,9 @@ const StitcherTool = dynamic(() => import("./StitcherTool"), { ssr: false, loadi
 const CollageTool = dynamic(() => import("./CollageTool"), { ssr: false, loading: () => <StudioLoader /> });
 
 const TABS = [
-  { id: "split", label: "Split", icon: FaTh },
-  { id: "stitch", label: "Stitch", icon: FaLayerGroup },
-  { id: "collage", label: "Collage", icon: FaBorderAll },
+  { id: "split", label: "Split", icon: IconTh },
+  { id: "stitch", label: "Stitch", icon: IconLayerGroup },
+  { id: "collage", label: "Collage", icon: IconBorderAll },
 ] as const;
 
 type TabId = typeof TABS[number]["id"];
@@ -23,7 +23,7 @@ const ComposeTool: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 text-zinc-400">
-         <FaObjectGroup className="text-uiupc-orange" />
+         <IconObjectGroup size={16} className="text-uiupc-orange" />
          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Compose Studio</span>
       </div>
 
@@ -38,7 +38,7 @@ const ComposeTool: React.FC = () => {
                 ? 'bg-zinc-900 dark:bg-white text-white dark:text-black shadow-lg' 
                 : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-black/5 dark:hover:bg-white/5'}`}
           >
-            <tab.icon className="text-[10px]" /> {tab.label}
+            <tab.icon size={12} /> {tab.label}
           </button>
         ))}
       </div>

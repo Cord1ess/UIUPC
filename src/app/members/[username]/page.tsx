@@ -1,10 +1,10 @@
 "use client";
 
 import React, { use } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { Member } from '@/types';
-import { FaChevronLeft, FaFacebook, FaInstagram, FaGlobe, FaPalette, FaCamera, FaQuoteLeft } from 'react-icons/fa';
+import { IconChevronLeft, IconFacebook, IconInstagram, IconGlobe, IconPalette, IconCamera, IconQuoteLeft } from '@/components/shared/Icons';
 import Link from 'next/link';
 import { getImageUrl } from '@/utils/imageUrl';
 
@@ -20,7 +20,7 @@ export default function MemberPortfolioPage({ params }: { params: Promise<{ user
     <main className="min-h-screen pt-32 pb-20 px-6 max-w-7xl mx-auto">
       {/* Back Button */}
       <Link href="/departments" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-uiupc-orange transition-colors mb-12">
-        <FaChevronLeft /> Back
+        <IconChevronLeft size={12} /> Back
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
@@ -43,24 +43,24 @@ export default function MemberPortfolioPage({ params }: { params: Promise<{ user
             <div className="flex items-center gap-4">
               {member.social_links.facebook && (
                 <a href={member.social_links.facebook} target="_blank" className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-400 hover:text-uiupc-orange transition-all">
-                  <FaFacebook />
+                  <IconFacebook size={18} />
                 </a>
               )}
               {member.social_links.instagram && (
                 <a href={member.social_links.instagram} target="_blank" className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-400 hover:text-uiupc-orange transition-all">
-                  <FaInstagram />
+                  <IconInstagram size={18} />
                 </a>
               )}
               {member.social_links.portfolio && (
                 <a href={member.social_links.portfolio} target="_blank" className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-400 hover:text-uiupc-orange transition-all">
-                  <FaGlobe />
+                  <IconGlobe size={18} />
                 </a>
               )}
             </div>
 
             <div className="pt-8 border-t border-black/5 dark:border-white/5">
               <div className="flex gap-4">
-                <FaQuoteLeft className="text-uiupc-orange/20 text-3xl flex-shrink-0" />
+                <IconQuoteLeft size={32} className="text-uiupc-orange/20 flex-shrink-0" />
                 <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium italic leading-relaxed">
                   {member.bio || "Dedicated creator pushing the visual boundaries of UIUPC through innovative design and perspective."}
                 </p>
@@ -73,13 +73,13 @@ export default function MemberPortfolioPage({ params }: { params: Promise<{ user
         <div className="lg:col-span-8 space-y-12">
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-3 text-sm font-black uppercase tracking-[0.2em] dark:text-white">
-              <FaPalette className="text-uiupc-orange" /> Work Showcase
+              <IconPalette size={16} className="text-uiupc-orange" /> Work Showcase
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {member.works && member.works.length > 0 ? (
-              member.works.map((work, i) => (
+              member.works.map((work: any, i: number) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 20 }}
@@ -97,7 +97,7 @@ export default function MemberPortfolioPage({ params }: { params: Promise<{ user
             ) : (
               <div className="col-span-2 py-32 text-center bg-zinc-50 dark:bg-zinc-900/50 rounded-[3rem] border border-dashed border-black/10 dark:border-white/10">
                 <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-6 text-zinc-300">
-                  <FaPalette className="text-2xl" />
+                  <IconPalette size={24} />
                 </div>
                 <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest">No showcase items yet</p>
               </div>

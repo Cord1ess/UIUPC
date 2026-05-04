@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'motion/react';
+import { IconChevronLeft, IconChevronRight } from '@/components/shared/Icons';
 
 interface MediaItem {
   type: 'image' | 'video';
@@ -57,13 +57,13 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ media }) => {
               onClick={(e) => { e.preventDefault(); prev(); }}
               className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all"
             >
-              <FaChevronLeft />
+              <IconChevronLeft size={16} />
             </button>
             <button 
               onClick={(e) => { e.preventDefault(); next(); }}
               className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all"
             >
-              <FaChevronRight />
+              <IconChevronRight size={16} />
             </button>
           </div>
 

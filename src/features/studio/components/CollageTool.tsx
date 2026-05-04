@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaBorderAll, FaCheckCircle, FaMinus, FaPlus, FaGripHorizontal } from "react-icons/fa";
+import { IconBorderAll, IconCheckCircle, IconMinus, IconPlus, IconGripHorizontal } from "@/components/shared/Icons";
 import { WorkerMessage } from "@/workers/imageWorker";
 
 const CollageTool: React.FC = () => {
@@ -24,7 +24,7 @@ const CollageTool: React.FC = () => {
   if (images.length < 2) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-50">
-        <FaBorderAll className="text-4xl text-zinc-500" />
+        <IconBorderAll size={40} className="text-zinc-500" />
         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
           Collage requires at least 2 images.
         </p>
@@ -83,11 +83,11 @@ const CollageTool: React.FC = () => {
          
          <div className="space-y-4">
             <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-               <span className="flex items-center gap-2"><FaGripHorizontal /> Columns</span>
+               <span className="flex items-center gap-2"><IconGripHorizontal size={12} /> Columns</span>
                <div className="flex items-center gap-3">
-                  <button onClick={() => setColumns(Math.max(1, columns - 1))} className="text-zinc-400 hover:text-uiupc-orange"><FaMinus className="text-[8px]"/></button>
+                  <button onClick={() => setColumns(Math.max(1, columns - 1))} className="text-zinc-400 hover:text-uiupc-orange"><IconMinus size={8}/></button>
                   <span className="text-uiupc-orange text-xs text-center w-4">{columns}</span>
-                  <button onClick={() => setColumns(Math.min(10, columns + 1))} className="text-zinc-400 hover:text-uiupc-orange"><FaPlus className="text-[8px]" /></button>
+                  <button onClick={() => setColumns(Math.min(10, columns + 1))} className="text-zinc-400 hover:text-uiupc-orange"><IconPlus size={8} /></button>
                </div>
             </div>
          </div>
@@ -131,7 +131,7 @@ const CollageTool: React.FC = () => {
         disabled={isProcessing || selectedImageIds.length < 2}
         className="w-full py-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3"
       >
-        {isProcessing ? "Assembling Grid..." : <><FaCheckCircle /> Assemble Matrix</>}
+        {isProcessing ? "Assembling Grid..." : <><IconCheckCircle size={12} /> Assemble Matrix</>}
       </button>
     </div>
   );

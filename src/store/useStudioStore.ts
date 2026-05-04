@@ -62,10 +62,9 @@ interface StudioState {
   images: StudioImage[];
   activeImageId: string | null;
   activeToolId: string;
-  retouchMode: "background" | "inpaint";
-  brushSize: number;
   maxImages: number;
   uiKey: number;
+
   
   // Actions
   restartUi: () => void;
@@ -74,8 +73,7 @@ interface StudioState {
   clearStudio: () => void;
   setActiveImage: (id: string) => void;
   setActiveTool: (id: string) => void;
-  setRetouchMode: (mode: "background" | "inpaint") => void;
-  setBrushSize: (size: number) => void;
+
   updateImageResult: (id: string, updates: Partial<StudioImage>) => void;
   updateImageEdits: (id: string, edits: Partial<StudioImage["edits"]>) => void;
   applyProcessedImage: (id: string, newBlob: Blob, toolId: string, label: string) => void;
@@ -86,15 +84,12 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   images: [],
   activeImageId: null,
   activeToolId: "optimizer",
-  retouchMode: "background",
-  brushSize: 24,
   maxImages: 20,
   uiKey: 0,
 
-  restartUi: () => set((state) => ({ uiKey: state.uiKey + 1, activeToolId: "optimizer", retouchMode: "background" })),
 
-  setRetouchMode: (mode) => set({ retouchMode: mode }),
-  setBrushSize: (size) => set({ brushSize: size }),
+  restartUi: () => set((state) => ({ uiKey: state.uiKey + 1, activeToolId: "optimizer" })),
+
 
   addImages: async (files) => {
     const currentImages = get().images;

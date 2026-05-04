@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useLoaderStore } from "@/store/useLoaderStore";
 import { buildImagePool, IMAGE_COUNT, failedUrls } from "@/features/home/components/hero/utils/constants";

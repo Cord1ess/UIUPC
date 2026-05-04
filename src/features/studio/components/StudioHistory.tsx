@@ -2,8 +2,8 @@
 
 import React from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaHistory, FaUndoAlt, FaClock, FaCheckCircle, FaLayerGroup } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { IconHistory, IconUndoAlt, IconClock, IconCheckCircle, IconLayerGroup } from "@/components/shared/Icons";
+import { motion, AnimatePresence } from "motion/react";
 
 const StudioHistory: React.FC = () => {
   const { images, activeImageId, revertToHistory } = useStudioStore();
@@ -15,7 +15,7 @@ const StudioHistory: React.FC = () => {
     <aside className="fixed right-0 top-20 bottom-32 sm:bottom-0 w-64 bg-white dark:bg-zinc-900 border-l border-black/5 dark:border-white/5 z-40 hidden xl:flex flex-col">
        <div className="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-             <FaHistory className="text-uiupc-orange" /> Edit Stack
+             <IconHistory size={12} className="text-uiupc-orange" /> Edit Stack
           </span>
           <span className="text-[10px] font-bold text-zinc-400">
              {activeImage.history.length} Steps
@@ -27,7 +27,7 @@ const StudioHistory: React.FC = () => {
              {/* Original State */}
              <div className="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-black/5 flex items-center gap-4 opacity-50">
                 <div className="w-8 h-8 rounded-md bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-xs">
-                   <FaClock />
+                    <IconClock size={14} />
                 </div>
                 <div>
                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Original</h4>
@@ -44,7 +44,7 @@ const StudioHistory: React.FC = () => {
                    className="w-full text-left p-4 rounded-lg bg-white dark:bg-zinc-800 border border-black/5 dark:border-white/10 shadow-sm hover:border-uiupc-orange/50 transition-all group flex items-start gap-4"
                 >
                    <div className="w-8 h-8 rounded-md bg-uiupc-orange/10 text-uiupc-orange flex items-center justify-center text-xs">
-                      <FaLayerGroup />
+                       <IconLayerGroup size={14} />
                    </div>
                    <div className="flex-1 min-w-0">
                       <p className="text-[11px] font-black uppercase tracking-widest text-zinc-800 dark:text-zinc-200 truncate">
@@ -61,7 +61,7 @@ const StudioHistory: React.FC = () => {
                    </div>
                    
                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <FaUndoAlt className="text-zinc-300 text-[10px]" />
+                       <IconUndoAlt size={10} className="text-zinc-300" />
                    </div>
                 </motion.button>
              ))}
@@ -69,7 +69,7 @@ const StudioHistory: React.FC = () => {
 
           {activeImage.history.length === 0 && (
              <div className="py-20 text-center flex flex-col items-center gap-4 opacity-20">
-                <FaLayerGroup className="text-3xl" />
+                 <IconLayerGroup size={32} />
                 <p className="text-[9px] font-black uppercase tracking-[0.2em]">No Edits Applied</p>
              </div>
           )}

@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { FaExclamationTriangle, FaSync } from 'react-icons/fa'
+import { motion } from 'motion/react'
+import { IconExclamationTriangle, IconSync } from '@/components/shared/Icons'
 
 export default function Error({
   error,
@@ -24,7 +24,7 @@ export default function Error({
         className="max-w-md w-full bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 rounded-[2rem] p-12 text-center shadow-2xl"
       >
         <div className="w-20 h-20 bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto mb-8">
-          <FaExclamationTriangle className="text-red-500 text-3xl" />
+          <IconExclamationTriangle size={32} className="text-red-500" />
         </div>
         
         <h2 className="text-3xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white mb-4 leading-none">
@@ -40,7 +40,7 @@ export default function Error({
             onClick={() => reset()}
             className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-[0.4em] rounded-full hover:bg-uiupc-orange dark:hover:bg-uiupc-orange hover:text-white transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-3"
           >
-            <FaSync className="animate-spin-slow" />
+            <IconSync size={12} className="animate-spin-slow" />
             Retry Connection
           </button>
           

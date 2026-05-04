@@ -2,8 +2,8 @@
 
 import React, { useState, useRef } from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaHistory, FaImages, FaUndoAlt, FaLayerGroup, FaTimes, FaCheckCircle, FaCloudUploadAlt, FaClock } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { IconHistory, IconImages, IconUndoAlt, IconLayerGroup, IconClose, IconCheckCircle, IconCloudUpload, IconClock } from "@/components/shared/Icons";
+import { motion, AnimatePresence } from "motion/react";
 
 const StudioRightPanel: React.FC = () => {
   const { images, activeImageId, setActiveImage, removeImage, revertToHistory, addImages } = useStudioStore();
@@ -60,14 +60,14 @@ const StudioRightPanel: React.FC = () => {
            className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all
              ${activeTab === "edits" ? 'bg-zinc-900 dark:bg-white text-white dark:text-black shadow-lg' : 'text-zinc-400 hover:bg-black/5'}`}
          >
-            <FaHistory /> History
+            <IconHistory size={12} /> History
          </button>
          <button 
            onClick={() => setActiveTab("images")}
            className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all
              ${activeTab === "images" ? 'bg-zinc-900 dark:bg-white text-white dark:text-black shadow-lg' : 'text-zinc-400 hover:bg-black/5'}`}
          >
-            <FaImages /> Bin
+            <IconImages size={12} /> Bin
          </button>
       </div>
 
@@ -90,7 +90,7 @@ const StudioRightPanel: React.FC = () => {
 
               {!activeImage || activeImage.history.length === 0 ? (
                 <div className="py-20 text-center space-y-4 opacity-30">
-                  <FaLayerGroup className="text-3xl mx-auto" />
+                  <IconLayerGroup size={32} className="mx-auto" />
                   <p className="text-[8px] font-black uppercase tracking-widest">No History</p>
                 </div>
               ) : (
@@ -120,13 +120,13 @@ const StudioRightPanel: React.FC = () => {
                          <div className="flex-1 min-w-0">
                             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-800 dark:text-zinc-200 truncate">{action.label}</p>
                             <p className="text-[8px] text-zinc-400 font-mono flex items-center gap-1 mt-0.5">
-                              <FaClock className="text-[7px]" /> {formatTime(action.timestamp)}
+                              <IconClock size={7} /> {formatTime(action.timestamp)}
                             </p>
                          </div>
                          {isCurrent ? (
                            <span className="text-[7px] font-black uppercase tracking-widest text-uiupc-orange bg-uiupc-orange/10 px-1.5 py-0.5 rounded flex-shrink-0">Current</span>
                          ) : (
-                           <FaUndoAlt className="text-zinc-300 text-[9px] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                           <IconUndoAlt size={9} className="text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                          )}
                       </div>
                     );
@@ -169,7 +169,7 @@ const StudioRightPanel: React.FC = () => {
                     </div>
 
                     {image.history.length > 1 && (
-                      <FaCheckCircle className="text-[10px] text-uiupc-orange mr-2 flex-shrink-0" />
+                      <IconCheckCircle size={10} className="text-uiupc-orange mr-2 flex-shrink-0" />
                     )}
 
                     <button
@@ -179,7 +179,7 @@ const StudioRightPanel: React.FC = () => {
                       }}
                       className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-lg bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <FaTimes className="text-white text-[10px]" />
+                      <IconClose size={10} className="text-white" />
                     </button>
                   </div>
                 ))}
@@ -189,7 +189,7 @@ const StudioRightPanel: React.FC = () => {
                     onClick={handleUploadMore}
                     className="w-full h-12 rounded-xl border-2 border-dashed border-black/10 dark:border-white/10 flex items-center justify-center gap-2 text-zinc-400 bg-black/5 dark:bg-white/5 hover:border-uiupc-orange hover:text-uiupc-orange transition-all cursor-pointer"
                   >
-                    <FaCloudUploadAlt className="text-xs" />
+                    <IconCloudUpload size={12} />
                     <span className="text-[8px] font-black uppercase tracking-widest">Upload More</span>
                   </button>
                 )}

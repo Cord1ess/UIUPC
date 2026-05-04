@@ -29,18 +29,26 @@ export interface CommitteeMember {
   year: string;
   category: 'CORE' | 'Head' | 'Asst. Head' | 'Executive';
   image_url: string | null;
+  image?: string | null; // For legacy/modernization compatibility
+  club_department: string | null;
+  blood_group: string | null;
+  email: string | null;
+  phone: string | null;
+  social_links?: any;
   order_index: number;
 }
 
 export interface ExhibitionSubmission {
   id: string;
   participant_name: string;
-  institution: string;
+  institute: string;
   photo_title: string;
   photo_url: string;
   category: string;
   status: 'pending' | 'selected' | 'rejected';
   submitted_at: string;
+  email?: string;
+  featured_on_hero?: boolean;
 }
 
 export interface FinanceRecord {

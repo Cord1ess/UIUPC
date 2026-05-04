@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaFolder, FaFileImage, FaChevronRight, FaTimes, FaSearch, FaSpinner, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'motion/react';
+import { IconFolder, IconFileImage, IconChevronRight, IconClose, IconSearch, IconSync, IconCheckCircle, IconExclamationTriangle } from '@/components/shared/Icons';
 import { getImageUrl } from '@/utils/imageUrl';
+import { Admin_ModalPortal } from "@/features/admin/components/core/Admin_ModalPortal";
 
 interface DriveItem {
   id: string;
@@ -185,6 +186,7 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
   };
 
   return (
+    <Admin_ModalPortal>
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
@@ -193,14 +195,14 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
           />
           
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]"
+            className="relative w-full max-w-5xl bg-white dark:bg-[#111] rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]"
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
@@ -217,7 +219,7 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
                 onClick={onClose}
                 className="w-10 h-10 flex items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
               >
-                <FaTimes />
+                <IconClose size={16} />
               </button>
             </div>
 
@@ -234,7 +236,7 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
                     >
                       Return to Folder
                     </button>
-                    <FaChevronRight className="text-zinc-400 text-[10px]" />
+                    <IconChevronRight size={10} className="text-zinc-400" />
                     <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
                       Search Results
                     </span>
@@ -242,7 +244,7 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
                 ) : (
                   path.map((segment, index) => (
                     <React.Fragment key={segment.id}>
-                      {index > 0 && <FaChevronRight className="text-zinc-400 text-[10px] shrink-0" />}
+                      {index > 0 && <IconChevronRight size={10} className="text-zinc-400 shrink-0" />}
                       <button
                         onClick={() => handleBreadcrumbClick(segment.id, index)}
                         className={`text-xs font-bold truncate max-w-[120px] transition-colors ${
@@ -260,13 +262,13 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
 
               {/* Search */}
               <div className="relative w-full sm:w-64 shrink-0">
-                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm" />
+                <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
                 <input 
                   type="text"
                   placeholder="Search images..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-uiupc-orange transition-colors shadow-sm"
+                  className="w-full pl-9 pr-4 py-2 bg-zinc-50 dark:bg-[#080808] border border-transparent focus:border-uiupc-orange/30 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none transition-colors shadow-sm"
                 />
               </div>
             </div>
@@ -275,21 +277,21 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
             <div className="flex-1 overflow-y-auto p-6 min-h-[300px] bg-zinc-50/30 dark:bg-zinc-950/30 relative">
               {isLoading ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm z-10">
-                  <FaSpinner className="animate-spin text-3xl text-uiupc-orange mb-4" />
+                  <IconSync size={30} className="animate-spin text-uiupc-orange mb-4" />
                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
                     {isSearching ? 'Searching...' : 'Loading folder...'}
                   </span>
                 </div>
               ) : error ? (
                 <div className="flex flex-col items-center justify-center h-full text-center max-w-md mx-auto">
-                  <FaExclamationTriangle className="text-4xl text-red-500 mb-4" />
+                  <IconExclamationTriangle size={40} className="text-red-500 mb-4" />
                   <h3 className="text-sm font-black text-zinc-900 dark:text-white uppercase mb-2">Error Accessing Drive</h3>
                   <p className="text-xs text-zinc-500">{error}</p>
                 </div>
               ) : items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center mb-4 text-zinc-300 dark:text-zinc-600 text-2xl">
-                    <FaFolder />
+                    <IconFolder size={24} />
                   </div>
                   <span className="text-xs font-bold text-zinc-500">
                     {isSearching ? 'No images found.' : 'This folder is empty.'}
@@ -301,31 +303,25 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
                     <div 
                       key={item.id}
                       onClick={() => handleItemClick(item)}
+                      onDoubleClick={() => {
+                        if (item.type === 'folder') {
+                          fetchFolder(item.id);
+                          setSearchQuery('');
+                        }
+                      }}
                       className={`
                         group relative flex flex-col items-center p-3 rounded-2xl cursor-pointer transition-all duration-200 border-2
-                        ${item.type === 'file' && selectedItem?.id === item.id 
+                        ${selectedItem?.id === item.id 
                           ? 'bg-uiupc-orange/5 border-uiupc-orange shadow-md' 
-                          : 'bg-white dark:bg-zinc-900 border-transparent hover:border-black/5 dark:hover:border-white/5 hover:shadow-lg'
+                          : 'bg-white dark:bg-[#111] border-transparent hover:border-black/5 dark:hover:border-white/5 hover:shadow-lg'
                         }
                       `}
                     >
                       {/* Thumbnail/Icon */}
                       <div className="w-full aspect-square rounded-xl mb-3 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 overflow-hidden relative">
                         {item.type === 'folder' ? (
-                          <div className="relative group/folder">
-                            <FaFolder className="text-4xl text-blue-400 group-hover:scale-110 transition-transform" />
-                            {allowFolderSelection && (
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  fetchFolder(item.id);
-                                  setSearchQuery('');
-                                }}
-                                className="absolute -bottom-2 -right-2 bg-white dark:bg-zinc-800 shadow-lg border border-black/5 rounded-lg px-2 py-1 text-[8px] font-black uppercase tracking-tighter hover:bg-uiupc-orange hover:text-white transition-all z-20"
-                              >
-                                Enter
-                              </button>
-                            )}
+                          <div className="relative group/folder w-full h-full flex items-center justify-center">
+                            <IconFolder size={40} className="text-blue-400 group-hover:scale-110 transition-transform" />
                           </div>
                         ) : item.type === 'file' ? (
                           <img 
@@ -335,13 +331,13 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
                             loading="lazy"
                           />
                         ) : (
-                          <FaFileImage className="text-4xl text-zinc-300" />
+                          <IconFileImage size={40} className="text-zinc-300" />
                         )}
                         
                         {/* Selection Checkmark */}
                         {selectedItem?.id === item.id && (
                           <div className="absolute top-2 right-2 w-6 h-6 bg-uiupc-orange rounded-full flex items-center justify-center text-white shadow-lg">
-                            <FaCheckCircle className="text-sm" />
+                            <IconCheckCircle size={14} />
                           </div>
                         )}
                       </div>
@@ -362,7 +358,7 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
             </div>
 
             {/* Footer / Actions */}
-            <div className="p-4 sm:p-6 border-t border-black/5 dark:border-white/5 bg-white dark:bg-zinc-900 flex items-center justify-between shrink-0">
+            <div className="p-4 sm:p-6 border-t border-black/5 dark:border-white/5 bg-white dark:bg-[#111] flex items-center justify-between shrink-0">
               <div className="flex-1 truncate pr-4">
                 {selectedItem ? (
                   <p className="text-xs font-bold text-zinc-900 dark:text-white truncate">
@@ -394,5 +390,6 @@ export const Admin_DrivePicker: React.FC<AdminDrivePickerProps> = ({
         </div>
       )}
     </AnimatePresence>
+    </Admin_ModalPortal>
   );
 };

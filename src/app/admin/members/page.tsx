@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabaseServer";
 import { MembersContainer } from "./MembersContainer";
 import { Member } from "@/types/admin";
 
@@ -7,6 +7,7 @@ export default async function MembersPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const supabase = await createClient();
   const params = await searchParams;
   const page = Number(params.page) || 0;
   const search = (params.search as string) || "";
@@ -16,6 +17,7 @@ export default async function MembersPage({
 
   // 1. Fetch filtered data from Supabase (Server Side)
   let query = supabase
+
     .from("members")
     .select("*", { count: "exact" });
 

@@ -2,22 +2,22 @@
 
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { supabase } from "@/lib/supabase";
 import {
-  FaUpload,
-  FaUser,
-  FaEnvelope,
-  FaPhone,
-  FaUniversity,
-  FaCamera,
-  FaImages,
-  FaFileAlt,
-  FaTimes,
-  FaExclamationTriangle,
-  FaChevronRight,
-  FaCheckCircle,
-} from "react-icons/fa";
+  IconUpload,
+  IconUser,
+  IconEnvelope,
+  IconPhone,
+  IconUniversity,
+  IconCamera,
+  IconImages,
+  IconFileAlt,
+  IconClose,
+  IconExclamationTriangle,
+  IconChevronRight,
+  IconCheckCircle,
+} from "@/components/shared/Icons";
 import { useSubmissionStatus } from '@/hooks/useSubmissionStatus';
 import GlobalLoader from "@/components/shared/GlobalLoader";
 import ScrollRevealText from "@/components/motion/ScrollRevealText";
@@ -321,7 +321,7 @@ const PhotoSubmissionForm = () => {
             </div>
           ) : submissionDetails?.success ? (
             <div className="space-y-10">
-              <FaCheckCircle className="text-uiupc-orange text-7xl mx-auto" />
+              <IconCheckCircle size={70} className="text-uiupc-orange mx-auto" />
               <div className="space-y-4">
                   <h2 className="text-4xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white leading-tight">
                       Submission Successful
@@ -339,7 +339,7 @@ const PhotoSubmissionForm = () => {
             </div>
           ) : (
             <div className="space-y-10">
-              <FaExclamationTriangle className="text-red-500 text-7xl mx-auto" />
+              <IconExclamationTriangle size={70} className="text-red-500 mx-auto" />
               <div className="space-y-4">
                   <h2 className="text-4xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white leading-tight">
                       Upload Failed
@@ -369,7 +369,7 @@ const PhotoSubmissionForm = () => {
             className="w-full max-w-md bg-white dark:bg-zinc-950 border border-black/10 dark:border-white/10 rounded-[2rem] p-10 md:p-12 shadow-2xl text-center space-y-8"
           >
             <div className="w-16 h-16 bg-uiupc-orange/10 rounded-full flex items-center justify-center mx-auto">
-                <FaExclamationTriangle className="text-uiupc-orange text-xl" />
+                <IconExclamationTriangle size={20} className="text-uiupc-orange" />
             </div>
             <div className="space-y-4">
                 <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white">Rename Confirmation</h3>
@@ -401,7 +401,7 @@ const PhotoSubmissionForm = () => {
             <div className="relative w-32 h-32 mx-auto">
                 <div className="absolute inset-0 border border-uiupc-orange/20 rounded-full animate-ping" />
                 <div className="absolute inset-4 border border-zinc-200 dark:border-zinc-800 rounded-full flex items-center justify-center">
-                    <FaTimes className="text-zinc-300 dark:text-zinc-700 text-2xl" />
+                    <IconClose size={24} className="text-zinc-300 dark:text-zinc-700" />
                 </div>
             </div>
             <div className="space-y-4">
@@ -481,8 +481,8 @@ const PhotoSubmissionForm = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[
-                    { id: 'single', name: 'Single Photo', desc: 'Fragments of a larger world.', icon: FaCamera },
-                    { id: 'story', name: 'Photo Story', desc: 'A curated visual narrative.', icon: FaImages }
+                    { id: 'single', name: 'Single Photo', desc: 'Fragments of a larger world.', icon: IconCamera },
+                    { id: 'story', name: 'Photo Story', desc: 'A curated visual narrative.', icon: IconImages }
                   ].map(cat => (
                     <button
                       key={cat.id}
@@ -495,7 +495,7 @@ const PhotoSubmissionForm = () => {
                             : 'bg-white border-black/5 hover:border-uiupc-orange/40 dark:bg-zinc-950 dark:border-white/5'}
                       `}
                     >
-                      <cat.icon className={`text-2xl mb-6 ${formData.category === cat.id ? 'text-uiupc-orange' : 'text-zinc-300 dark:text-zinc-700'}`} />
+                      <cat.icon size={24} className={`${formData.category === cat.id ? 'text-uiupc-orange' : 'text-zinc-300 dark:text-zinc-700'}`} />
                       <h4 className="text-xl font-black uppercase tracking-tighter mb-2">{cat.name}</h4>
                       <p className={`text-[10px] font-bold uppercase tracking-widest ${formData.category === cat.id ? 'opacity-60' : 'text-zinc-400'}`}>{cat.desc}</p>
                     </button>
@@ -522,7 +522,7 @@ const PhotoSubmissionForm = () => {
                     />
                     <div className="p-16 md:p-24 border-2 border-dashed border-black/5 dark:border-white/5 rounded-[3rem] text-center space-y-6 group-hover:bg-uiupc-orange/[0.02] group-hover:border-uiupc-orange/30 transition-all duration-500">
                         <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center mx-auto transition-transform group-hover:scale-110">
-                            <FaUpload className="text-zinc-400 group-hover:text-uiupc-orange transition-colors" />
+                            <IconUpload size={20} className="text-zinc-400 group-hover:text-uiupc-orange transition-colors" />
                         </div>
                         <div className="space-y-2">
                             <h5 className="text-xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white">Deposit Files</h5>
@@ -545,7 +545,7 @@ const PhotoSubmissionForm = () => {
                                     className="p-4 bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 rounded-2xl flex items-center justify-between"
                                 >
                                     <div className="flex items-center gap-4 truncate">
-                                        <FaCamera className="text-zinc-300 dark:text-zinc-700 shrink-0" />
+                                        <IconCamera size={16} className="text-zinc-300 dark:text-zinc-700 shrink-0" />
                                         <div className="truncate">
                                             <p className="text-[10px] font-black truncate uppercase tracking-tighter text-zinc-900 dark:text-white">{file.name}</p>
                                             <p className="text-[8px] font-bold text-zinc-400 uppercase">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
@@ -556,7 +556,7 @@ const PhotoSubmissionForm = () => {
                                         onClick={() => formData.category === "single" ? removeSinglePhoto(idx) : removeStoryPhoto(idx)}
                                         className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 transition-colors"
                                     >
-                                        <FaTimes />
+                                        <IconClose size={14} />
                                     </button>
                                 </motion.div>
                             ))}
@@ -569,7 +569,7 @@ const PhotoSubmissionForm = () => {
                                     className="p-4 bg-uiupc-orange/5 border border-uiupc-orange/20 rounded-2xl flex items-center justify-between"
                                 >
                                     <div className="flex items-center gap-4 truncate">
-                                        <FaFileAlt className="text-uiupc-orange shrink-0" />
+                                        <IconFileAlt size={16} className="text-uiupc-orange shrink-0" />
                                         <div className="truncate">
                                             <p className="text-[10px] font-black truncate uppercase tracking-tighter text-uiupc-orange">{formData.storyTextFile.name}</p>
                                             <p className="text-[8px] font-bold text-uiupc-orange/60 uppercase">NARRATIVE TEXT</p>
@@ -580,7 +580,7 @@ const PhotoSubmissionForm = () => {
                                         onClick={removeTextFile}
                                         className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-uiupc-orange/10 text-uiupc-orange"
                                     >
-                                        <FaTimes />
+                                        <IconClose size={14} />
                                     </button>
                                 </motion.div>
                             )}
@@ -598,7 +598,7 @@ const PhotoSubmissionForm = () => {
                   className="w-full py-6 md:py-8 bg-black dark:bg-white text-white dark:text-black rounded-[2rem] flex items-center justify-center gap-4 group hover:bg-uiupc-orange dark:hover:bg-uiupc-orange hover:text-white transition-all transform hover:scale-[1.02] active:scale-95 shadow-2xl disabled:opacity-50"
                 >
                   <span className="text-[11px] md:text-xs font-black uppercase tracking-[0.5em]">Seal and Submit Manifest</span>
-                  <FaChevronRight className="group-hover:translate-x-2 transition-transform" />
+                  <IconChevronRight size={14} className="group-hover:translate-x-2 transition-transform" />
                 </button>
                 <p className="text-center mt-8 text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400">
                     BY SUBMITTING, YOU AGREE TO THE UIUPC CODE OF ETHICS AND EXHIBITION GUIDELINES.

@@ -1,20 +1,19 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
-  FaFacebookF,
-  FaInstagram,
-  FaYoutube,
-  FaLinkedinIn,
-  FaEnvelope,
-  FaClock,
-  FaPaperPlane,
-  FaCheck,
-  FaExclamationTriangle,
-  FaArrowRight,
-} from "react-icons/fa";
-import emailjs from "emailjs-com";
+  IconFacebook,
+  IconInstagram,
+  IconYoutube,
+  IconLinkedin,
+  IconEnvelope,
+  IconClock,
+  IconPaperPlane,
+  IconCheck,
+  IconExclamationTriangle,
+  IconArrowRight,
+} from "@/components/shared/Icons";
 import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
 const ContactPage = () => {
@@ -38,9 +37,11 @@ const ContactPage = () => {
     setSubmitStatus(null);
 
     if (form.current) {
-      emailjs
-        .sendForm(EMAIL_SERVICE_ID, EMAIL_TEMPLATE_ID, form.current, EMAIL_PUBLIC_KEY)
-        .then(() => {
+      import("emailjs-com").then((module) => {
+        const emailjs = module.default;
+        emailjs
+          .sendForm(EMAIL_SERVICE_ID, EMAIL_TEMPLATE_ID, form.current!, EMAIL_PUBLIC_KEY)
+          .then(() => {
           setIsSubmitting(false);
           setSubmitStatus("success");
           setShowSuccessModal(true);
@@ -50,14 +51,15 @@ const ContactPage = () => {
           setIsSubmitting(false);
           setSubmitStatus("error");
         });
+      });
     }
   };
 
   const socialLinks = [
-    { icon: <FaFacebookF />, label: "Facebook", href: "https://facebook.com/UIUPC" },
-    { icon: <FaInstagram />, label: "Instagram", href: "https://www.instagram.com/uiuphotographyclub" },
-    { icon: <FaYoutube />, label: "YouTube", href: "https://www.youtube.com/@uiupc6885" },
-    { icon: <FaLinkedinIn />, label: "LinkedIn", href: "https://linkedin.com/company/uiupc" },
+    { icon: <IconFacebook size={20} />, label: "Facebook", href: "https://facebook.com/UIUPC" },
+    { icon: <IconInstagram size={20} />, label: "Instagram", href: "https://www.instagram.com/uiuphotographyclub" },
+    { icon: <IconYoutube size={20} />, label: "YouTube", href: "https://www.youtube.com/@uiupc6885" },
+    { icon: <IconLinkedin size={20} />, label: "LinkedIn", href: "https://linkedin.com/company/uiupc" },
   ];
 
   return (
@@ -187,14 +189,14 @@ const ContactPage = () => {
                     <span className="relative z-10 text-[10px] font-black uppercase tracking-[0.3em]">
                       {isSubmitting ? "Submitting..." : "Send Message"}
                     </span>
-                    <FaArrowRight className={`relative z-10 transition-transform ${isSubmitting ? 'animate-pulse' : 'group-hover:translate-x-1'}`} />
+                    <IconArrowRight size={12} className={`${isSubmitting ? 'animate-pulse' : 'group-hover:translate-x-1'} transition-transform`} />
                   </button>
                 </div>
               </form>
 
               {submitStatus === "error" && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8 flex items-center gap-3 text-red-500 font-bold text-xs uppercase tracking-widest">
-                  <FaExclamationTriangle />
+                  <IconExclamationTriangle size={14} />
                   <span>Submission Failed. Please try again.</span>
                 </motion.div>
               )}
@@ -215,7 +217,7 @@ const ContactPage = () => {
               className="bg-[#f9f5ea] dark:bg-zinc-900 p-12 md:p-16 rounded-[3rem] max-w-lg w-full text-center space-y-8 shadow-2xl"
             >
               <div className="w-20 h-20 bg-uiupc-orange/10 text-uiupc-orange rounded-full flex items-center justify-center mx-auto text-3xl">
-                <FaCheck />
+                <IconCheck size={30} />
               </div>
               <div className="space-y-4">
                 <h3 className="text-3xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white">Success</h3>

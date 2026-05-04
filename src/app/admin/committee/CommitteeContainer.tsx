@@ -16,6 +16,7 @@ interface CommitteeContainerProps {
   filterLink: string;
   sortOrder: "asc" | "desc";
   availableYears: string[];
+  allDepartments: string[];
 }
 
 export function CommitteeContainer({
@@ -28,7 +29,8 @@ export function CommitteeContainer({
   filterCategory,
   filterLink,
   sortOrder,
-  availableYears
+  availableYears,
+  allDepartments
 }: CommitteeContainerProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -87,6 +89,7 @@ export function CommitteeContainer({
         filterLink={filterLink}
         sortOrder={sortOrder}
         availableYears={availableYears}
+        allDepartments={allDepartments}
         onFilterChange={handleFilterChange}
       />
     </div>

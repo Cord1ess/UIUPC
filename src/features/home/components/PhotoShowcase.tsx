@@ -3,9 +3,9 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { getImageUrl } from '@/utils/imageUrl';
-import { FaArrowRight } from 'react-icons/fa';
+import { IconArrowRight } from '@/components/shared/Icons';
 
 interface PhotoShowcaseProps {
   photos: any[];
@@ -67,7 +67,7 @@ const PhotoShowcase: React.FC<PhotoShowcaseProps> = ({ photos }) => {
           
           <div className="relative z-10 flex flex-col items-center gap-6">
              <div className="w-16 h-16 rounded-full border-2 border-current flex items-center justify-center group-hover:scale-110 group-hover:rotate-45 transition-all duration-500">
-               <FaArrowRight className="text-2xl -rotate-45 group-hover:rotate-0 transition-all" />
+               <IconArrowRight size={24} className="-rotate-45 group-hover:rotate-0 transition-all" />
              </div>
              
              <div className="text-center">

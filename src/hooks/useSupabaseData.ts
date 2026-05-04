@@ -65,12 +65,13 @@ const fetcherWithRetry = async <T>(
     const { data, error, count } = await query;
 
     if (error) {
-      // Handle transient errors (e.g. 502, 503, 504) or network failures
-      if ((error.status && error.status >= 500) || error.message.includes("fetch")) {
+      // Handle transient errors or network failures
+      const status = (error as any).status;
+      if ((status && status >= 500) || error.message.includes("fetch")) {
         if (retryCount < 3) {
           const delay = Math.pow(2, retryCount) * 1000;
           await new Promise(resolve => setTimeout(resolve, delay));
-          return fetcherWithRetry([table, options], retryCount + 1);
+          return fetcherWithRetry([table, optionsStr], retryCount + 1);
         }
       }
       throw error;

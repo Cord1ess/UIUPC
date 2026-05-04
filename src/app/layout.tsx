@@ -50,7 +50,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { AuthProvider } from "@/contexts/AuthContext";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Header from "@/components/layout/Header";
@@ -80,18 +79,16 @@ export default async function RootLayout({
         <ThemeProvider>
           <GlobalPrefetch />
           <DynamicGrid />
-          <AuthProvider>
-            <SupabaseAuthProvider>
-              <GlobalLoader />
-              <Header />
-              <main>
-                <PageTransition>
-                  {children}
-                </PageTransition>
-              </main>
-              <Footer />
-            </SupabaseAuthProvider>
-          </AuthProvider>
+          <SupabaseAuthProvider>
+            <GlobalLoader />
+            <Header />
+            <main className="relative z-10 flex-1 isolate">
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </main>
+            <Footer />
+          </SupabaseAuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FaTrophy, FaEdit, FaTrash, FaChevronLeft, FaChevronRight, FaDownload } from "react-icons/fa";
+import { IconTrophy, IconEdit, IconTrash, IconChevronLeft, IconChevronRight, IconDownload } from "@/components/shared/Icons";
 import { Result } from "@/types";
 
 interface ResultsTableProps {
@@ -44,7 +44,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
           onClick={() => onPageChange(currentResultsPage - 1)}
           disabled={currentResultsPage === 1}
         >
-          <FaChevronLeft />
+          <IconChevronLeft size={12} />
         </button>
         <span className="pagination-info">Page {currentResultsPage} of {totalPages}</span>
         <button
@@ -52,7 +52,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
           onClick={() => onPageChange(currentResultsPage + 1)}
           disabled={currentResultsPage === totalPages}
         >
-          <FaChevronRight />
+          <IconChevronRight size={12} />
         </button>
       </div>
     );
@@ -62,14 +62,14 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-black uppercase tracking-tighter dark:text-white flex items-center gap-2">
-          <FaTrophy className="text-uiupc-orange" /> Entry Records <span className="text-zinc-400 text-sm">({filteredResults.length})</span>
+          <IconTrophy size={16} className="text-uiupc-orange" /> Entry Records <span className="text-zinc-400 text-sm">({filteredResults.length})</span>
         </h3>
         <div className="flex items-center gap-3">
           <button onClick={onAddResult} className="px-6 h-10 flex items-center gap-2 bg-uiupc-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all">
             Add Result
           </button>
           <button onClick={onExport} disabled={results.length === 0} className="px-6 h-10 flex items-center gap-2 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-600 dark:text-zinc-300 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-uiupc-orange disabled:opacity-50 transition-all">
-            <FaDownload /> Download List
+            <IconDownload size={12} /> Download List
           </button>
         </div>
       </div>
@@ -106,8 +106,8 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                   </td>
                   <td className="px-6 py-5 bg-white dark:bg-[#080808] border-y border-r border-black/5 dark:border-white/5 rounded-r-2xl text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => onEdit(result)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"><FaEdit className="text-xs" /></button>
-                      <button onClick={() => onDelete(result.id)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"><FaTrash className="text-xs" /></button>
+                      <button onClick={() => onEdit(result)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"><IconEdit size={12} /></button>
+                      <button onClick={() => onDelete(result.id)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"><IconTrash size={12} /></button>
                     </div>
                   </td>
                 </tr>
@@ -142,8 +142,8 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
         <div className="flex items-center justify-between pt-4">
           <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Page {currentResultsPage} of {totalPages}</p>
           <div className="flex items-center gap-2">
-            <button disabled={currentResultsPage === 1} onClick={() => onPageChange(currentResultsPage - 1)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-30 hover:border-uiupc-orange hover:text-uiupc-orange transition-all"><FaChevronLeft className="text-xs" /></button>
-            <button disabled={currentResultsPage === totalPages} onClick={() => onPageChange(currentResultsPage + 1)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-30 hover:border-uiupc-orange hover:text-uiupc-orange transition-all"><FaChevronRight className="text-xs" /></button>
+            <button disabled={currentResultsPage === 1} onClick={() => onPageChange(currentResultsPage - 1)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-30 hover:border-uiupc-orange hover:text-uiupc-orange transition-all"><IconChevronLeft size={12} /></button>
+            <button disabled={currentResultsPage === totalPages} onClick={() => onPageChange(currentResultsPage + 1)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-30 hover:border-uiupc-orange hover:text-uiupc-orange transition-all"><IconChevronRight size={12} /></button>
           </div>
         </div>
       )}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { FaChevronDown } from 'react-icons/fa';
+import { IconChevronDown } from '@/components/shared/Icons';
 
 interface Admin_DropdownProps {
   value: string;
@@ -49,7 +49,7 @@ export const Admin_Dropdown: React.FC<Admin_DropdownProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className={variant === 'minimal' 
           ? "w-full flex items-center justify-between gap-3 group outline-none"
-          : "w-full flex items-center justify-between gap-3 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-widest hover:border-uiupc-orange transition-all outline-none"
+          : "w-full flex items-center justify-between gap-3 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-widest hover:border-uiupc-orange transition-all outline-none"
         }
       >
         {variant === 'minimal' ? (
@@ -63,13 +63,13 @@ export const Admin_Dropdown: React.FC<Admin_DropdownProps> = ({
               </span>
             </div>
             <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isOpen ? 'bg-zinc-100 dark:bg-zinc-800' : ''}`}>
-              <FaChevronDown className={`text-[10px] text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+              <IconChevronDown size={10} className={`text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </div>
           </>
         ) : (
           <>
             <span className="truncate dark:text-white">{selectedOption.label}</span>
-            <FaChevronDown className={`text-[10px] text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+            <IconChevronDown size={10} className={`text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
           </>
         )}
       </button>

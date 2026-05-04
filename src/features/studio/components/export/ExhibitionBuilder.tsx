@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useStudioStore } from "@/store/useStudioStore";
-import { FaArchive, FaCheckCircle, FaTrash, FaPlus, FaColumns, FaTimes } from "react-icons/fa";
-import JSZip from "jszip";
+import { IconArchive, IconCheckCircle, IconTrash, IconPlus, IconColumns, IconClose } from "@/components/shared/Icons";
 
 interface ExhibitionBuilderProps {
   convertBlob: (img: any, mime: string, quality: number) => Promise<Blob>;
@@ -142,6 +141,7 @@ const ExhibitionBuilder: React.FC<ExhibitionBuilderProps> = ({ convertBlob, getE
 
   const handleZipProcess = async () => {
     setIsProcessing(true);
+    const JSZip = (await import("jszip")).default;
     const zip = new JSZip();
     const folder = zip.folder(`${zipFilename || 'UIUPC_Export'}_${Date.now()}`);
 
@@ -208,7 +208,7 @@ const ExhibitionBuilder: React.FC<ExhibitionBuilderProps> = ({ convertBlob, getE
                          className="w-4 h-4 rounded-full bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white flex items-center justify-center transition-all flex-shrink-0"
                          title="Remove Token"
                        >
-                         <FaTimes className="text-[8px]" />
+                         <IconClose size={8} />
                        </button>
                     </span>
                   ))}
@@ -216,7 +216,7 @@ const ExhibitionBuilder: React.FC<ExhibitionBuilderProps> = ({ convertBlob, getE
                <div className="flex flex-wrap items-center gap-2">
                   {availableTokens.map(t => (
                      <button key={t} onClick={() => setSyntaxTokens([...syntaxTokens, t])} className="px-2 py-1 rounded bg-black/5 dark:bg-white/5 text-[9px] hover:bg-uiupc-orange hover:text-white transition-colors">
-                       <FaPlus className="inline mr-1 text-[8px]"/> {t}
+                       <IconPlus size={8} className="inline mr-1"/> {t}
                      </button>
                   ))}
                </div>
@@ -314,7 +314,7 @@ const ExhibitionBuilder: React.FC<ExhibitionBuilderProps> = ({ convertBlob, getE
             disabled={isProcessing}
             className="w-full sm:w-auto px-8 py-4 rounded-xl bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-uiupc-orange/20 disabled:opacity-50 flex items-center justify-center gap-3"
          >
-            {isProcessing ? "Packaging Exhibition Payload..." : <><FaArchive className="text-sm" /> Generate Renamed ZIP ({images.length})</>}
+            {isProcessing ? "Packaging Exhibition Payload..." : <><IconArchive size={14} /> Generate Renamed ZIP ({images.length})</>}
          </button>
       </div>
 

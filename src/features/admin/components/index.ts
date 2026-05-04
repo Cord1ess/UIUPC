@@ -8,15 +8,17 @@ export * from './modules/Admin_Blog';
 export * from './modules/Admin_Gallery';
 export * from './modules/Admin_Departments';
 export * from './modules/Admin_Achievements';
+export * from './modules/Admin_DeleteConfirmModal';
 
 // Core Infrastructure
-export * from './core/Admin_Dashboard';
+// export * from './core/Admin_Dashboard';
 export * from './core/Admin_Sidebar';
 export * from './core/Admin_Dropdown';
 export * from './core/Admin_DetailsModal';
 export * from './core/Admin_EmailModal';
 export * from './core/Admin_ModuleHeader';
 export * from './core/Admin_FilterMenu';
+export * from './core/Admin_ErrorBoundary';
 export * from './Admin_DrivePicker';
 
 // Governance Hub

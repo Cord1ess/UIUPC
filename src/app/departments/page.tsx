@@ -1,14 +1,18 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { DepartmentGrid } from '@/features/departments/components/DepartmentGrid';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
-import { Department } from '@/types';
-import { FaLayerGroup } from 'react-icons/fa';
+import { Department, Member } from '@/types';
+import { IconLayerGroup } from '@/components/shared/Icons';
+import GlobalLoader from '@/components/shared/GlobalLoader';
 
 export default function DepartmentsPage() {
-  const { data: departments, loading, error } = useSupabaseData<Department>("departments");
+  const { data: departments, isLoading, error } = useSupabaseData<Department>("departments");
+  const { data: members, isLoading: membersLoading } = useSupabaseData<Member>("members");
+
+  if (isLoading || membersLoading) return <GlobalLoader />;
 
   return (
     <main className="min-h-screen pt-32 pb-20 px-6 max-w-7xl mx-auto">
@@ -19,7 +23,7 @@ export default function DepartmentsPage() {
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-3 text-uiupc-orange mb-4"
         >
-          <FaLayerGroup className="text-xl" />
+          <IconLayerGroup size={20} />
           <span className="text-xs font-black uppercase tracking-[0.3em]">Our Architecture</span>
         </motion.div>
         
@@ -44,19 +48,11 @@ export default function DepartmentsPage() {
 
       {error && (
         <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-xs font-bold uppercase tracking-widest mb-12">
-          Error loading departments: {error}
+          Error loading departments: {typeof error === 'string' ? error : (error as any).message}
         </div>
       )}
 
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-64 bg-zinc-100 dark:bg-zinc-900 rounded-[2.5rem] animate-pulse" />
-          ))}
-        </div>
-      ) : (
-        <DepartmentGrid departments={departments || []} />
-      )}
+      <DepartmentGrid departments={departments || []} />
     </main>
   );
 }

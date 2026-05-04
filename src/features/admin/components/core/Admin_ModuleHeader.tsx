@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
 interface StatCardProps {
@@ -12,7 +12,7 @@ interface StatCardProps {
 }
 
 export const Admin_StatCard = ({ label, value, icon, color = "text-uiupc-orange" }: StatCardProps) => (
-  <div className="p-6 bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 rounded-2xl flex flex-col justify-between shadow-sm group min-h-[140px]">
+  <div className="p-6 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col justify-between shadow-sm group min-h-[140px] relative z-10">
     <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">{label}</p>
     <div className="flex items-end justify-between mt-auto">
       <div className={`${color} text-4xl opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500`}>

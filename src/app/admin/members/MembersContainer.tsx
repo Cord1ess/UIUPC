@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Admin_Members, Admin_DetailsModal } from '@/features/admin/components';
+import { Admin_Members, Admin_DetailsModal, Admin_ErrorBoundary } from '@/features/admin/components';
+import { Member } from '@/types/admin';
 
 interface MembersContainerProps {
   initialData: Member[];
@@ -65,12 +66,14 @@ export function MembersContainer({
         onEmailReply={(item) => { window.location.href = `mailto:${item.email}`; }}
       />
 
-      <Admin_DetailsModal 
-        isOpen={showModal} 
-        onClose={() => setShowModal(false)}
-        item={selectedItem}
-        dataType="membership"
-      />
+      <Admin_ErrorBoundary>
+        <Admin_DetailsModal 
+          isOpen={showModal} 
+          onClose={() => setShowModal(false)}
+          item={selectedItem}
+          dataType="membership"
+        />
+      </Admin_ErrorBoundary>
     </div>
   );
 }

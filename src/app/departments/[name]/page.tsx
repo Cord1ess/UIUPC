@@ -1,10 +1,10 @@
 "use client";
 
 import React, { use } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { Department, Member } from '@/types';
-import { FaChevronLeft, FaTrophy, FaBriefcase, FaUsers, FaFacebook, FaInstagram, FaGlobe } from 'react-icons/fa';
+import { IconChevronLeft, IconTrophy, IconBriefcase, IconUsers, IconFacebook, IconInstagram, IconGlobe } from '@/components/shared/Icons';
 import Link from 'next/link';
 import { getImageUrl } from '@/utils/imageUrl';
 
@@ -27,7 +27,7 @@ export default function DepartmentDetailPage({ params }: { params: Promise<{ nam
     <main className="min-h-screen pt-32 pb-20 px-6 max-w-7xl mx-auto">
       {/* Back Button */}
       <Link href="/departments" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-uiupc-orange transition-colors mb-12">
-        <FaChevronLeft /> Back to Departments
+        <IconChevronLeft size={12} /> Back to Departments
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
@@ -46,10 +46,10 @@ export default function DepartmentDetailPage({ params }: { params: Promise<{ nam
           {dept.achievements && dept.achievements.length > 0 && (
             <div className="space-y-6">
               <h2 className="flex items-center gap-3 text-sm font-black uppercase tracking-[0.2em] dark:text-white">
-                <FaTrophy className="text-uiupc-orange" /> Key Achievements
+                <IconTrophy size={14} className="text-uiupc-orange" /> Key Achievements
               </h2>
               <div className="grid grid-cols-1 gap-4">
-                {dept.achievements.map((ach, i) => (
+                {dept.achievements.map((ach: string, i: number) => (
                   <div key={i} className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 rounded-2xl text-sm font-medium dark:text-zinc-300">
                     {ach}
                   </div>
@@ -65,7 +65,7 @@ export default function DepartmentDetailPage({ params }: { params: Promise<{ nam
             <div className="space-y-12">
               <div className="flex items-center justify-between">
                 <h2 className="flex items-center gap-3 text-sm font-black uppercase tracking-[0.2em] dark:text-white">
-                  <FaUsers className="text-uiupc-orange" /> Meet the Team
+                  <IconUsers size={14} className="text-uiupc-orange" /> Meet the Team
                 </h2>
                 <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                   {members.length} Members
@@ -94,10 +94,10 @@ export default function DepartmentDetailPage({ params }: { params: Promise<{ nam
           ) : (
             <div className="space-y-12">
               <h2 className="flex items-center gap-3 text-sm font-black uppercase tracking-[0.2em] dark:text-white">
-                <FaBriefcase className="text-uiupc-orange" /> Recent Works
+                <IconBriefcase size={14} className="text-uiupc-orange" /> Recent Works
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {dept.works?.map((work, i) => (
+                {dept.works?.map((work: any, i: number) => (
                   <div key={i} className="group relative aspect-video bg-zinc-100 dark:bg-zinc-900 rounded-3xl overflow-hidden">
                     <img src={getImageUrl(work.image, 600)} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={work.title} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
@@ -141,9 +141,9 @@ function MemberCard({ member, index }: { member: Member, index: number }) {
             {member.role}
           </p>
           <div className="flex items-center gap-3 mt-3">
-            {member.social_links.facebook && <FaFacebook className="text-zinc-300 dark:text-zinc-600 hover:text-uiupc-orange transition-colors cursor-pointer" />}
-            {member.social_links.instagram && <FaInstagram className="text-zinc-300 dark:text-zinc-600 hover:text-uiupc-orange transition-colors cursor-pointer" />}
-            {member.social_links.portfolio && <FaGlobe className="text-zinc-300 dark:text-zinc-600 hover:text-uiupc-orange transition-colors cursor-pointer" />}
+            {member.social_links.facebook && <IconFacebook size={12} className="text-zinc-300 dark:text-zinc-600 hover:text-uiupc-orange transition-colors cursor-pointer" />}
+            {member.social_links.instagram && <IconInstagram size={12} className="text-zinc-300 dark:text-zinc-600 hover:text-uiupc-orange transition-colors cursor-pointer" />}
+            {member.social_links.portfolio && <IconGlobe size={12} className="text-zinc-300 dark:text-zinc-600 hover:text-uiupc-orange transition-colors cursor-pointer" />}
           </div>
         </div>
         <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-50 dark:bg-zinc-900 text-zinc-300 group-hover:bg-uiupc-orange group-hover:text-white transition-all">

@@ -3,8 +3,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useStudioStore } from "@/store/useStudioStore";
 import dynamic from "next/dynamic";
-import { FaImages, FaUndo, FaDownload, FaExternalLinkAlt, FaTrash, FaCopy, FaSyncAlt } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { IconImages, IconUndo, IconDownload, IconExternalLink, IconTrash, IconCopy, IconSync } from "@/components/shared/Icons";
+import { motion, AnimatePresence } from "motion/react";
 import StudioLoader from "@/features/studio/components/StudioLoader";
 import StudioCanvas from "@/features/studio/components/StudioCanvas";
 
@@ -19,8 +19,6 @@ const MetadataTool = dynamic(() => import("@/features/studio/components/Metadata
 const TransformerTool = dynamic(() => import("@/features/studio/components/TransformerTool"), { ssr: false, loading: () => <StudioLoader /> });
 const ComposeTool = dynamic(() => import("@/features/studio/components/ComposeTool"), { ssr: false, loading: () => <StudioLoader /> });
 const PdfTool = dynamic(() => import("@/features/studio/components/PdfTool"), { ssr: false, loading: () => <StudioLoader /> });
-const AIRetouchTool = dynamic(() => import("@/features/studio/components/AIRetouchTool"), { ssr: false, loading: () => <StudioLoader /> });
-const AIEnhanceTool = dynamic(() => import("@/features/studio/components/AIEnhanceTool"), { ssr: false, loading: () => <StudioLoader /> });
 
 export default function UIUPCStudioPage() {
   const { images, activeImageId, activeToolId, uiKey, addImages, revertToHistory } = useStudioStore();
@@ -146,10 +144,6 @@ export default function UIUPCStudioPage() {
         return <ComposeTool key={`compose-${uiKey}`} />;
       case "pdf":
         return <PdfTool key={`pdf-${uiKey}`} />;
-      case "retouch":
-        return <AIRetouchTool key={`retouch-${uiKey}`} />;
-      case "enhance":
-        return <AIEnhanceTool key={`enhance-${uiKey}`} />;
       default:
         return null;
     }
@@ -180,7 +174,7 @@ export default function UIUPCStudioPage() {
               className="flex flex-col items-center gap-6"
             >
               <div className="w-32 h-32 rounded-full border-4 border-dashed border-uiupc-orange/60 flex items-center justify-center">
-                <FaImages className="text-5xl text-uiupc-orange" />
+                <IconImages size={50} className="text-uiupc-orange" />
               </div>
               <p className="text-white font-sans text-sm font-semibold tracking-wide">Drop images to import</p>
             </motion.div>
@@ -200,24 +194,24 @@ export default function UIUPCStudioPage() {
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
             <button onClick={handleUndo} disabled={!activeImage || activeImage.history.length <= 1} className="w-full px-4 py-2.5 text-left text-xs flex items-center gap-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-30">
-              <FaUndo className="text-zinc-400" /> Undo Last Edit
+              <IconUndo size={12} className="text-zinc-400" /> Undo Last Edit
             </button>
             <button onClick={handleOpenInNewTab} disabled={!activeImage} className="w-full px-4 py-2.5 text-left text-xs flex items-center gap-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-30">
-              <FaExternalLinkAlt className="text-zinc-400" /> Open Image in New Tab
+              <IconExternalLink size={12} className="text-zinc-400" /> Open Image in New Tab
             </button>
             <button onClick={handleDownloadNow} disabled={!activeImage} className="w-full px-4 py-2.5 text-left text-xs flex items-center gap-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-30">
-              <FaDownload className="text-zinc-400" /> Download Now
+              <IconDownload size={12} className="text-zinc-400" /> Download Now
             </button>
             <button onClick={handleCopyToClipboard} disabled={!activeImage} className="w-full px-4 py-2.5 text-left text-xs flex items-center gap-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-30">
-              <FaCopy className="text-zinc-400" /> Copy to Clipboard
+              <IconCopy size={12} className="text-zinc-400" /> Copy to Clipboard
             </button>
             <div className="h-[1px] bg-black/5 dark:bg-white/5 my-1" />
             <button onClick={() => { useStudioStore.getState().restartUi(); setContextMenu(null); }} className="w-full px-4 py-2.5 text-left text-xs flex items-center gap-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-zinc-500">
-              <FaSyncAlt className="text-zinc-400" /> Restart Studio UI
+              <IconSync size={12} className="text-zinc-400" /> Restart Studio UI
             </button>
             {activeImage && (
               <button onClick={() => { useStudioStore.getState().removeImage(activeImage.id); setContextMenu(null); }} className="w-full px-4 py-2.5 text-left text-xs flex items-center gap-3 hover:bg-red-500/10 text-red-500 transition-colors">
-                <FaTrash className="text-red-400" /> Remove Active Image
+                <IconTrash size={12} className="text-red-400" /> Remove Active Image
               </button>
             )}
           </motion.div>
@@ -238,7 +232,7 @@ export default function UIUPCStudioPage() {
                 exit={{ opacity: 0, scale: 0.98 }}
                 className="w-full h-full flex flex-col items-center justify-center text-center space-y-6 px-6"
               >
-                  <FaImages className="text-6xl text-zinc-300 dark:text-zinc-700 mb-2" />
+                  <IconImages size={60} className="text-zinc-300 dark:text-zinc-700 mb-2" />
                   <div className="space-y-4">
                     <div className="flex items-center justify-center gap-3">
                       <h2 className="text-2xl font-sans font-extrabold tracking-tight text-zinc-900 dark:text-white">
@@ -247,7 +241,7 @@ export default function UIUPCStudioPage() {
                       <span className="text-[9px] font-black uppercase tracking-wide bg-uiupc-orange/10 text-uiupc-orange px-2 py-1 rounded">Beta</span>
                     </div>
                     <p className="text-zinc-500 dark:text-zinc-500 text-xs font-sans max-w-[340px] mx-auto leading-relaxed">
-                        A professional image processing studio. Optimize, crop, edit, transform, remove backgrounds, stitch collages, and export to ZIP or PDF — all in one place.
+                        A professional image processing studio. Optimize, crop, edit, transform, stitch collages, and export to ZIP or PDF — all in one place.
                     </p>
                     <p className="text-zinc-400 dark:text-zinc-600 text-[10px] font-sans max-w-[320px] mx-auto leading-relaxed">
                         Completely client-side. Your images and data never leave your device — nothing is uploaded or stored.
@@ -278,7 +272,7 @@ export default function UIUPCStudioPage() {
                       <div className="flex items-center justify-between mb-8">
                          <h3 className="text-xs font-black uppercase tracking-widest text-uiupc-orange">Tool Controls</h3>
                          <button onClick={() => setIsMobileControlsOpen(false)} className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center">
-                            <FaTrash className="text-[10px]" />
+                            <IconTrash size={10} />
                          </button>
                       </div>
                       {renderToolControls()}
@@ -314,7 +308,7 @@ export default function UIUPCStudioPage() {
              <div className="p-4 border-b border-black/5 dark:border-white/5 flex items-center justify-between">
                 <h3 className="text-xs font-black uppercase tracking-widest">History & Bin</h3>
                 <button onClick={() => setIsMobileHistoryOpen(false)} className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center">
-                    <FaTrash className="text-[10px]" />
+                    <IconTrash size={10} />
                 </button>
              </div>
              <div className="flex-1 overflow-y-auto">
@@ -333,13 +327,13 @@ export default function UIUPCStudioPage() {
              onClick={() => setIsMobileControlsOpen(!isMobileControlsOpen)}
              className="w-12 h-12 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black shadow-2xl flex items-center justify-center pointer-events-auto active:scale-90 transition-transform"
            >
-              <FaSyncAlt className={`text-sm transition-transform ${isMobileControlsOpen ? 'rotate-180' : ''}`} />
+              <IconSync size={14} className={`${isMobileControlsOpen ? 'rotate-180' : ''} transition-transform`} />
            </button>
            <button 
              onClick={() => setIsMobileHistoryOpen(!isMobileHistoryOpen)}
              className="w-12 h-12 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black shadow-2xl flex items-center justify-center pointer-events-auto active:scale-90 transition-transform"
            >
-              <FaImages className="text-sm" />
+              <IconImages size={14} />
            </button>
         </div>
       )}

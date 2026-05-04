@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import imageCompression from "browser-image-compression";
+
 import { 
-  FaCheckCircle, FaExpandArrowsAlt, FaPercentage, 
-  FaRulerCombined, FaLock, FaLockOpen 
-} from "react-icons/fa";
+  IconCheckCircle, IconExpandArrows, IconPercentage, 
+  IconRulerCombined, IconLock, IconLockOpen 
+} from "@/components/shared/Icons";
 import { useStudioStore } from "@/store/useStudioStore";
 
 const LOSSLESS_FORMATS = ["image/png", "image/bmp", "image/gif"];
@@ -134,6 +134,7 @@ const OptimizerTool: React.FC = () => {
         onProgress: (val: number) => setProgress(val),
       };
 
+      const imageCompression = (await import("browser-image-compression")).default;
       const compressedBlob = await imageCompression(blob as File, options);
       
       const dims = target ? `${target.width}×${target.height} ` : '';
@@ -222,7 +223,7 @@ const OptimizerTool: React.FC = () => {
       {/* Resize Engine */}
       <div className="space-y-4 pt-5 border-t border-black/5 dark:border-white/5">
         <div className="flex items-center gap-2">
-           <FaExpandArrowsAlt className="text-[10px] text-uiupc-orange" />
+           <IconExpandArrows size={10} className="text-uiupc-orange" />
            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">Resize</span>
            {naturalSize.width > 0 && (
              <span className="text-[8px] font-mono text-zinc-400 ml-auto">{naturalSize.width}×{naturalSize.height}</span>
@@ -251,14 +252,14 @@ const OptimizerTool: React.FC = () => {
                onClick={() => setLockAspect(!lockAspect)}
                className="flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-uiupc-orange transition-colors"
              >
-               {lockAspect ? <FaLock className="text-uiupc-orange text-[9px]" /> : <FaLockOpen className="text-[9px]" />}
+               {lockAspect ? <IconLock size={9} className="text-uiupc-orange" /> : <IconLockOpen size={9} />}
                {lockAspect ? "Aspect Locked" : "Aspect Free"}
              </button>
 
              <div className="grid grid-cols-2 gap-2">
                <div>
                  <p className="text-[8px] font-black uppercase tracking-[0.15em] text-zinc-400 mb-1.5 flex items-center gap-1">
-                   <FaRulerCombined className="text-[7px]" /> W
+                   <IconRulerCombined size={7} /> W
                  </p>
                  <input 
                    type="number" 
@@ -270,7 +271,7 @@ const OptimizerTool: React.FC = () => {
                </div>
                <div>
                  <p className="text-[8px] font-black uppercase tracking-[0.15em] text-zinc-400 mb-1.5 flex items-center gap-1">
-                   <FaRulerCombined className="text-[7px]" /> H
+                   <IconRulerCombined size={7} /> H
                  </p>
                  <input 
                    type="number" 
@@ -288,7 +289,7 @@ const OptimizerTool: React.FC = () => {
         {resizeMode === "percentage" && (
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-1.5"><FaPercentage className="text-[8px]" /> Scale</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-1.5"><IconPercentage size={8} /> Scale</span>
               <span className="text-xs font-black text-uiupc-orange font-mono tabular-nums">{scalePercent}%</span>
             </div>
             <input 
@@ -311,7 +312,7 @@ const OptimizerTool: React.FC = () => {
         disabled={isProcessing}
         className="w-full py-4 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3"
       >
-        {isProcessing ? `Processing... ${Math.round(progress)}%` : <><FaCheckCircle /> Apply Transform</>}
+        {isProcessing ? `Processing... ${Math.round(progress)}%` : <><IconCheckCircle size={14} /> Apply Transform</>}
       </button>
     </div>
   );
