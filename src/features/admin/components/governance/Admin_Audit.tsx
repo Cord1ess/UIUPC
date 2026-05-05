@@ -1,5 +1,7 @@
 "use client";
 
+import Link from 'next/link';
+
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -14,6 +16,21 @@ import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { initAdminPassword } from "@/features/admin/actions";
 
+const getTargetLink = (table: string) => {
+  const map: Record<string, string> = {
+    'members': '/admin/members',
+    'committees': '/admin/committee',
+    'exhibition_submissions': '/admin/submissions',
+    'admins': '/admin/admins',
+    'events': '/admin/events',
+    'gallery': '/admin/gallery',
+    'blog': '/admin/blog',
+    'finance': '/admin/finances',
+    'pending_changes': '/admin/admins',
+  };
+  return map[table] || '/admin';
+};
+
 const AuditRow = React.memo(({ 
   item, isExpanded, onToggle 
 }: { 
@@ -21,6 +38,7 @@ const AuditRow = React.memo(({
 }) => {
   const isCritical = (item.action || "").includes('delete') || (item.action || "").includes('purge');
   const isCreation = (item.action || "").includes('create') || (item.action || "").includes('add');
+  const targetLink = getTargetLink(item.target_table || '');
 
   return (
     <React.Fragment>
@@ -28,33 +46,33 @@ const AuditRow = React.memo(({
         onClick={onToggle}
         className={`group hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition-all cursor-pointer border-b border-zinc-100 dark:border-zinc-800/50 ${isExpanded ? 'bg-uiupc-orange/[0.03]' : ''}`}
       >
-        <td className="px-8 py-6 whitespace-nowrap">
-          <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-sm shadow-inner border border-zinc-200 dark:border-zinc-800 ${isCritical ? 'bg-red-500/10 text-red-500' : isCreation ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}`}>
-              <IconTerminal size={14} />
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm shadow-inner border border-zinc-200 dark:border-zinc-800 ${isCritical ? 'bg-red-500/10 text-red-500' : isCreation ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}`}>
+              <IconTerminal size={12} />
             </div>
-            <div className="flex flex-col min-w-[200px]">
-              <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tight truncate">{(item.action || "Event").replace(/_/g, ' ')}</span>
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest truncate flex items-center gap-2 mt-0.5"><IconFingerprint size={12} className="text-zinc-300 dark:text-zinc-700" /> {item.id.split('-')[0]}</span>
+            <div className="flex flex-col min-w-[150px]">
+              <span className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-tight truncate">{(item.action || "Event").replace(/_/g, ' ')}</span>
+              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest truncate flex items-center gap-1 mt-0.5"><IconFingerprint size={10} className="text-zinc-300 dark:text-zinc-700" /> {item.id.split('-')[0]}</span>
             </div>
           </div>
         </td>
-        <td className="px-6 py-6 whitespace-nowrap hidden sm:table-cell">
-           <span className="text-[11px] font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-             <IconUserShield size={10} className="text-uiupc-orange" /> {item.admin_id ? `Admin ${item.admin_id.slice(0, 5)}` : "System"}
+        <td className="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+           <span className="text-[10px] font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+             <IconUserShield size={10} className="text-uiupc-orange shrink-0" /> <span className="truncate max-w-[120px]">{item.admin_email || (item.admin_id ? `Admin ${item.admin_id.slice(0, 5)}` : "System")}</span>
            </span>
         </td>
-        <td className="px-6 py-6 whitespace-nowrap hidden md:table-cell">
-           <span className="px-4 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 text-[9px] font-black uppercase tracking-widest border border-zinc-200 dark:border-zinc-800/50 flex items-center gap-2 w-fit">
+        <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+           <span className="px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 text-[9px] font-black uppercase tracking-widest border border-zinc-200 dark:border-zinc-800/50 flex items-center gap-1.5 w-fit">
              <IconDatabase size={10} /> {(item.target_table || "system").replace(/_/g, ' ')}
            </span>
         </td>
-        <td className="px-6 py-6 whitespace-nowrap hidden lg:table-cell">
-           <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2"><IconClock size={12} className="text-zinc-300 dark:text-zinc-700" /> {new Date(item.created_at).toLocaleString()}</span>
+        <td className="px-6 py-4 whitespace-nowrap hidden lg:table-cell">
+           <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><IconClock size={10} className="text-zinc-300 dark:text-zinc-700" /> {new Date(item.created_at).toLocaleString()}</span>
         </td>
-        <td className="px-8 py-6 text-right whitespace-nowrap">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ml-auto border border-zinc-200 dark:border-zinc-800/50 ${isExpanded ? 'bg-uiupc-orange text-white rotate-180 border-uiupc-orange' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-300'}`}>
-            <IconChevronDown size={12} />
+        <td className="px-6 py-4 text-right whitespace-nowrap">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-500 ml-auto border border-zinc-200 dark:border-zinc-800/50 ${isExpanded ? 'bg-uiupc-orange text-white rotate-180 border-uiupc-orange' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-300'}`}>
+            <IconChevronDown size={10} />
           </div>
         </td>
       </motion.tr>
@@ -77,6 +95,15 @@ const AuditRow = React.memo(({
                     </pre>
                   </div>
                 </div>
+                
+                <div className="mt-8 flex justify-end">
+                  <Link 
+                    href={targetLink}
+                    className="px-6 py-3 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-uiupc-orange/20 hover:brightness-110 transition-all flex items-center gap-2"
+                  >
+                    View Resource Module
+                  </Link>
+                </div>
               </motion.div>
             </td>
           </tr>
@@ -92,6 +119,8 @@ export const Admin_Audit: React.FC = () => {
   const [page, setPage] = useState(0);
   const pageSize = 20;
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterAction, setFilterAction] = useState('all');
+  const [filterTable, setFilterTable] = useState('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => { initAdminPassword(); }, []);
@@ -104,13 +133,32 @@ export const Admin_Audit: React.FC = () => {
   });
 
   const visibleLogs = useMemo(() => {
-    const rawData = logs || [];
-    if (!searchTerm) return rawData;
-    return rawData.filter(l => 
-      (l.action || "").toLowerCase().includes(searchTerm.toLowerCase()) || 
-      (l.target_table || "").toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [logs, searchTerm]);
+    let rawData = logs || [];
+    
+    if (filterAction !== 'all') {
+      rawData = rawData.filter(l => (l.action || "").toLowerCase().includes(filterAction));
+    }
+    
+    if (filterTable !== 'all') {
+      rawData = rawData.filter(l => (l.target_table || "").toLowerCase() === filterTable);
+    }
+    
+    if (searchTerm) {
+      rawData = rawData.filter(l => 
+        (l.action || "").toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (l.target_table || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (l.admin_email || "").toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    return rawData;
+  }, [logs, searchTerm, filterAction, filterTable]);
+  
+  // Extract unique tables for the filter
+  const uniqueTables = useMemo(() => {
+    const tables = new Set((logs || []).map(l => l.target_table).filter(Boolean));
+    return Array.from(tables).sort();
+  }, [logs]);
   
   const totalPages = Math.ceil((count || 0) / pageSize);
 
@@ -137,21 +185,45 @@ export const Admin_Audit: React.FC = () => {
       </Admin_ModuleHeader>
 
       {/* ── FILTER BAR ─────────────────────────────────────────── */}
-      <div className="w-full bg-white dark:bg-[#0d0d0d] p-3 sm:p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm relative z-10">
-        <div className="flex flex-col lg:flex-row gap-6 items-stretch lg:items-center justify-between">
-          <div className="relative flex-1 group min-w-[200px]">
-            <IconSearch size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-uiupc-orange transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Search by event or resource..." 
-              value={searchTerm} 
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full py-4 pl-14 pr-8 bg-zinc-100 dark:bg-[#1a1a1a] border border-transparent focus:border-uiupc-orange/30 rounded-xl text-sm font-bold outline-none transition-all placeholder:text-zinc-400 dark:text-white" 
-            />
-          </div>
-          <div className="flex items-center gap-3 px-6 py-4 bg-zinc-50 dark:bg-[#0a0a0a] rounded-2xl border border-zinc-100 dark:border-zinc-800/50 shadow-inner">
+      <div className="w-full bg-white dark:bg-[#0d0d0d] p-3 sm:p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm relative z-10 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
+        <div className="relative flex-1 min-w-[200px]">
+          <IconSearch size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-uiupc-orange transition-colors" />
+          <input 
+            type="text" 
+            placeholder="Search by event, resource, or email..." 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full py-4 pl-14 pr-8 bg-zinc-100 dark:bg-[#1a1a1a] border border-transparent focus:border-uiupc-orange/30 rounded-xl text-sm font-bold outline-none transition-all placeholder:text-zinc-400 dark:text-white" 
+          />
+        </div>
+        
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 lg:pb-0">
+          <select 
+            value={filterAction} 
+            onChange={(e) => setFilterAction(e.target.value)}
+            className="px-4 py-3 bg-zinc-100 dark:bg-[#1a1a1a] border border-transparent focus:border-uiupc-orange/30 rounded-xl text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 outline-none cursor-pointer appearance-none"
+          >
+            <option value="all">All Actions</option>
+            <option value="create">Create</option>
+            <option value="update">Update</option>
+            <option value="delete">Delete</option>
+            <option value="purge">Purge</option>
+          </select>
+          
+          <select 
+            value={filterTable} 
+            onChange={(e) => setFilterTable(e.target.value)}
+            className="px-4 py-3 bg-zinc-100 dark:bg-[#1a1a1a] border border-transparent focus:border-uiupc-orange/30 rounded-xl text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 outline-none cursor-pointer appearance-none"
+          >
+            <option value="all">All Targets</option>
+            {uniqueTables.map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          
+          <div className="flex items-center shrink-0 gap-3 px-6 py-3 bg-zinc-50 dark:bg-[#0a0a0a] rounded-xl border border-zinc-100 dark:border-zinc-800/50 shadow-inner">
             <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.4)]" />
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">Security Monitoring Active</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">Monitoring Active</span>
           </div>
         </div>
       </div>
@@ -162,11 +234,11 @@ export const Admin_Audit: React.FC = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-zinc-50 dark:bg-zinc-900/50">
-                <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Operational Event</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden sm:table-cell">Initiator</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden md:table-cell">Affected Resource</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden lg:table-cell">Timestamp</th>
-                <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Trace</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Operational Event</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden sm:table-cell">Initiator</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden md:table-cell">Affected Resource</th>
+                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden lg:table-cell">Timestamp</th>
+                <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Trace</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { IconFolder, IconClose, IconSync, IconCheckCircle, IconExclamationCircle, IconUserCircle, IconImages } from '@/components/shared/Icons';
 import { Admin_DrivePicker } from "@/features/admin/components";
 import { supabase } from "@/lib/supabase";
+import { executeAdminMutation } from "@/features/admin/actions";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { getImageUrl } from "@/utils/imageUrl";
 import { Admin_ModalPortal } from "@/features/admin/components/core/Admin_ModalPortal";
@@ -107,7 +108,7 @@ export const Admin_CommitteeFolderSyncModal: React.FC<Admin_CommitteeFolderSyncM
         }));
 
       for (const update of updates) {
-        await supabase.from('committees').update({ image_url: update.image_url }).eq('id', update.id);
+        await executeAdminMutation('committees', 'update', { image_url: update.image_url }, update.id);
       }
 
       alert(`Successfully updated ${updates.length} committee photos!`);

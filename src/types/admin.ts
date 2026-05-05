@@ -1,4 +1,4 @@
-export type AdminRole = 'core' | 'hr' | 'pr' | 'event' | 'organizer' | 'design' | 'visual';
+export type AdminRole = 'core' | 'hr' | 'pr' | 'event' | 'organizer' | 'design' | 'visual' | 'alumni_advisor';
 
 export interface AdminProfile {
   id: string;
@@ -8,16 +8,34 @@ export interface AdminProfile {
   is_active: boolean;
 }
 
+export interface ClubEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  image_url: string;
+  tags?: string[];
+  countdown_target?: string | null;
+  show_in_more_events?: boolean;
+  event_images?: string[];
+  gallery_folder_id?: string | null;
+  has_timer?: boolean;
+  marker_color?: string;
+  marker_link_url?: string;
+}
+
 export interface Member {
   id: string;
   student_id: string;
-  member_name: string;
+  full_name: string;
   email: string;
   phone: string;
   department: string;
   session: string;
   status: 'pending' | 'approved' | 'rejected' | 'alumni';
   created_at: string;
+  image_url?: string | null;
 }
 
 export interface CommitteeMember {
@@ -44,8 +62,11 @@ export interface ExhibitionSubmission {
   institute: string;
   photo_title: string;
   photo_url: string;
+  drive_file_ids?: string[];
   category: string;
   status: 'pending' | 'selected' | 'rejected';
+  payment_status: 'paid' | 'unpaid';
+  transaction_id?: string;
   submitted_at: string;
   email?: string;
   featured_on_hero?: boolean;

@@ -18,7 +18,7 @@ import { Admin_DeleteConfirmModal } from "./Admin_DeleteConfirmModal";
 import { getImageUrl } from "@/utils/imageUrl";
 import { exportToCSV } from "@/utils/adminHelpers";
 import { Admin_CommitteeFolderSyncModal } from "./Admin_CommitteeFolderSyncModal";
-import { upsertCommitteeMember, initAdminPassword } from "@/features/admin/actions";
+import { initAdminPassword, executeAdminMutation } from "@/features/admin/actions";
 import { CommitteeMember } from "@/types/admin";
 
 interface CommitteeRowProps {
@@ -192,8 +192,11 @@ export const Admin_Committee: React.FC<Admin_CommitteeProps> = ({
   }, [onFilterChange]);
 
   const handleUpsert = async (id: string | null, recordData: any) => {
-    const result = await upsertCommitteeMember({ ...recordData, id: id || undefined });
-    return result;
+    const { success, message } = id 
+      ? await executeAdminMutation("committees", "update", recordData, id)
+      : await executeAdminMutation("committees", "create", recordData);
+    
+    return { success, message };
   };
 
   const totalPages = Math.ceil((count || 0) / pageSize);
@@ -403,6 +406,9 @@ export const Admin_Committee: React.FC<Admin_CommitteeProps> = ({
           onSuccess={() => {
             if (deleteTarget) setHiddenIds(prev => new Set(prev).add(deleteTarget.id));
             refreshData();
+          }}
+          onConfirm={async (password) => {
+            return await executeAdminMutation("committees", "delete", null, deleteTarget?.id, password);
           }}
         />
       </Admin_ErrorBoundary>

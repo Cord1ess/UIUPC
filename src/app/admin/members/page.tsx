@@ -13,29 +13,39 @@ export default async function MembersPage({
   const search = (params.search as string) || "";
   const status = (params.status as string) || "all";
   const dept = (params.dept as string) || "all";
+  const year = (params.year as string) || "all";
+  const sort = (params.sort as string) || "desc";
   const pageSize = 12;
 
-  // 1. Fetch filtered data from Supabase (Server Side)
-  let query = supabase
+  // 1. Fetch unique sessions (years) for the filter dropdown
+  const { data: sessionData } = await supabase
+    .from("members")
+    .select("session")
+    .not("session", "is", null);
+  
+  const availableYears = Array.from(new Set((sessionData || []).map(d => d.session))).sort((a, b) => b.localeCompare(a));
 
+  // 2. Fetch filtered data from Supabase (Server Side)
+  let query = supabase
     .from("members")
     .select("*", { count: "exact" });
 
   if (status !== "all") query = query.eq("status", status);
   if (dept !== "all") query = query.eq("department", dept);
+  if (year !== "all") query = query.eq("session", year);
   if (search) {
-    query = query.or(`member_name.ilike.%${search}%,student_id.ilike.%${search}%,email.ilike.%${search}%`);
+    query = query.or(`full_name.ilike.%${search}%,student_id.ilike.%${search}%,email.ilike.%${search}%`);
   }
 
   const { data, count, error } = await query
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: sort === "asc" })
     .range(page * pageSize, (page + 1) * pageSize - 1);
 
   if (error) {
     console.error("Error fetching members:", error);
   }
 
-  // 2. Fetch unique departments for the filter dropdown
+  // 3. Fetch unique departments for the filter dropdown
   const { data: deptData } = await supabase
     .from("members")
     .select("department")
@@ -51,7 +61,10 @@ export default async function MembersPage({
       searchTerm={search}
       filterStatus={status}
       filterDept={dept}
+      filterYear={year}
+      sortOrder={sort as "asc" | "desc"}
       departments={departments}
+      availableYears={availableYears}
     />
   );
 }

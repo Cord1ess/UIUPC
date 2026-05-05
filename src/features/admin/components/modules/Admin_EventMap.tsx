@@ -22,6 +22,8 @@ export const Admin_EventMap = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [tempCoords, setTempCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [tempIconType, setTempIconType] = useState<string>("workshop");
+  const [tempColor, setTempColor] = useState<string>("#f58920");
+  const [tempLinkUrl, setTempLinkUrl] = useState<string>("");
 
   // Sync temp state when an event is selected
   useEffect(() => {
@@ -32,6 +34,8 @@ export const Admin_EventMap = () => {
         setTempCoords(null);
       }
       setTempIconType(selectedEvent.map_icon_type || "workshop");
+      setTempColor(selectedEvent.marker_color || "#f58920");
+      setTempLinkUrl(selectedEvent.marker_link_url || `/events/${selectedEvent.id}`);
     } else {
       setTempCoords(null);
     }
@@ -59,6 +63,8 @@ export const Admin_EventMap = () => {
           latitude: tempCoords.lat,
           longitude: tempCoords.lng,
           map_icon_type: tempIconType,
+          marker_color: tempColor,
+          marker_link_url: tempLinkUrl,
           is_mapped: true
         })
         .eq("id", selectedEvent.id);
@@ -83,6 +89,15 @@ export const Admin_EventMap = () => {
     { value: "exhibition", label: "Exhibition" },
     { value: "visit", label: "Visit" },
     { value: "uiu", label: "UIU" }
+  ];
+
+  const markerColors = [
+    { value: "#f58920", label: "Orange" },
+    { value: "#3b82f6", label: "Blue" },
+    { value: "#22c55e", label: "Green" },
+    { value: "#ef4444", label: "Red" },
+    { value: "#a855f7", label: "Purple" },
+    { value: "#18181b", label: "Dark" }
   ];
 
   return (
@@ -123,20 +138,27 @@ export const Admin_EventMap = () => {
                 <button
                   key={event.id}
                   onClick={() => setSelectedEvent(event)}
-                  className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 relative group overflow-hidden ${
+                  className={`w-full text-left px-4 py-3 rounded-xl border transition-all duration-300 relative group overflow-hidden ${
                     selectedEvent?.id === event.id 
-                      ? "bg-uiupc-orange/10 border-uiupc-orange/40 shadow-sm" 
+                      ? "bg-uiupc-orange/10 border-uiupc-orange/40" 
                       : "bg-transparent border-zinc-100 dark:border-zinc-800/50 hover:border-uiupc-orange/20"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h3 className={`text-sm font-black uppercase tracking-tight truncate ${selectedEvent?.id === event.id ? "text-uiupc-orange" : "text-zinc-900 dark:text-white"}`}>
-                        {event.title}
-                      </h3>
-                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest truncate mt-1">{event.location}</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${event.is_mapped ? 'bg-uiupc-orange/20 text-uiupc-orange' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400'}`}>
+                        <IconMapMarker size={14} />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className={`text-[11px] font-black uppercase tracking-tight truncate ${selectedEvent?.id === event.id ? "text-uiupc-orange" : "text-zinc-900 dark:text-white"}`}>
+                          {event.title}
+                        </h3>
+                        <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest truncate">{event.location}</p>
+                      </div>
                     </div>
-                    <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 shadow-inner ${event.is_mapped ? "bg-blue-500 shadow-blue-500/20" : "bg-red-500/40"}`} />
+                    {event.is_mapped && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-uiupc-orange shadow-[0_0_8px_rgba(245,137,32,0.5)]" />
+                    )}
                   </div>
                 </button>
               ))}
@@ -176,30 +198,54 @@ export const Admin_EventMap = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
                   <div className="col-span-2 space-y-3">
                     <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Pin Category</label>
                     <select 
                       value={tempIconType}
                       onChange={(e) => setTempIconType(e.target.value)}
-                      className="w-full px-5 py-4 bg-zinc-100 dark:bg-[#1a1a1a] border border-transparent rounded-2xl text-sm font-bold outline-none focus:border-uiupc-orange/30 transition-all dark:text-white"
+                      className="w-full px-5 py-4 bg-zinc-100 dark:bg-[#1a1a1a] border border-transparent rounded-2xl text-xs font-bold outline-none focus:border-uiupc-orange/30 transition-all dark:text-white appearance-none"
                     >
                       {iconTypes.map(type => (
                         <option key={type.value} value={type.value}>{type.label}</option>
                       ))}
                     </select>
                   </div>
+                  <div className="col-span-2 space-y-3">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Pin Color</label>
+                    <div className="flex items-center gap-2 p-2 bg-zinc-100 dark:bg-[#1a1a1a] rounded-2xl h-[52px]">
+                      {markerColors.map(color => (
+                        <button 
+                          key={color.value}
+                          onClick={() => setTempColor(color.value)}
+                          className={`w-8 h-8 rounded-full border-4 transition-all ${tempColor === color.value ? 'border-white dark:border-zinc-800 scale-110 shadow-lg' : 'border-transparent opacity-40 hover:opacity-100'}`}
+                          style={{ backgroundColor: color.value }}
+                          title={color.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
                   <div className="col-span-1 space-y-3">
                     <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Latitude</label>
-                    <div className="px-5 py-4 bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-zinc-800/50 rounded-2xl text-sm font-black text-zinc-400 font-mono">
-                      {tempCoords?.lat?.toFixed(6) || "???"}
+                    <div className="px-4 py-4 bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-zinc-800/50 rounded-2xl text-[10px] font-black text-zinc-400 font-mono">
+                      {tempCoords?.lat?.toFixed(5) || "??.????"}
                     </div>
                   </div>
                   <div className="col-span-1 space-y-3">
                     <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Longitude</label>
-                    <div className="px-5 py-4 bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-zinc-800/50 rounded-2xl text-sm font-black text-zinc-400 font-mono">
-                      {tempCoords?.lng?.toFixed(6) || "???"}
+                    <div className="px-4 py-4 bg-zinc-50 dark:bg-[#0a0a0a] border border-zinc-200 dark:border-zinc-800/50 rounded-2xl text-[10px] font-black text-zinc-400 font-mono">
+                      {tempCoords?.lng?.toFixed(5) || "??.????"}
                     </div>
+                  </div>
+                  <div className="col-span-6 space-y-3">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Marker Link URL</label>
+                    <input 
+                      type="text" 
+                      value={tempLinkUrl} 
+                      onChange={(e) => setTempLinkUrl(e.target.value)} 
+                      className="w-full px-5 py-4 bg-zinc-100 dark:bg-[#1a1a1a] border border-transparent rounded-2xl text-xs font-bold outline-none focus:border-uiupc-orange/30 transition-all dark:text-white"
+                      placeholder="/events/event-id"
+                    />
                   </div>
                 </div>
 

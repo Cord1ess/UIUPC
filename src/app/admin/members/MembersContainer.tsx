@@ -12,7 +12,10 @@ interface MembersContainerProps {
   searchTerm: string;
   filterStatus: string;
   filterDept: string;
+  filterYear: string;
+  sortOrder: "asc" | "desc";
   departments: string[];
+  availableYears: string[];
 }
 
 export function MembersContainer({
@@ -22,7 +25,10 @@ export function MembersContainer({
   searchTerm,
   filterStatus,
   filterDept,
-  departments
+  filterYear,
+  sortOrder,
+  departments,
+  availableYears
 }: MembersContainerProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -31,7 +37,7 @@ export function MembersContainer({
   const [selectedItem, setSelectedItem] = useState<Member | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  const handleFilterChange = (updates: { page?: number; search?: string; dept?: string; status?: string }) => {
+  const handleFilterChange = (updates: { page?: number; search?: string; dept?: string; status?: string; year?: string; sort?: "asc" | "desc" }) => {
     const params = new URLSearchParams(searchParams.toString());
     
     if (updates.page !== undefined) params.set('page', updates.page.toString());
@@ -47,6 +53,14 @@ export function MembersContainer({
       if (updates.dept !== 'all') params.set('dept', updates.dept);
       else params.delete('dept');
     }
+    if (updates.year !== undefined) {
+      if (updates.year !== 'all') params.set('year', updates.year);
+      else params.delete('year');
+    }
+    if (updates.sort !== undefined) {
+      if (updates.sort !== 'desc') params.set('sort', updates.sort); // default is desc
+      else params.delete('sort');
+    }
 
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
@@ -60,7 +74,10 @@ export function MembersContainer({
         searchTerm={searchTerm}
         filterStatus={filterStatus}
         filterDept={filterDept}
+        filterYear={filterYear}
+        sortOrder={sortOrder}
         departments={departments}
+        availableYears={availableYears}
         onFilterChange={handleFilterChange}
         onViewDetails={(item) => { setSelectedItem(item as Member); setShowModal(true); }}
         onEmailReply={(item) => { window.location.href = `mailto:${item.email}`; }}

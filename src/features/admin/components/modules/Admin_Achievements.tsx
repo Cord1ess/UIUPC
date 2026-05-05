@@ -1,298 +1,331 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  IconPlus, IconTrophy, IconTrash, IconEdit, IconSearch, IconSpinner, 
-  IconAward, IconImage, IconCalendarAlt, IconUserCircle, IconCheck 
+  IconTrophy, IconPlus, IconEdit, IconTrash, 
+  IconSearch, IconClose, IconSync, IconExternalLink,
+  IconArchive
 } from '@/components/shared/Icons';
-import { 
-  Admin_ErrorBoundary, Admin_DeleteConfirmModal, Admin_ModuleHeader, 
-  Admin_StatCard, Admin_DrivePicker 
-} from "@/features/admin/components";
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useSupabaseData } from "@/hooks/useSupabaseData";
-import { supabase } from "@/lib/supabase";
-import { getImageUrl } from "@/utils/imageUrl";
-import { initAdminPassword } from "@/features/admin/actions";
-
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  year: string;
-  category: string;
-  image_url: string;
-  recipient: string;
-  order_index: number;
-}
-
-const AchievementRow = React.memo(({ 
-  item, onEdit, onDelete 
-}: { 
-  item: Achievement; onEdit: (item: Achievement) => void; onDelete: (item: Achievement) => void 
-}) => {
-  return (
-    <motion.tr className="group hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition-all border-b border-zinc-100 dark:border-zinc-800/50">
-      <td className="px-8 py-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden shrink-0 border border-zinc-200 dark:border-zinc-800 shadow-inner flex items-center justify-center group-hover:scale-105 transition-transform">
-            {item.image_url ? (
-              <img src={getImageUrl(item.image_url, 150, 150)} className="w-full h-full object-cover" alt="" />
-            ) : (
-              <IconTrophy size={20} className="text-uiupc-orange" />
-            )}
-          </div>
-          <div className="flex flex-col min-w-[200px]">
-            <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tight">{item.title}</span>
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest truncate">{item.description?.slice(0, 40)}...</span>
-          </div>
-        </div>
-      </td>
-      <td className="px-6 py-6 text-sm font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.2em] hidden sm:table-cell">{item.year}</td>
-      <td className="px-6 py-6 hidden md:table-cell">
-         <span className="px-4 py-1.5 bg-zinc-100 dark:bg-zinc-800/50 text-[9px] font-black uppercase tracking-widest rounded-xl border border-zinc-200 dark:border-zinc-800/50 flex items-center gap-2 w-fit text-zinc-500">
-           <IconAward size={10} className="text-uiupc-orange" /> {item.category}
-         </span>
-      </td>
-      <td className="px-6 py-6 text-[10px] font-bold text-zinc-400 uppercase tracking-widest hidden lg:table-cell">{item.recipient}</td>
-      <td className="px-8 py-6 text-right whitespace-nowrap">
-        <div className="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-          <button onClick={() => onEdit(item)} title="Edit" className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-uiupc-orange hover:text-white transition-all"><IconEdit size={12} /></button>
-          <button onClick={() => onDelete(item)} title="Delete" className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:bg-red-500 hover:text-white transition-all"><IconTrash size={12} /></button>
-        </div>
-      </td>
-    </motion.tr>
-  );
-});
-AchievementRow.displayName = 'AchievementRow';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
+import { supabase } from '@/lib/supabase';
+import { Admin_DrivePicker, Admin_ModuleHeader, Admin_StatCard, Admin_ModalPortal } from "@/features/admin/components";
+import { getImageUrl } from '@/utils/imageUrl';
+import { executeAdminMutation } from "@/features/admin/actions";
 
 export const Admin_Achievements: React.FC = () => {
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingItem, setEditingItem] = useState<Achievement | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
-  const [deleteTarget, setDeleteTarget] = useState<Achievement | null>(null);
+  const { data: achievements, isLoading, refetch } = useSupabaseData("achievements", { orderBy: 'created_at', orderDesc: true });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDrivePickerOpen, setIsDrivePickerOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => { initAdminPassword(); }, []);
-
-  const { data, isLoading, refetch } = useSupabaseData("achievements", {
-    orderBy: 'year',
-    orderDesc: true,
+  // Form State
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    year: new Date().getFullYear().toString(),
+    category: "Award",
+    image_url: "",
+    recipient: "",
   });
 
-  const handleUpsert = async (id: string | null, formData: any) => {
-    try {
-      const { error } = id 
-        ? await supabase.from("achievements").update(formData).eq('id', id)
-        : await supabase.from("achievements").insert([formData]);
+  const handleEdit = (item: any) => {
+    setEditingItem(item);
+    setForm({
+      title: item.title,
+      description: item.description,
+      year: item.year || new Date().getFullYear().toString(),
+      category: item.category || "Award",
+      image_url: item.image_url,
+      recipient: item.recipient || "",
+    });
+    setIsModalOpen(true);
+  };
 
-      if (error) throw error;
-      return { success: true };
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this achievement?")) return;
+    const { success, message } = await executeAdminMutation("achievements", "delete", null, id);
+    if (!success) alert(message);
+    else refetch();
+  };
+
+  const handleSave = async () => {
+    if (!form.title) return alert("Title is required");
+    setIsSaving(true);
+
+    try {
+      const payload = { ...form };
+      const { success, message } = editingItem 
+        ? await executeAdminMutation("achievements", "update", payload, editingItem.id)
+        : await executeAdminMutation("achievements", "create", payload);
+
+      if (!success) throw new Error(message);
+      
+      setIsModalOpen(false);
+      setEditingItem(null);
+      setForm({ title: "", description: "", year: new Date().getFullYear().toString(), category: "Award", image_url: "", recipient: "" });
+      refetch();
+      alert(editingItem ? "Achievement updated!" : "New achievement added!");
     } catch (err: any) {
-      return { success: false, message: err.message };
+      alert("Save failed: " + err.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const refreshData = useCallback(() => {
-    setHiddenIds(new Set());
-    refetch();
-  }, [refetch]);
-
-  const visibleData = useMemo(() => {
-    const rawData = (data || []).filter(item => !hiddenIds.has(item.id));
-    if (!searchTerm) return rawData;
-    return rawData.filter(item => 
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.recipient.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [data, hiddenIds, searchTerm]);
+  const filteredItems = (achievements || []).filter((item: any) => 
+    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="w-full space-y-8 min-w-0 relative z-10 isolate">
+    <div className="w-full space-y-6 min-w-0">
+      {/* ── HEADER & ACTIONS ────────────────────────────────────── */}
       <Admin_ModuleHeader 
-        title="Achievements"
-        description="Record and showcase club milestones and awards."
+        title="Achievements Archive"
+        description="Manage and showcase the club's major milestones."
       >
-        <Admin_StatCard label="Total Records" value={data?.length || 0} icon={<IconTrophy size={20} />} />
-        <Admin_StatCard label="Review Status" value="Online" icon={<IconCheck size={20} />} color="text-green-500" />
+        <Admin_StatCard label="Total Achievements" value={(achievements || []).length} icon={<IconTrophy />} />
+        
+        <div className="p-6 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col justify-between shadow-sm min-h-[140px] group relative z-10">
+          <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Quick Actions</p>
+          <div className="flex items-end justify-between mt-auto">
+            <div className="text-uiupc-orange text-4xl opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+              <IconTrophy size={40} />
+            </div>
+            <div className="flex-1 ml-6">
+              <button 
+                onClick={() => { setEditingItem(null); setForm({ title: "", description: "", year: new Date().getFullYear().toString(), category: "Award", image_url: "", recipient: "" }); setIsModalOpen(true); }}
+                className="w-full h-12 flex items-center justify-center gap-3 bg-uiupc-orange text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-uiupc-orange/20 hover:brightness-110 transition-all"
+              >
+                <IconPlus size={14} /> Add Achievement
+              </button>
+            </div>
+          </div>
+        </div>
       </Admin_ModuleHeader>
 
-      {/* ── FILTER BAR ─────────────────────────────────────────── */}
+      {/* ── SEARCH & FILTER BAR ──────────────────────────────────────── */}
       <div className="w-full bg-white dark:bg-[#0d0d0d] p-3 sm:p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm relative z-10">
-        <div className="flex flex-col lg:flex-row gap-6 items-stretch lg:items-center justify-between">
+        <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
           <div className="relative flex-1 group min-w-[200px]">
-            <IconSearch size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-uiupc-orange transition-colors" />
+            <IconSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-uiupc-orange transition-colors" />
             <input 
               type="text" 
               placeholder="Search achievements..." 
-              value={searchTerm} 
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full py-4 pl-14 pr-8 bg-zinc-100 dark:bg-[#1a1a1a] border border-transparent focus:border-uiupc-orange/30 rounded-xl text-sm outline-none transition-all placeholder:text-zinc-400 font-medium" 
             />
           </div>
-          <button 
-            onClick={() => setIsAdding(true)} 
-            className="px-8 h-12 flex items-center gap-3 bg-uiupc-orange text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-uiupc-orange/20 hover:brightness-110 transition-all"
-          >
-            <IconPlus size={14} /> New Achievement
-          </button>
         </div>
       </div>
 
-      {/* ── DATA TABLE ─────────────────────────────────────────── */}
+      {/* ── ACHIEVEMENTS TABLE ───────────────────────────────────── */}
       <div className="bg-white dark:bg-[#0d0d0d] rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm relative z-10">
         <div className="overflow-x-auto min-h-[500px]">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-zinc-50 dark:bg-zinc-900/50">
-                <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Achievement Info</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden sm:table-cell">Year</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden md:table-cell">Category</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden lg:table-cell">Recipient</th>
-                <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actions</th>
+                <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400 whitespace-nowrap w-20">Image</th>
+                <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400 whitespace-nowrap">Achievement Details</th>
+                <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400 whitespace-nowrap hidden sm:table-cell w-32">Created</th>
+                <th className="px-4 py-3 text-right text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400 w-24">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
               {isLoading ? (
-                [...Array(5)].map((_, i) => <tr key={i} className="animate-pulse"><td colSpan={5} className="px-8 py-8"><div className="h-10 bg-zinc-50 dark:bg-zinc-900 rounded-xl" /></td></tr>)
-              ) : visibleData.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-8 py-20 text-center">
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="w-16 h-16 rounded-[2rem] bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-zinc-300 dark:text-zinc-600"><IconSearch size={20} /></div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">No achievements found</p>
+                  <td colSpan={4} className="py-20 text-center">
+                    <IconSync size={32} className="animate-spin mx-auto text-uiupc-orange" />
+                  </td>
+                </tr>
+              ) : filteredItems.map((item: any) => (
+                <tr key={item.id} className="group hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors border-b border-zinc-100 dark:border-zinc-800/50">
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                      {item.image_url ? (
+                        <img src={getImageUrl(item.image_url, 100, 100)} className="w-full h-full object-cover" alt="" />
+                      ) : (
+                        <IconArchive size={20} className="text-zinc-300 dark:text-zinc-600" />
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[12px] font-black text-zinc-900 dark:text-white uppercase tracking-tight truncate max-w-sm">
+                        {item.title}
+                      </span>
+                      <span className="text-[9px] font-bold text-zinc-400 line-clamp-1 max-w-sm mt-0.5">{item.description}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap hidden sm:table-cell">
+                     <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+                      {new Date(item.created_at).toLocaleDateString()}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-1.5 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => handleEdit(item)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-uiupc-orange hover:text-white transition-all"><IconEdit size={10} /></button>
+                      <button onClick={() => handleDelete(item.id)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:bg-red-500 hover:text-white transition-all"><IconTrash size={10} /></button>
                     </div>
                   </td>
                 </tr>
-              ) : (
-                visibleData.map((item) => (
-                  <AchievementRow 
-                    key={item.id} 
-                    item={item} 
-                    onEdit={setEditingItem}
-                    onDelete={setDeleteTarget}
-                  />
-                ))
+              ))}
+              {!isLoading && filteredItems.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-20 text-center text-[10px] font-black uppercase tracking-widest text-zinc-300">No achievements found</td>
+                </tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ── MODALS ────────────────────────────────────────────── */}
-      <Admin_ErrorBoundary>
-        <AnimatePresence>
-          {(isAdding || editingItem) && (
-            <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 md:p-10">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-2xl" onClick={() => { setIsAdding(false); setEditingItem(null); }} />
-              <motion.div initial={{ scale: 0.9, opacity: 0, y: 40 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 40 }} className="relative w-full max-w-2xl bg-white dark:bg-[#0d0d0d] rounded-[3rem] p-8 md:p-14 border border-zinc-200 dark:border-zinc-800 shadow-3xl overflow-y-auto max-h-[90vh] custom-scrollbar">
-                <div className="mb-14 text-center md:text-left">
-                  <span className="text-uiupc-orange text-[10px] font-black uppercase tracking-[0.4em] mb-4 block">{editingItem ? 'Achievement Record' : 'Legacy Addition'}</span>
-                  <h3 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white leading-none">{editingItem ? 'Edit Award' : 'Record Award'}</h3>
+      {/* ── MODAL ────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <Admin_ModalPortal>
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              onClick={() => !isSaving && setIsModalOpen(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-[3rem] overflow-hidden shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto custom-scrollbar"
+            >
+              <div className="p-8 md:p-12 space-y-8">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-2xl font-black uppercase tracking-tight text-zinc-900 dark:text-white">
+                    {editingItem ? "Edit Achievement" : "Add Achievement"}
+                  </h3>
+                  <button onClick={() => setIsModalOpen(false)} className="w-12 h-12 rounded-2xl bg-zinc-50 dark:bg-zinc-800 text-zinc-400 hover:text-red-500 flex items-center justify-center transition-all">
+                    <IconClose size={16} />
+                  </button>
                 </div>
-                <AchievementForm 
-                  initialData={editingItem || undefined} 
-                  onSuccess={() => { setIsAdding(false); setEditingItem(null); refreshData(); }} 
-                  onCancel={() => { setIsAdding(false); setEditingItem(null); }} 
-                  onSave={handleUpsert} 
-                />
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-      </Admin_ErrorBoundary>
 
-      <Admin_ErrorBoundary>
-        <Admin_DeleteConfirmModal 
-          isOpen={!!deleteTarget} 
-          onClose={() => setDeleteTarget(null)} 
-          itemId={deleteTarget?.id} 
-          itemName={deleteTarget?.title} 
-          onSuccess={() => {
-            if (deleteTarget) setHiddenIds(prev => new Set(prev).add(deleteTarget.id));
-            refreshData();
-          }}
-        />
-      </Admin_ErrorBoundary>
+                <div className="space-y-6">
+                  {/* Title */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Achievement Title</label>
+                      <input 
+                        type="text" 
+                        value={form.title} 
+                        onChange={(e) => setForm({ ...form, title: e.target.value })}
+                        placeholder="e.g. Best Club Award"
+                        className="w-full px-6 py-4 bg-[#f9f5ea] dark:bg-black/40 rounded-2xl text-sm font-bold outline-none border border-transparent focus:border-uiupc-orange/20 dark:text-white"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Recipient / Group</label>
+                      <input 
+                        type="text" 
+                        value={form.recipient} 
+                        onChange={(e) => setForm({ ...form, recipient: e.target.value })}
+                        placeholder="e.g. UIUPC Core"
+                        className="w-full px-6 py-4 bg-[#f9f5ea] dark:bg-black/40 rounded-2xl text-sm font-bold outline-none border border-transparent focus:border-uiupc-orange/20 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Year</label>
+                      <input 
+                        type="text" 
+                        value={form.year} 
+                        onChange={(e) => setForm({ ...form, year: e.target.value })}
+                        className="w-full px-6 py-4 bg-[#f9f5ea] dark:bg-black/40 rounded-2xl text-sm font-bold outline-none border border-transparent focus:border-uiupc-orange/20 dark:text-white"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Category</label>
+                      <select 
+                        value={form.category} 
+                        onChange={(e) => setForm({ ...form, category: e.target.value })}
+                        className="w-full px-6 py-4 bg-[#f9f5ea] dark:bg-black/40 rounded-2xl text-sm font-bold outline-none border border-transparent focus:border-uiupc-orange/20 dark:text-white"
+                      >
+                        <option value="Award">Award</option>
+                        <option value="Recognition">Recognition</option>
+                        <option value="Milestone">Milestone</option>
+                        <option value="Competition">Competition</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Description / Details</label>
+                    <textarea 
+                      value={form.description} 
+                      onChange={(e) => setForm({ ...form, description: e.target.value })}
+                      placeholder="Describe the achievement in detail..."
+                      rows={4}
+                      className="w-full px-6 py-4 bg-[#f9f5ea] dark:bg-black/40 rounded-2xl text-sm font-bold outline-none border border-transparent focus:border-uiupc-orange/20 dark:text-white resize-none"
+                    />
+                  </div>
+
+                  {/* Image Picker */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Feature Photo</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={form.image_url} 
+                        onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                        placeholder="Google Drive Image ID"
+                        className="flex-1 px-6 py-4 bg-[#f9f5ea] dark:bg-black/40 rounded-2xl text-xs font-mono outline-none border border-transparent focus:border-uiupc-orange/20 dark:text-white"
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => setIsDrivePickerOpen(true)}
+                        className="px-8 bg-zinc-200 dark:bg-zinc-800 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-uiupc-orange hover:text-white transition-all"
+                      >
+                        Pick
+                      </button>
+                    </div>
+                    {form.image_url && (
+                      <div className="mt-4 w-24 h-24 rounded-2xl overflow-hidden border border-black/5 dark:border-white/5">
+                        <img src={getImageUrl(form.image_url, 100, 100)} className="w-full h-full object-cover" alt="Preview" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <button 
+                    disabled={isSaving}
+                    onClick={handleSave}
+                    className="px-12 py-5 bg-uiupc-orange text-white text-[11px] font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-all shadow-xl disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-3"
+                  >
+                    {isSaving ? <IconSync className="animate-spin" size={16} /> : <IconPlus size={16} />}
+                    {editingItem ? "Update Achievement" : "Publish Achievement"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+          </Admin_ModalPortal>
+        )}
+      </AnimatePresence>
+
+      {/* ── DRIVE PICKER MODAL ─────────────────────────────────────── */}
+      <Admin_DrivePicker 
+        isOpen={isDrivePickerOpen} 
+        onClose={() => setIsDrivePickerOpen(false)} 
+        onSelect={(id) => {
+          setForm({ ...form, image_url: id });
+          setIsDrivePickerOpen(false);
+        }}
+      />
     </div>
   );
 };
 
-const AchievementForm: React.FC<{ initialData?: Achievement; onSuccess: () => void; onCancel: () => void; onSave: (id: string | null, data: any) => Promise<any> }> = ({ initialData, onSuccess, onCancel, onSave }) => {
-  const [loading, setLoading] = useState(false);
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    year: initialData?.year || new Date().getFullYear().toString(),
-    category: initialData?.category || 'Award',
-    recipient: initialData?.recipient || 'UIUPC',
-    image_url: initialData?.image_url || '',
-    order_index: initialData?.order_index || 0,
-  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    const result = await onSave(initialData?.id || null, formData);
-    if (result?.success) onSuccess();
-    else alert(result?.message || "Operation failed");
-    setLoading(false);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-10">
-      <div className="space-y-3">
-        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Achievement Title</label>
-        <input type="text" required value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full bg-transparent border-b-2 border-zinc-100 dark:border-zinc-800 py-4 outline-none focus:border-uiupc-orange dark:text-white text-2xl font-black transition-all" placeholder="e.g. Club of the Year" />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        <div className="space-y-3">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Year</label>
-          <input type="text" required value={formData.year} onChange={(e) => setFormData({...formData, year: e.target.value})} className="w-full bg-zinc-100 dark:bg-[#1a1a1a] p-5 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold text-sm" placeholder="2024" />
-        </div>
-        <div className="space-y-3">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Category</label>
-          <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-zinc-100 dark:bg-[#1a1a1a] p-5 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold text-sm">
-            <option value="Award">Award</option>
-            <option value="Exhibition">Exhibition</option>
-            <option value="Milestone">Milestone</option>
-            <option value="Recognition">Recognition</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Recipient</label>
-        <input type="text" required value={formData.recipient} onChange={(e) => setFormData({...formData, recipient: e.target.value})} className="w-full bg-zinc-100 dark:bg-[#1a1a1a] p-5 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold text-sm" placeholder="e.g. UIUPC Visual Dept" />
-      </div>
-
-      <div className="space-y-3">
-        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Achievement Image</label>
-        <div className="flex gap-4">
-           <input type="text" value={formData.image_url} onChange={(e) => setFormData({...formData, image_url: e.target.value})} className="flex-1 bg-zinc-100 dark:bg-[#1a1a1a] border border-transparent p-5 rounded-2xl outline-none focus:border-uiupc-orange dark:text-white font-bold text-sm transition-all" placeholder="Drive ID..." />
-           <button type="button" onClick={() => setIsPickerOpen(true)} className="px-6 py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-uiupc-orange rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">Select</button>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Description</label>
-        <textarea required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full bg-zinc-100 dark:bg-[#1a1a1a] p-6 rounded-[2rem] outline-none focus:border-uiupc-orange dark:text-white font-bold text-sm resize-none h-32 transition-all" placeholder="Mission and scope of this achievement..." />
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4 pt-10 border-t border-zinc-100 dark:border-zinc-800">
-        <button type="button" onClick={onCancel} className="flex-1 py-6 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 text-[10px] font-black uppercase tracking-widest rounded-3xl hover:bg-zinc-200 transition-all">Discard</button>
-        <button type="submit" disabled={loading} className="flex-[2] py-6 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-3xl shadow-2xl hover:translate-y-[-2px] transition-all disabled:opacity-50">{loading ? <IconSpinner size={16} className="animate-spin mx-auto" /> : (initialData ? 'Save Changes' : 'Record Achievement')}</button>
-      </div>
-
-      <Admin_DrivePicker 
-        isOpen={isPickerOpen} 
-        onClose={() => setIsPickerOpen(false)} 
-        onSelect={(id) => setFormData({...formData, image_url: id})} 
-        title="Select Achievement Media"
-      />
-    </form>
-  );
-};

@@ -16,10 +16,14 @@ interface Admin_DeleteConfirmModalProps {
   bulkIds?: string[];
   /** Called after successful deletion to refresh data */
   onSuccess?: () => void;
+  /** Custom delete action */
+  onConfirm?: (password: string) => Promise<{ success: boolean; message: string; deleted?: number }>;
+  title?: string;
+  description?: string;
 }
 
 export const Admin_DeleteConfirmModal: React.FC<Admin_DeleteConfirmModalProps> = ({
-  isOpen, onClose, itemId, itemName, bulkIds, onSuccess
+  isOpen, onClose, itemId, itemName, bulkIds, onSuccess, onConfirm, title, description
 }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -37,13 +41,21 @@ export const Admin_DeleteConfirmModal: React.FC<Admin_DeleteConfirmModalProps> =
     setResult(null);
 
     try {
-      if (isBulk) {
-        const res = await bulkDeleteCommitteeMembersSecure(bulkIds, password);
+      if (onConfirm) {
+        const res = await onConfirm(password);
+        if (res.success) {
+          setResult(res.message || 'Deleted successfully');
+          setTimeout(() => { handleClose(); onSuccess?.(); }, 600);
+        } else {
+          setError(res.message);
+        }
+      } else if (isBulk) {
+        const res = await bulkDeleteCommitteeMembersSecure(bulkIds!, password);
         if (res.success) {
           setResult(res.message);
           setTimeout(() => { handleClose(); onSuccess?.(); }, 800);
         } else {
-          if (res.deleted > 0) {
+          if (res.deleted && res.deleted > 0) {
             setResult(res.message);
             setTimeout(() => { handleClose(); onSuccess?.(); }, 1500);
           } else {
@@ -94,9 +106,9 @@ export const Admin_DeleteConfirmModal: React.FC<Admin_DeleteConfirmModalProps> =
               </div>
               <div>
                 <h4 className="text-sm font-black uppercase tracking-tight dark:text-white">
-                  {isBulk ? `Delete ${count} Members` : 'Confirm Delete'}
+                  {title || (isBulk ? `Delete ${count} Members` : 'Confirm Delete')}
                 </h4>
-                {itemName && <p className="text-[10px] text-zinc-400 font-bold truncate max-w-[220px]">{itemName}</p>}
+                {(description || itemName) && <p className="text-[10px] text-zinc-400 font-bold truncate max-w-[220px]">{description || itemName}</p>}
               </div>
             </div>
 

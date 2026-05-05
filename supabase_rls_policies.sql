@@ -97,5 +97,38 @@ CREATE POLICY "Allow authenticated users to insert/update/delete blog_posts"
 ON blog_posts FOR ALL USING (auth.role() = 'authenticated');
 
 -- ==============================================================================
+-- 5. FINANCES TABLE POLICIES & SCHEMA FIXES
+-- ==============================================================================
+
+-- Fix for missing enum values (merchandise, university_support)
+DO $$ 
+BEGIN
+    -- Only attempt to add if the type exists
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'finance_category') THEN
+        -- PostgreSQL doesn't support IF NOT EXISTS for ADD VALUE directly in some versions, 
+        -- but Supabase usually does. We wrap in a block for safety.
+        BEGIN
+            ALTER TYPE finance_category ADD VALUE 'merchandise';
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END;
+        
+        BEGIN
+            ALTER TYPE finance_category ADD VALUE 'university_support';
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END;
+    END IF;
+END $$;
+
+ALTER TABLE finances ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow authenticated users to view finances" ON finances;
+CREATE POLICY "Allow authenticated users to view finances"
+ON finances FOR SELECT USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Allow authenticated users to manage finances" ON finances;
+CREATE POLICY "Allow authenticated users to manage finances"
+ON finances FOR ALL USING (auth.role() = 'authenticated');
+
+-- ==============================================================================
 -- SUCCESS: Database is now secured.
 -- ==============================================================================

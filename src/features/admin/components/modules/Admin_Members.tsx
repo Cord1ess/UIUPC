@@ -5,18 +5,19 @@ import {
   IconSearch, IconFileExport, IconEye, IconCheck, IconClose, 
   IconChevronLeft, IconChevronRight, IconEnvelope, IconUserGraduate, 
   IconIdBadge, IconSpinner, IconCrown, IconHistory, IconUsers, 
-  IconLayerGroup, IconFilter, IconTrash 
+  IconLayerGroup, IconFilter, IconTrash, IconCalendar, IconFolderOpen
 } from '@/components/shared/Icons';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Admin_Dropdown, Admin_ModuleHeader, Admin_StatCard, 
-  Admin_FilterMenu, Admin_ErrorBoundary, Admin_DeleteConfirmModal 
+  Admin_MembersFilterMenu, Admin_ErrorBoundary, Admin_DeleteConfirmModal,
+  Admin_DrivePicker, Admin_MembersFolderSyncModal
 } from "@/features/admin/components";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/lib/supabase";
 import { exportToCSV, generateBccMailto } from "@/utils/adminHelpers";
 import { Member } from "@/types/admin";
-import { approveMember, rejectMember, initAdminPassword } from "@/features/admin/actions";
+import { initAdminPassword, executeAdminMutation } from "@/features/admin/actions";
 import { useRouter } from 'next/navigation';
 
 interface MemberRowProps {
@@ -37,38 +38,38 @@ const MemberRow = React.memo(({
 }: MemberRowProps) => {
   return (
     <motion.tr 
-      className={`group hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition-all ${isSelected ? 'bg-uiupc-orange/[0.03]' : ''} border-b border-zinc-100 dark:border-zinc-800/50`}
+      className={`group hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all ${isSelected ? 'bg-uiupc-orange/10' : ''} border-b border-zinc-100 dark:border-zinc-800/50`}
     >
-      <td className="px-8 py-4 w-20">
+      <td className="px-4 py-3 whitespace-nowrap w-10">
         <input 
           type="checkbox" 
-          className="w-5 h-5 rounded-lg border-zinc-300 text-uiupc-orange transition-all cursor-pointer" 
+          className="w-4 h-4 rounded border-zinc-300 text-uiupc-orange transition-all cursor-pointer" 
           checked={isSelected} 
           onChange={() => toggleSelection(item.id)} 
         />
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-sm font-black text-uiupc-orange group-hover:scale-110 transition-transform shadow-inner shrink-0">
-            {(item.member_name || "?").charAt(0).toUpperCase()}
+      <td className="px-4 py-3 whitespace-nowrap">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-[10px] font-black text-uiupc-orange overflow-hidden shrink-0">
+            {(item.full_name || "?").charAt(0).toUpperCase()}
           </div>
-          <div className="flex flex-col min-w-[200px]">
-            <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tight truncate">{item.member_name}</span>
-            <span className="text-[11px] font-bold text-zinc-400 lowercase truncate">{item.email}</span>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[12px] font-black text-zinc-900 dark:text-white uppercase tracking-tight truncate">{item.full_name}</span>
+            <span className="text-[9px] font-bold text-zinc-400 lowercase truncate">{item.email}</span>
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-        <div className="flex flex-col gap-1 min-w-[150px]">
-          <div className="flex items-center gap-2 text-[11px] font-black text-zinc-900 dark:text-white uppercase tracking-wider"><IconIdBadge size={10} className="text-uiupc-orange" /> {item.student_id}</div>
-          <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest"><IconUserGraduate size={9} className="text-zinc-300" /> {item.department}</div>
+      <td className="px-4 py-3 whitespace-nowrap hidden sm:table-cell">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1.5 text-[11px] font-black text-zinc-900 dark:text-white uppercase tracking-wider"><IconIdBadge size={10} className="text-uiupc-orange" /> {item.student_id}</div>
+          <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-400 uppercase tracking-widest"><IconUserGraduate size={9} className="text-zinc-300" /> {item.department}</div>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
-        <span className="px-4 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 text-[9px] font-black uppercase tracking-widest border border-black/5 dark:border-white/5">{item.session}</span>
+      <td className="px-3 py-3 whitespace-nowrap hidden md:table-cell">
+        <span className="text-[10px] font-bold text-zinc-400 uppercase">{item.session}</span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <span className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+      <td className="px-3 py-3 whitespace-nowrap">
+        <span className={`px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest border ${
           item.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 
           item.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 
           'bg-amber-500/10 text-amber-500 border-amber-500/20'
@@ -76,23 +77,23 @@ const MemberRow = React.memo(({
           {item.status || "Pending"}
         </span>
       </td>
-      <td className="px-8 py-4 text-right whitespace-nowrap">
-        <div className="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+      <td className="px-4 py-3 text-right whitespace-nowrap">
+        <div className="flex items-center justify-end gap-1.5 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           {item.status === 'pending' && (
             <>
-              <button onClick={() => onUpdateStatus(item.id, 'approved')} title="Approve" className="w-10 h-10 flex items-center justify-center rounded-xl bg-green-500 text-white shadow-lg hover:scale-110 transition-all"><IconCheck size={12} /></button>
-              <button onClick={() => onUpdateStatus(item.id, 'rejected')} title="Reject" className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500 text-white shadow-lg hover:scale-110 transition-all"><IconClose size={12} /></button>
+              <button onClick={() => onUpdateStatus(item.id, 'approved')} title="Approve" className="w-8 h-8 flex items-center justify-center rounded-lg bg-green-500 text-white shadow hover:brightness-110 transition-all"><IconCheck size={10} /></button>
+              <button onClick={() => onUpdateStatus(item.id, 'rejected')} title="Reject" className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500 text-white shadow hover:brightness-110 transition-all"><IconClose size={10} /></button>
             </>
           )}
-          <button onClick={() => onViewDetails(item)} title="Details" className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-uiupc-orange hover:text-white transition-all"><IconEye size={12} /></button>
-          <button onClick={() => onEmailReply(item)} title="Email" className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"><IconEnvelope size={12} /></button>
+          <button onClick={() => onViewDetails(item)} title="Details" className="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-uiupc-orange hover:text-white transition-all"><IconEye size={10} /></button>
+          <button onClick={() => onEmailReply(item)} title="Email" className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"><IconEnvelope size={10} /></button>
           {onViewTrajectory && (
-            <button onClick={() => onViewTrajectory(item)} title="History" className="w-10 h-10 flex items-center justify-center rounded-xl bg-purple-500/10 text-purple-500 hover:bg-purple-500 hover:text-white transition-all"><IconHistory size={12} /></button>
+            <button onClick={() => onViewTrajectory(item)} title="History" className="w-8 h-8 flex items-center justify-center rounded-lg bg-purple-500/10 text-purple-500 hover:bg-purple-500 hover:text-white transition-all"><IconHistory size={10} /></button>
           )}
           {onPromote && (
-            <button onClick={() => onPromote(item)} title="Add to Committee" className="w-10 h-10 flex items-center justify-center rounded-xl bg-uiupc-orange/10 text-uiupc-orange hover:bg-uiupc-orange hover:text-white transition-all"><IconCrown size={12} /></button>
+            <button onClick={() => onPromote(item)} title="Add to Committee" className="w-8 h-8 flex items-center justify-center rounded-lg bg-uiupc-orange/10 text-uiupc-orange hover:bg-uiupc-orange hover:text-white transition-all"><IconCrown size={10} /></button>
           )}
-          <button onClick={() => onDelete(item)} title="Delete" className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:bg-red-500 hover:text-white transition-all"><IconTrash size={12} /></button>
+          <button onClick={() => onDelete(item)} title="Delete" className="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:bg-red-500 hover:text-white transition-all"><IconTrash size={10} /></button>
         </div>
       </td>
     </motion.tr>
@@ -107,8 +108,11 @@ interface Admin_MembersProps {
   searchTerm: string;
   filterDept: string;
   filterStatus: string;
+  filterYear: string;
+  sortOrder: "asc" | "desc";
   departments: string[];
-  onFilterChange: (filters: { page?: number; search?: string; dept?: string; status?: string }) => void;
+  availableYears: string[];
+  onFilterChange: (filters: { page?: number; search?: string; dept?: string; status?: string; year?: string; sort?: "asc" | "desc" }) => void;
   onViewDetails: (item: Member) => void;
   onEmailReply: (item: Member) => void;
   onPromoteToCommittee?: (item: Member) => void;
@@ -116,7 +120,7 @@ interface Admin_MembersProps {
 }
 
 export const Admin_Members: React.FC<Admin_MembersProps> = ({
-  data, count, currentPage, searchTerm, filterDept, filterStatus, departments,
+  data, count, currentPage, searchTerm, filterDept, filterStatus, filterYear, sortOrder, departments, availableYears,
   onFilterChange, onViewDetails, onEmailReply, onPromoteToCommittee, onViewTrajectory
 }) => {
   const { adminProfile } = useSupabaseAuth();
@@ -125,6 +129,10 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
+
+  const [isDrivePickerOpen, setIsDrivePickerOpen] = useState(false);
+  const [isFolderSyncOpen, setIsFolderSyncOpen] = useState(false);
+  const [selectedFolder, setSelectedFolder] = useState<{ id: string, name: string } | null>(null);
 
   const pageSize = 12;
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -140,8 +148,9 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
 
   const handleUpdateStatus = async (id: string, status: string) => {
     try {
-      if (status === 'approved') await approveMember(id);
-      else if (status === 'rejected') await rejectMember(id);
+      const { success, message } = await executeAdminMutation("members", "update", { status }, id);
+      if (!success) throw new Error(message);
+      onFilterChange({});
     } catch (err: any) {
       alert("Action failed: " + err.message);
     }
@@ -154,7 +163,7 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
       // Note: Full bulk update would need a server action that accepts filters
       // For simplicity here, we use the selected IDs
       await Promise.all(idsToUpdate.map(id => 
-        status === 'approved' ? approveMember(id) : rejectMember(id)
+        executeAdminMutation("members", "update", { status }, id)
       ));
       setSelectedIds(new Set());
       setIsSelectAllMode(false);
@@ -214,45 +223,64 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
       >
         <Admin_StatCard label="Total Records" value={count} icon={<IconUsers size={20} />} />
         
-        <div className="p-6 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col justify-between shadow-sm min-h-[140px] group">
-          <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Filter Status</p>
+        {/* Quick Filters Card */}
+        <div className="p-6 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col justify-between shadow-sm min-h-[140px] group relative z-30">
+          <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Quick Filters</p>
           <div className="flex items-end justify-between mt-auto">
             <div className="text-uiupc-orange text-4xl opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
               <IconFilter size={40} />
             </div>
-            <div className="flex-1 ml-6 max-w-[180px]">
-              <Admin_Dropdown 
-                variant="minimal"
-                label="Application Status"
-                value={filterStatus} 
-                onChange={(val) => onFilterChange({ status: val, page: 0 })}
-                options={[{ value: 'all', label: 'All Status' }, { value: 'pending', label: 'Pending' }, { value: 'approved', label: 'Approved' }, { value: 'rejected', label: 'Rejected' }]}
-                className="w-full"
+            <div className="flex-1 ml-6 max-w-[200px]">
+              <Admin_MembersFilterMenu 
+                currentDept={filterDept}
+                currentStatus={filterStatus}
+                currentSort={sortOrder}
+                departments={departments}
+                onDeptChange={(val) => onFilterChange({ dept: val, page: 0 })}
+                onStatusChange={(val) => onFilterChange({ status: val, page: 0 })}
+                onSortChange={(val) => onFilterChange({ sort: val, page: 0 })}
               />
             </div>
           </div>
         </div>
 
-        <div className="p-6 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col justify-between shadow-sm min-h-[140px] group">
-          <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Department</p>
+        {/* Session Year Card */}
+        <div className="p-6 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col justify-between shadow-sm min-h-[140px] group relative z-20">
+          <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Session Year</p>
           <div className="flex items-end justify-between mt-auto">
             <div className="text-blue-500 text-4xl opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
-              <IconLayerGroup size={40} />
+              <IconCalendar size={40} />
             </div>
             <div className="flex-1 ml-6 max-w-[180px]">
               <Admin_Dropdown 
                 variant="minimal"
-                label="Select Dept"
-                value={filterDept} 
-                onChange={(val) => onFilterChange({ dept: val, page: 0 })}
-                options={[{ value: 'all', label: 'All Dept' }, ...departments.map(d => ({ value: d, label: d }))]}
+                label="Select Session"
+                value={filterYear} 
+                onChange={(val) => onFilterChange({ year: val, page: 0 })}
+                options={[{ value: 'all', label: 'All Sessions' }, ...availableYears.map(s => ({ value: s, label: s }))]}
                 className="w-full"
               />
             </div>
           </div>
         </div>
 
-        <Admin_StatCard label="Departments" value={deptCount} icon={<IconLayerGroup size={20} />} />
+        {/* Drive Sync Card */}
+        <div className="p-6 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col justify-between shadow-sm min-h-[140px] group relative z-10">
+          <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Drive Sync</p>
+          <div className="flex items-end justify-between mt-auto">
+            <div className="text-purple-500 text-4xl opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+              <IconFolderOpen size={40} />
+            </div>
+            <div className="flex-1 ml-6 max-w-[180px]">
+              <button 
+                onClick={() => setIsDrivePickerOpen(true)}
+                className="w-full h-12 flex items-center justify-center gap-3 bg-purple-500/10 text-purple-500 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-purple-500 hover:text-white transition-all"
+              >
+                Sync Session Folder
+              </button>
+            </div>
+          </div>
+        </div>
       </Admin_ModuleHeader>
 
       {/* ── FILTER BAR ─────────────────────────────────────────── */}
@@ -307,23 +335,23 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
 
       {/* ── DATA TABLE ─────────────────────────────────────────── */}
       <div className="bg-white dark:bg-[#0d0d0d] rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm relative z-10">
-        <div className="overflow-x-auto min-h-[500px]">
+        <div className="overflow-x-auto min-h-[400px]">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-zinc-50 dark:bg-zinc-900/50">
-                <th className="px-8 py-4 text-left w-20">
+                <th className="px-4 py-3 text-left w-10">
                   <input 
                     type="checkbox" 
-                    className="w-5 h-5 rounded-lg border-zinc-300 text-uiupc-orange transition-all cursor-pointer" 
+                    className="w-4 h-4 rounded border-zinc-300 text-uiupc-orange transition-all cursor-pointer" 
                     checked={isSelectAllMode || (selectedIds.size > 0 && selectedIds.size >= count)} 
                     onChange={(e) => handleSelectAll(e.target.checked)} 
                   />
                 </th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Basic Info</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden sm:table-cell">Student Info</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden md:table-cell">Academic Batch</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Status</th>
-                <th className="px-8 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actions</th>
+                <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Basic Info</th>
+                <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden sm:table-cell">Student Info</th>
+                <th className="px-3 py-3 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden md:table-cell">Batch</th>
+                <th className="px-3 py-3 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Status</th>
+                <th className="px-4 py-3 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
@@ -373,16 +401,44 @@ export const Admin_Members: React.FC<Admin_MembersProps> = ({
 
       {/* ── MODALS ─────────────────────────────────────────────── */}
       <Admin_ErrorBoundary>
-        <Admin_DeleteConfirmModal 
-          isOpen={!!deleteTarget} 
-          onClose={() => setDeleteTarget(null)} 
-          itemId={deleteTarget?.id} 
-          itemName={deleteTarget?.member_name} 
-          onSuccess={() => {
-            if (deleteTarget) setHiddenIds(prev => new Set(prev).add(deleteTarget.id));
-            refreshData();
+        <Admin_DeleteConfirmModal
+          isOpen={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={async (password: string) => {
+            return await executeAdminMutation("members", "delete", null, deleteTarget?.id, password);
           }}
+          title="Delete Member"
+          description={`Are you sure you want to delete ${deleteTarget?.full_name}?`}
         />
+
+        <Admin_DrivePicker
+          isOpen={isDrivePickerOpen}
+          onClose={() => setIsDrivePickerOpen(false)}
+          onSelect={(id, url, name) => {
+            if (url === 'FOLDER') {
+              setSelectedFolder({ id, name });
+              setIsDrivePickerOpen(false);
+              setIsFolderSyncOpen(true);
+            } else {
+              alert("Please select a folder, not a file.");
+            }
+          }}
+          allowFolderSelection={true}
+          title="Select Session Folder"
+        />
+
+        {selectedFolder && (
+          <Admin_MembersFolderSyncModal
+            isOpen={isFolderSyncOpen}
+            onClose={() => {
+              setIsFolderSyncOpen(false);
+              setSelectedFolder(null);
+            }}
+            currentYear={filterYear}
+            folderInfo={selectedFolder}
+            onSuccess={() => onFilterChange({})}
+          />
+        )}
       </Admin_ErrorBoundary>
     </div>
   );

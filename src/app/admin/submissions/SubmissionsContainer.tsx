@@ -31,7 +31,7 @@ export function SubmissionsContainer({
   const [selectedEmailItem, setSelectedEmailItem] = React.useState<any>(null);
   const [showEmailModal, setShowEmailModal] = React.useState(false);
 
-  const handleFilterChange = (updates: { page?: number; search?: string; category?: string }) => {
+  const handleFilterChange = (updates: { page?: number; search?: string; category?: string; status?: string; payment?: string }) => {
     const params = new URLSearchParams(searchParams.toString());
     
     if (updates.page !== undefined) params.set('page', updates.page.toString());
@@ -42,6 +42,14 @@ export function SubmissionsContainer({
     if (updates.category !== undefined) {
       if (updates.category !== 'all') params.set('category', updates.category);
       else params.delete('category');
+    }
+    if (updates.status !== undefined) {
+      if (updates.status !== 'all') params.set('status', updates.status);
+      else params.delete('status');
+    }
+    if (updates.payment !== undefined) {
+      if (updates.payment !== 'all') params.set('payment', updates.payment);
+      else params.delete('payment');
     }
 
     router.push(`${pathname}?${params.toString()}`, { scroll: false });

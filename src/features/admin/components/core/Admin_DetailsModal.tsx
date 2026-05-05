@@ -161,17 +161,40 @@ export const Admin_DetailsModal: React.FC<Admin_DetailsModalProps> = ({ isOpen, 
                 </>
               ) : (
                 <>
-                  <DetailSection title="Submission" icon={IconCalendar}>
+                  <DetailSection title="Submission Information" icon={IconCalendar}>
+                    <DetailItem label="Submission ID" value={item.id} />
                     <DetailItem label="Submitted On" value={timestamp} />
-                    <DetailItem label="Category" value={getProperty(item, "Category")} />
-                    <DetailItem label="Institute" value={getProperty(item, "Institute")} />
-                    <DetailItem label="Status" value={getProperty(item, "Status") || "PENDING"} />
+                    <DetailItem label="Status" value={item.status?.toUpperCase() || "PENDING"} />
+                    <DetailItem label="Institute" value={item.institute} />
                   </DetailSection>
 
-                  <DetailSection title="Photo Details" icon={IconLink}>
-                    <DetailItem label="Photo Title" value={getProperty(item, "Photo Title")} />
-                    <DetailItem label="Photo Count" value={getProperty(item, "Photo Count")} />
-                    <DetailItem label="Files" value={getProperty(item, "Folder URL") || getProperty(item, "Drive File IDs")} isLink fullWidth />
+                  <DetailSection title="Photo & Category" icon={IconImages}>
+                    <DetailItem label="Photo Title" value={item.photo_title || "Untitled"} />
+                    <DetailItem label="Category" value={item.category} />
+                    <DetailItem label="Photo URL" value={item.photo_url} isLink fullWidth />
+                    {item.drive_file_ids && item.drive_file_ids.length > 0 && (
+                      <div className="md:col-span-2 space-y-4">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Drive Files ({item.drive_file_ids.length})</label>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          {item.drive_file_ids.map((id: string, idx: number) => (
+                            <a 
+                              key={id} 
+                              href={`https://drive.google.com/file/d/${id}/view`} 
+                              target="_blank" rel="noopener noreferrer"
+                              className="aspect-square rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-black/5 dark:border-white/5 flex flex-col items-center justify-center gap-2 hover:border-uiupc-orange/30 transition-all group/file overflow-hidden relative"
+                            >
+                              <img src={`/api/image/${id}`} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover/file:scale-110 transition-transform" alt={`File ${idx + 1}`} />
+                              <div className="relative z-10 bg-black/40 backdrop-blur-md px-2 py-1 rounded text-[8px] font-black text-white uppercase tracking-widest">File {idx + 1}</div>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </DetailSection>
+
+                  <DetailSection title="Payment Verification" icon={IconCreditCard}>
+                    <DetailItem label="Payment Status" value={item.payment_status?.toUpperCase() || "UNPAID"} />
+                    <DetailItem label="Transaction ID" value={item.transaction_id || "N/A"} />
                   </DetailSection>
                 </>
               )}

@@ -26,7 +26,7 @@ import {
   IconChevronDown,
   IconInfo,
 } from "@/components/shared/Icons";
-import { useSubmissionStatus } from "@/hooks/useSubmissionStatus";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useRegistrationForm } from "@/hooks/useRegistrationForm";
 import ScrollRevealText from "@/components/motion/ScrollRevealText";
 
@@ -98,10 +98,11 @@ const EditorialSelect = ({ label, value, options, onChange, placeholder }: {
     </div>
   );
 };
-
 const JoinPage = () => {
+  const { getSettingBool, loading: settingsLoading } = useSiteSettings();
   const GOOGLE_SCRIPT_URL = process.env.NEXT_PUBLIC_GAS_JOIN || "";
-  const { status: joinStatus } = useSubmissionStatus(GOOGLE_SCRIPT_URL, "getJoinPageStatus");
+
+  const joinEnabled = getSettingBool('join_page_open', true);
 
   const initialFormData = {
     name: "",
@@ -143,7 +144,7 @@ const JoinPage = () => {
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
-    handleInitialSubmit(e, joinStatus === "enabled");
+    handleInitialSubmit(e, joinEnabled);
   };
 
   const benefits = [
@@ -215,6 +216,20 @@ const JoinPage = () => {
             viewport={{ once: true }}
             className="bg-[#ffffff] dark:bg-[#050505] p-8 md:p-12 lg:p-14 rounded-2xl border border-black/5 dark:border-white/5 shadow-[0_20px_80px_rgba(0,0,0,0.05)]"
           >
+              {!joinEnabled && !settingsLoading && (
+                <div className="absolute inset-0 z-[100] bg-white/80 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-8 text-center rounded-2xl border border-uiupc-orange/20">
+                  <div className="max-w-xs">
+                    <div className="w-16 h-16 bg-uiupc-orange/10 text-uiupc-orange rounded-full flex items-center justify-center mx-auto mb-6">
+                      <IconExclamationTriangle size={32} />
+                    </div>
+                    <h3 className="text-xl font-black uppercase tracking-tight dark:text-white mb-3">Registrations Closed</h3>
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-relaxed">
+                      Membership applications are currently paused. Please stay tuned to our social media for the next recruitment cycle.
+                    </p>
+                  </div>
+                </div>
+              )}
+
              <div className="mb-14">
                <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white mb-4">Application Form</h2>
                <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">Please provide your details for review.</p>
@@ -227,7 +242,7 @@ const JoinPage = () => {
                 </div>
              )}
 
-             <form onSubmit={handleSubmit} className="space-y-12">
+             <form onSubmit={handleSubmit} className={`space-y-12 ${!joinEnabled ? 'opacity-20 pointer-events-none grayscale' : ''}`}>
                 {/* Section: Identity */}
                 <div className="space-y-10">
                    <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">

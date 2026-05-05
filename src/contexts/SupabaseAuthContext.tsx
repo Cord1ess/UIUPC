@@ -3,12 +3,34 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
+import type { AdminRole } from '@/types/admin';
+
+// Re-export for convenience
+export type { AdminRole };
+
+// ============================================================
+// Role → Permitted Pages mapping
+// ============================================================
+const ROLE_PAGE_ACCESS: Record<AdminRole, string[]> = {
+  core: ['all'],
+  hr: ['overview', 'membership', 'committee'],
+  pr: ['overview', 'blog', 'gallery', 'achievements'],
+  event: ['overview', 'events', 'event_map', 'photos'],
+  organizer: ['overview', 'events', 'finance'],
+  design: ['overview', 'departments'],
+  visual: ['overview', 'departments'],
+  alumni_advisor: ['overview'],
+};
+
+export function canAccessPage(role: AdminRole | undefined, pageId: string): boolean {
+  if (!role) return false;
+  const allowed = ROLE_PAGE_ACCESS[role];
+  return allowed.includes('all') || allowed.includes(pageId);
+}
 
 // ============================================================
 // Types
 // ============================================================
-
-export type AdminRole = 'core' | 'hr' | 'pr' | 'event' | 'organizer' | 'design' | 'visual';
 
 export interface AdminProfile {
   id: string;

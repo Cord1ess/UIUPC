@@ -1,22 +1,22 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   IconSearch, IconFileExport, IconEye, IconClose, IconChevronLeft, 
-  IconChevronRight, IconEnvelope, IconUniversity, IconImages, 
-  IconSpinner, IconStar, IconRegStar, IconCheck, IconUsers, IconFilter 
+  IconChevronRight, IconEnvelope, IconImages, 
+  IconSync, IconCheck, IconTrash, IconExternalLink,
+  IconCheckCircle, IconExclamationCircle
 } from '@/components/shared/Icons';
 import { 
   Admin_Dropdown, Admin_ModuleHeader, Admin_StatCard, 
   Admin_ErrorBoundary, Admin_DeleteConfirmModal 
 } from "@/features/admin/components";
 import { supabase } from "@/lib/supabase";
-// import { Admin_CommitteeManagerModal } from "./Admin_CommitteeManagerModal";
 import { exportToCSV, generateBccMailto } from "@/utils/adminHelpers";
-import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { initAdminPassword, executeAdminMutation } from "@/features/admin/actions";
 import { ExhibitionSubmission } from "@/types/admin";
-import { initAdminPassword } from "@/features/admin/actions";
+import { getImageUrl } from '@/utils/imageUrl';
 
 interface Admin_SubmissionsProps {
   data: ExhibitionSubmission[];
@@ -24,295 +24,179 @@ interface Admin_SubmissionsProps {
   currentPage: number;
   searchTerm: string;
   filterCategory: string;
-  onFilterChange: (filters: { page?: number; search?: string; category?: string }) => void;
+  onFilterChange: (filters: { page?: number; search?: string; category?: string; status?: string; payment?: string }) => void;
   onOpenDetails: (item: ExhibitionSubmission) => void;
   onOpenEmail?: (item: ExhibitionSubmission) => void;
 }
 
-const CategoryBadge = ({ category }: { category: string }) => {
-  const styles: Record<string, string> = {
-    single: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-    story: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-    mobile: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-  };
-  const cat = (category || "single").toLowerCase();
-  return (
-    <span className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${styles[cat] || styles.single}`}>
-      {category || "Single"}
-    </span>
-  );
-};
-
-const SubmissionRow = React.memo(({ 
-  item, isSelected, toggleSelection, onOpenDetails, onOpenEmail, onToggleHero, onDelete 
-}: { 
-  item: ExhibitionSubmission; isSelected: boolean; toggleSelection: (id: string) => void; 
-  onOpenDetails: (item: ExhibitionSubmission) => void; 
-  onOpenEmail?: (item: ExhibitionSubmission) => void;
-  onToggleHero: (item: ExhibitionSubmission) => void;
-  onDelete: (item: ExhibitionSubmission) => void;
+export const Admin_Submissions: React.FC<Admin_SubmissionsProps> = ({ 
+  data, count, currentPage, searchTerm, filterCategory, onFilterChange 
 }) => {
-  return (
-    <motion.tr className={`group hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition-all ${isSelected ? 'bg-uiupc-orange/[0.03]' : ''} border-b border-zinc-100 dark:border-zinc-800/50`}>
-      <td className="px-8 py-4 w-20">
-        <input 
-          type="checkbox" 
-          className="w-5 h-5 rounded-lg border-zinc-300 text-uiupc-orange cursor-pointer transition-all" 
-          checked={isSelected} 
-          onChange={() => toggleSelection(item.id)} 
-        />
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-sm font-black text-uiupc-orange shadow-inner truncate shrink-0">
-            {(item.participant_name || "?").charAt(0).toUpperCase()}
-          </div>
-          <div className="flex flex-col min-w-[200px]">
-            <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tight truncate">{item.participant_name}</span>
-            <span className="text-[11px] font-bold text-zinc-400 lowercase truncate tracking-tight">Participant</span>
-          </div>
-        </div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-        <div className="flex items-center gap-2 text-[11px] font-black text-zinc-900 dark:text-white uppercase tracking-wider">
-          <IconUniversity size={10} className="text-uiupc-orange" /> {item.institute || "N/A"}
-        </div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
-         <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{item.photo_title || "Untitled"}</span>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap hidden lg:table-cell">
-         <button 
-           onClick={() => onToggleHero(item)}
-           className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${
-             item.featured_on_hero 
-               ? 'bg-uiupc-orange/10 text-uiupc-orange border border-uiupc-orange/20' 
-               : 'bg-zinc-100 dark:bg-[#1a1a1a] text-zinc-400 border border-transparent hover:border-zinc-300'
-           }`}
-         >
-           {item.featured_on_hero ? <IconStar size={10} /> : <IconRegStar size={10} />}
-           {item.featured_on_hero ? "Featured" : "Feature on Home"}
-         </button>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap"><CategoryBadge category={item.category} /></td>
-      <td className="px-8 py-4 text-right whitespace-nowrap">
-        <div className="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-          <button onClick={() => onOpenDetails(item)} title="Details" className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-uiupc-orange hover:text-white transition-all"><IconEye size={12} /></button>
-          {onOpenEmail && (
-            <button onClick={() => onOpenEmail(item)} title="Email" className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-blue-500 hover:text-white transition-all"><IconEnvelope size={12} /></button>
-          )}
-          <button onClick={() => onDelete(item)} title="Delete" className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:bg-red-500 hover:text-white transition-all"><IconClose size={12} /></button>
-        </div>
-      </td>
-    </motion.tr>
-  );
-});
-SubmissionRow.displayName = 'SubmissionRow';
-
-export const Admin_Submissions: React.FC<Admin_SubmissionsProps> = ({
-  data, count, currentPage, searchTerm, filterCategory, onFilterChange, onOpenDetails, onOpenEmail
-}) => {
-  const { adminProfile } = useSupabaseAuth();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSelectAllMode, setIsSelectAllMode] = useState(false);
-  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [deleteTarget, setDeleteTarget] = useState<ExhibitionSubmission | null>(null);
+  const [detailedItem, setDetailedItem] = useState<ExhibitionSubmission | null>(null);
 
-  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // ─── ACTIONS ─────────────────────────────────────────────────────────────
+  const handleToggleSelection = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) newSelected.delete(id);
+    else newSelected.add(id);
+    setSelectedIds(newSelected);
+    setIsSelectAllMode(false);
+  };
 
-  useEffect(() => { initAdminPassword(); }, []);
-
-  const handleSearchInput = useCallback((value: string) => {
-    if (searchTimer.current) clearTimeout(searchTimer.current);
-    searchTimer.current = setTimeout(() => {
-      onFilterChange({ search: value, page: 0 });
-    }, 400);
-  }, [onFilterChange]);
-
-  const handleToggleHero = async (item: ExhibitionSubmission) => {
-    try {
-      const { error } = await supabase
-        .from("exhibition_submissions")
-        .update({ featured_on_hero: !item.featured_on_hero })
-        .eq('id', item.id);
-      if (error) throw error;
-      onFilterChange({});
-    } catch (err: any) {
-      alert("Action failed: " + err.message);
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = new Set(data.map(item => item.id));
+      setSelectedIds(allIds);
+      setIsSelectAllMode(true);
+    } else {
+      setSelectedIds(new Set());
+      setIsSelectAllMode(false);
     }
+  };
+
+  const handleUpdateStatus = async (id: string, status: 'selected' | 'rejected') => {
+    const { success } = await executeAdminMutation("exhibition_submissions", "update", { status }, id);
+    if (success) onFilterChange({}); // Trigger refresh
+  };
+
+  const handleUpdatePayment = async (id: string, payment_status: 'paid' | 'unpaid') => {
+    const { success } = await executeAdminMutation("exhibition_submissions", "update", { payment_status }, id);
+    if (success) onFilterChange({}); // Trigger refresh
   };
 
   const handleBulkEmail = () => {
-    const targetItems = isSelectAllMode ? data : data.filter(item => selectedIds.has(item.id));
-    const emails = targetItems
-      .map(m => m.email)
-      .filter((e): e is string => !!e && e.includes('@'));
+    const emails = data
+      .filter(item => isSelectAllMode || selectedIds.has(item.id))
+      .map(item => item.email)
+      .filter(Boolean) as string[];
     
-    if (emails.length === 0) {
-      alert("No valid emails found for selected entries.");
-      return;
-    }
-    generateBccMailto(emails, adminProfile?.email);
+    if (emails.length === 0) return alert("No emails selected");
+    window.location.href = generateBccMailto(emails, "Exhibition Update | UIUPC");
   };
 
-  const handleSelectAll = useCallback((checked: boolean) => {
-    setIsSelectAllMode(checked);
-    setSelectedIds(new Set());
-  }, []);
-
-  const handleToggleSelection = useCallback((id: string) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const refreshData = useCallback(() => {
-    setSelectedIds(new Set());
-    setIsSelectAllMode(false);
-    setHiddenIds(new Set());
-    onFilterChange({});
-  }, [onFilterChange]);
-
-  const visibleData = useMemo(() => {
-    return data.filter(item => !hiddenIds.has(item.id));
-  }, [data, hiddenIds]);
-
-  const pageSize = 12;
-  const totalPages = Math.ceil((count || 0) / pageSize);
-  const instituteCount = new Set(data.map(item => item.institute)).size;
+  const totalPages = Math.ceil(count / 12);
 
   return (
-    <div className="w-full space-y-6 min-w-0 relative z-10 isolate">
+    <div className="space-y-8">
+      {/* ── HEADER ────────────────────────────────────────────── */}
       <Admin_ModuleHeader 
-        title="Exhibition"
-        description="Manage gallery submissions and featured photos."
+        title="Exhibition Engine" 
+        subtitle="Review and curate photo submissions for the club's upcoming showcase."
       >
-        <Admin_StatCard label="Total Entries" value={count} icon={<IconImages size={20} />} />
-        
-        <div className="p-6 bg-white dark:bg-[#0d0d0d] border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col justify-between shadow-sm min-h-[140px] group">
-          <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Filter Category</p>
-          <div className="flex items-end justify-between mt-auto">
-            <div className="text-uiupc-orange text-4xl opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
-              <IconFilter size={40} />
-            </div>
-            <div className="flex-1 ml-6 max-w-[180px]">
-              <Admin_Dropdown 
-                variant="minimal"
-                label="Photo Category"
-                value={filterCategory} 
-                onChange={(val) => onFilterChange({ category: val, page: 0 })}
-                options={[
-                  { value: 'all', label: 'All Categories' },
-                  { value: 'Single', label: 'Single' },
-                  { value: 'Story', label: 'Story' },
-                  { value: 'Mobile', label: 'Mobile' }
-                ]}
-                className="w-full"
-              />
-            </div>
-          </div>
+        <div className="flex gap-4">
+          <Admin_StatCard label="Total Submissions" value={count} icon={<IconImages size={20} />} />
         </div>
-
-        <Admin_StatCard label="Institutions" value={instituteCount} icon={<IconUniversity size={20} />} />
-        <Admin_StatCard label="Review Status" value="Online" icon={<IconCheck size={20} />} color="text-green-500" />
       </Admin_ModuleHeader>
 
-      {/* ── FILTER BAR ─────────────────────────────────────────── */}
-      <div className="w-full bg-white dark:bg-[#0d0d0d] p-3 sm:p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm relative z-10">
-        <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
-          <div className="relative flex-1 group min-w-[200px]">
-            <IconSearch size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-uiupc-orange transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Search entries..." 
-              defaultValue={searchTerm} 
-              onChange={(e) => handleSearchInput(e.target.value)}
-              className="w-full py-4 pl-14 pr-8 bg-zinc-100 dark:bg-[#1a1a1a] border border-transparent focus:border-uiupc-orange/30 rounded-xl text-sm outline-none transition-all placeholder:text-zinc-400 font-medium" 
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <button 
-              onClick={() => exportToCSV("submissions", data)} 
-              className="px-8 h-12 flex items-center gap-3 bg-uiupc-orange text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-uiupc-orange/20 hover:brightness-110 transition-all"
-            >
-              <IconFileExport size={14} /> Export List
-            </button>
-          </div>
+      {/* ── TOOLBAR ────────────────────────────────────────────── */}
+      <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+        <div className="relative flex-1 group w-full">
+          <IconSearch size={14} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 transition-colors group-focus-within:text-uiupc-orange" />
+          <input 
+            type="text"
+            placeholder="Search participants or photo titles..."
+            defaultValue={searchTerm}
+            onChange={(e) => onFilterChange({ search: e.target.value, page: 0 })}
+            className="w-full pl-14 pr-6 py-4 bg-white dark:bg-zinc-950 border border-black/5 dark:border-white/5 rounded-2xl text-sm font-bold tracking-tight outline-none focus:border-uiupc-orange/20 dark:text-white shadow-sm"
+          />
+        </div>
+        
+        <div className="flex items-center gap-3 w-full lg:w-auto">
+          <Admin_Dropdown 
+            label="Category"
+            value={filterCategory}
+            onChange={(val) => onFilterChange({ category: val, page: 0 })}
+            options={[
+              { value: 'all', label: 'All Categories' },
+              { value: 'Single', label: 'Single' },
+              { value: 'Story', label: 'Story' },
+              { value: 'Mobile', label: 'Mobile' }
+            ]}
+          />
+          <button 
+            onClick={() => exportToCSV("submissions", data)}
+            className="px-8 h-12 flex items-center gap-3 bg-uiupc-orange text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-uiupc-orange/20 hover:brightness-110 transition-all"
+          >
+            <IconFileExport size={14} /> Export List
+          </button>
         </div>
       </div>
 
-      {/* ── BULK ACTIONS ───────────────────────────────────────── */}
-      <AnimatePresence>
-        {(selectedIds.size > 0 || isSelectAllMode) && (
-          <motion.div 
-            initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
-            className="fixed bottom-28 sm:bottom-12 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 sm:gap-6 px-4 sm:px-10 py-3 sm:py-4 bg-zinc-950 dark:bg-white rounded-2xl shadow-2xl border border-zinc-800 dark:border-zinc-200"
-          >
-            <div className="flex items-center gap-3 sm:gap-5 pr-4 sm:pr-8 border-r border-white/10 dark:border-black/10">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-uiupc-orange flex items-center justify-center text-white text-[10px] sm:text-[12px] font-black">
-                {isSelectAllMode ? count : selectedIds.size}
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-white dark:text-black">Selected</span>
-                <span className="text-[7px] sm:text-[8px] font-bold text-zinc-500 uppercase">Submissions</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-4">
-              <button onClick={handleBulkEmail} className="flex items-center gap-2 px-6 py-4 bg-uiupc-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all"><IconEnvelope size={12} /><span>Email All</span></button>
-              <button onClick={() => { setSelectedIds(new Set()); setIsSelectAllMode(false); }} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-zinc-500 hover:text-white dark:hover:text-black transition-colors"><IconClose size={14} /></button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* ── DATA TABLE ─────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-[#0d0d0d] rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm relative z-10">
-        <div className="overflow-x-auto min-h-[500px]">
-          <table className="w-full border-collapse">
+      <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-black/5 dark:border-white/5 overflow-hidden shadow-xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-zinc-50 dark:bg-zinc-900/50">
-                <th className="px-8 py-4 text-left w-20">
+              <tr className="bg-[#f9f5ea] dark:bg-black/40 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                <th className="px-8 py-5 w-20">
                   <input 
                     type="checkbox" 
-                    className="w-5 h-5 rounded-lg border-zinc-300 text-uiupc-orange transition-all cursor-pointer" 
-                    checked={isSelectAllMode || (selectedIds.size > 0 && selectedIds.size >= count)} 
-                    onChange={(e) => handleSelectAll(e.target.checked)} 
+                    checked={isSelectAllMode || (selectedIds.size > 0 && selectedIds.size >= data.length)}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="w-5 h-5 rounded-lg border-zinc-300 text-uiupc-orange transition-all cursor-pointer"
                   />
                 </th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Full Name</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden sm:table-cell">Institution</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden md:table-cell">Photo Title</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap hidden lg:table-cell">Hero Status</th>
-                <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 whitespace-nowrap">Category</th>
-                <th className="px-8 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actions</th>
+                <th className="px-8 py-5">Photo</th>
+                <th className="px-8 py-5">Participant</th>
+                <th className="px-8 py-5">Status</th>
+                <th className="px-8 py-5">Payment</th>
+                <th className="px-8 py-5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
-              {visibleData.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-8 py-20 text-center">
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="w-16 h-16 rounded-[2rem] bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center text-zinc-300 dark:text-zinc-600"><IconSearch size={20} /></div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">No submissions found</p>
+              {data.map((item) => (
+                <tr key={item.id} className="group hover:bg-[#f9f5ea]/30 dark:hover:bg-white/[0.02] transition-colors">
+                  <td className="px-8 py-6">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedIds.has(item.id)}
+                      onChange={() => handleToggleSelection(item.id)}
+                      className="w-5 h-5 rounded-lg border-zinc-300 text-uiupc-orange transition-all cursor-pointer"
+                    />
+                  </td>
+                  <td className="px-8 py-6">
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 cursor-pointer" onClick={() => setDetailedItem(item)}>
+                      <img src={getImageUrl(item.photo_url, 100, 100)} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" alt="" />
+                    </div>
+                  </td>
+                  <td className="px-8 py-6">
+                    <h4 className="text-sm font-black uppercase tracking-tight text-zinc-900 dark:text-white truncate max-w-[200px]">{item.participant_name}</h4>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest truncate max-w-[200px]">{item.institute}</p>
+                  </td>
+                  <td className="px-8 py-6">
+                    <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                      item.status === 'selected' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                      item.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                      'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 border-transparent'
+                    }`}>
+                      {item.status || 'pending'}
+                    </span>
+                  </td>
+                  <td className="px-8 py-6">
+                    <button 
+                      onClick={() => handleUpdatePayment(item.id, item.payment_status === 'paid' ? 'unpaid' : 'paid')}
+                      className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${
+                        item.payment_status === 'paid' 
+                        ? 'bg-uiupc-orange text-white shadow-lg' 
+                        : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400'
+                      }`}
+                    >
+                      {item.payment_status || 'unpaid'}
+                    </button>
+                  </td>
+                  <td className="px-8 py-6 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button onClick={() => setDetailedItem(item)} className="p-2 text-zinc-300 hover:text-uiupc-orange transition-colors"><IconEye size={18} /></button>
+                      <button onClick={() => setDeleteTarget(item)} className="p-2 text-zinc-300 hover:text-zinc-600 transition-colors"><IconTrash size={18} /></button>
                     </div>
                   </td>
                 </tr>
-              ) : (
-                visibleData.map((item) => (
-                  <SubmissionRow 
-                    key={item.id} 
-                    item={item} 
-                    isSelected={selectedIds.has(item.id) || isSelectAllMode}
-                    toggleSelection={handleToggleSelection}
-                    onOpenDetails={onOpenDetails}
-                    onOpenEmail={onOpenEmail}
-                    onToggleHero={handleToggleHero}
-                    onDelete={setDeleteTarget}
-                  />
-                ))
+              ))}
+              {data.length === 0 && (
+                <tr><td colSpan={6} className="py-20 text-center text-[10px] font-black uppercase tracking-widest text-zinc-300">No submissions found</td></tr>
               )}
             </tbody>
           </table>
@@ -321,28 +205,120 @@ export const Admin_Submissions: React.FC<Admin_SubmissionsProps> = ({
 
       {/* ── PAGINATION ────────────────────────────────────────── */}
       {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-10 border-t border-black/5 dark:border-white/5">
-          <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Exhibition Overview</p>
-            <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Page {currentPage + 1} of {totalPages} <span className="hidden sm:inline">| Total {count} Entries</span></p>
-          </div>
+        <div className="flex items-center justify-between pt-8 border-t border-black/5 dark:border-white/5">
+          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Page {currentPage + 1} of {totalPages}</p>
           <div className="flex items-center gap-3">
-            <button disabled={currentPage === 0} onClick={() => onFilterChange({ page: Math.max(0, currentPage - 1) })} className="w-14 h-12 flex items-center justify-center rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange transition-all shadow-sm"><IconChevronLeft size={12} /></button>
-            <button disabled={currentPage >= totalPages - 1} onClick={() => onFilterChange({ page: currentPage + 1 })} className="w-14 h-12 flex items-center justify-center rounded-xl bg-white dark:bg-[#080808] border border-black/5 dark:border-white/5 text-zinc-400 disabled:opacity-20 hover:border-uiupc-orange hover:text-uiupc-orange transition-all shadow-sm"><IconChevronRight size={12} /></button>
+            <button disabled={currentPage === 0} onClick={() => onFilterChange({ page: currentPage - 1 })} className="w-12 h-12 flex items-center justify-center rounded-xl bg-white dark:bg-zinc-900 border border-black/5 text-zinc-400 disabled:opacity-20"><IconChevronLeft size={12} /></button>
+            <button disabled={currentPage >= totalPages - 1} onClick={() => onFilterChange({ page: currentPage + 1 })} className="w-12 h-12 flex items-center justify-center rounded-xl bg-white dark:bg-zinc-900 border border-black/5 text-zinc-400 disabled:opacity-20"><IconChevronRight size={12} /></button>
           </div>
         </div>
       )}
 
-      {/* ── MODALS ─────────────────────────────────────────────── */}
+      {/* ── BULK ACTIONS ───────────────────────────────────────── */}
+      <AnimatePresence>
+        {(selectedIds.size > 0 || isSelectAllMode) && (
+          <motion.div 
+            initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }}
+            className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[100] px-10 py-5 bg-zinc-900 dark:bg-white rounded-[2.5rem] shadow-2xl flex items-center gap-8 border border-white/10"
+          >
+            <div className="flex flex-col">
+              <span className="text-[11px] font-black uppercase tracking-widest text-white dark:text-black">{selectedIds.size} Selected</span>
+              <span className="text-[8px] font-bold text-zinc-500 uppercase">Submissions</span>
+            </div>
+            <button onClick={handleBulkEmail} className="px-8 py-3 bg-uiupc-orange text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all">
+              <IconEnvelope size={14} className="inline mr-2" /> Bulk Email
+            </button>
+            <button onClick={() => { setSelectedIds(new Set()); setIsSelectAllMode(false); }} className="p-2 text-zinc-500 hover:text-white dark:hover:text-black transition-colors"><IconClose size={18} /></button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── DETAILS MODAL ────────────────────────────────────────── */}
+      <AnimatePresence>
+        {detailedItem && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setDetailedItem(null)} />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-5xl bg-white dark:bg-zinc-950 rounded-[3rem] overflow-hidden shadow-2xl border border-white/10 flex flex-col md:flex-row max-h-[90vh]"
+            >
+              <div className="w-full md:w-3/5 bg-zinc-100 dark:bg-zinc-900 p-8 flex items-center justify-center relative group">
+                <img src={getImageUrl(detailedItem.photo_url, 1200, 1200)} className="w-full h-auto max-h-full object-contain rounded-2xl shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]" alt="" />
+              </div>
+              <div className="flex-1 p-10 space-y-8 overflow-y-auto custom-scrollbar">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-2xl font-black uppercase tracking-tight text-zinc-900 dark:text-white leading-none">{detailedItem.photo_title}</h3>
+                  <button onClick={() => setDetailedItem(null)} className="text-zinc-400 hover:text-uiupc-orange transition-colors"><IconClose size={24} /></button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-8 border-b border-black/5 dark:border-white/5 pb-8">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Participant</label>
+                    <p className="text-sm font-bold dark:text-white uppercase">{detailedItem.participant_name}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Category</label>
+                    <p className="text-sm font-bold dark:text-white uppercase tracking-tighter">{detailedItem.category}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-uiupc-orange">Exhibition Status</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button 
+                      onClick={() => handleUpdateStatus(detailedItem.id, 'selected')}
+                      className={`py-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${detailedItem.status === 'selected' ? 'bg-green-500 text-white' : 'bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white'}`}
+                    >
+                      Select
+                    </button>
+                    <button 
+                      onClick={() => handleUpdateStatus(detailedItem.id, 'rejected')}
+                      className={`py-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${detailedItem.status === 'rejected' ? 'bg-red-500 text-white' : 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white'}`}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-[#f9f5ea] dark:bg-white/[0.03] rounded-2xl border border-black/5 dark:border-white/5 space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-uiupc-orange">Payment Insight</h4>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Transaction ID</span>
+                    <span className="text-xs font-mono font-bold dark:text-white">{detailedItem.transaction_id || 'NOT PROVIDED'}</span>
+                  </div>
+                  <button 
+                    onClick={() => handleUpdatePayment(detailedItem.id, detailedItem.payment_status === 'paid' ? 'unpaid' : 'paid')}
+                    className={`w-full py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${detailedItem.payment_status === 'paid' ? 'bg-uiupc-orange text-white' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400'}`}
+                  >
+                    Mark as {detailedItem.payment_status === 'paid' ? 'Unpaid' : 'Paid'}
+                  </button>
+                </div>
+
+                <div className="pt-4">
+                  <a 
+                    href={`https://drive.google.com/file/d/${detailedItem.photo_url}/view`} 
+                    target="_blank" rel="noopener noreferrer"
+                    className="w-full py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-[10px] font-black uppercase tracking-widest rounded-xl text-center hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                  >
+                    <IconExternalLink size={14} /> Open High-Res Drive Source
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── DELETE CONFIRM ────────────────────────────────────────── */}
       <Admin_ErrorBoundary>
         <Admin_DeleteConfirmModal 
           isOpen={!!deleteTarget} 
           onClose={() => setDeleteTarget(null)} 
           itemId={deleteTarget?.id} 
           itemName={deleteTarget?.participant_name} 
-          onSuccess={() => {
-            if (deleteTarget) setHiddenIds(prev => new Set(prev).add(deleteTarget.id));
-            refreshData();
+          onSuccess={() => { setDeleteTarget(null); onFilterChange({}); }}
+          onConfirm={async () => {
+            return await executeAdminMutation("exhibition_submissions", "delete", null, deleteTarget?.id);
           }}
         />
       </Admin_ErrorBoundary>

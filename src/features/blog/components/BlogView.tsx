@@ -31,8 +31,8 @@ const BlogView: React.FC<BlogViewProps> = ({ initialPosts }) => {
 
     if (activeTab !== "all") {
       result = result.filter(post => {
-        const cat = (post.category || "Official").toLowerCase();
-        if (activeTab === "social") return !!post.facebookLink;
+        const cat = (post.category || post.tags || "Official").toLowerCase();
+        if (activeTab === "social") return !!(post.facebook_url || post.instagram_url || post.linkedin_url);
         if (activeTab === "news") return cat.includes("news") || cat.includes("official");
         return cat.includes(activeTab);
       });

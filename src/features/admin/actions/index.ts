@@ -13,6 +13,114 @@ async function requireAdmin() {
   if (error || !user) {
     throw new Error('Unauthorized: Admin access required');
   }
+  return user;
+}
+
+// ─── AUDIT LOGGING ────────────────────────────────────────────────────────
+export async function logAuditAction(
+  action: string,
+  targetTable: string,
+  targetId?: string,
+  oldData?: any,
+  newData?: any,
+  userOrEmail?: any
+) {
+  let email = 'system';
+  let adminId = null;
+
+  if (userOrEmail) {
+    email = userOrEmail.email || userOrEmail;
+  } else {
+    try {
+      const user = await requireAdmin();
+      email = user.email || 'system';
+    } catch (e) {
+      // fallback to system
+    }
+  }
+  
+  // Look up admin profile to get their UUID
+  if (email !== 'system') {
+    const { data: adminProfile } = await supabaseAdmin
+      .from('admins')
+      .select('id')
+      .eq('email', email)
+      .single();
+    if (adminProfile) adminId = adminProfile.id;
+  }
+
+  const { error } = await supabaseAdmin.from('audit_logs').insert({
+    action,
+    admin_id: adminId,
+    admin_email: email,
+    target_table: targetTable,
+    target_id: targetId || null,
+    old_data: oldData || null,
+    new_data: newData || null
+  });
+
+  if (error) console.error("Audit log error:", error.message);
+}
+
+// ─── UNIFIED MUTATION ROUTER ─────────────────────────────────────────────
+export async function executeAdminMutation(
+  targetTable: string,
+  action: 'create' | 'update' | 'delete',
+  payload: any,
+  targetId?: string
+) {
+  const user = await requireAdmin();
+  
+  // Check if approvals are required
+  const { data: settings } = await supabaseAdmin
+    .from('admin_settings')
+    .select('value')
+    .eq('key', 'require_approvals')
+    .maybeSingle();
+    
+  const requireApprovals = settings?.value === 'true';
+
+  // Get user role
+  const { data: adminProfile } = await supabaseAdmin
+    .from('admins')
+    .select('id, role')
+    .eq('email', user.email)
+    .single();
+
+  const isCore = adminProfile?.role === 'core';
+
+  if (requireApprovals && !isCore) {
+    // Route to pending changes
+    const { error } = await supabaseAdmin.from('pending_changes').insert({
+      requested_by: adminProfile?.id,
+      target_table: targetTable,
+      target_id: targetId,
+      action,
+      new_data: action !== 'delete' ? payload : null,
+      status: 'pending'
+    });
+    if (error) return { success: false, message: error.message };
+    return { success: true, pending: true, message: 'Change submitted for approval.' };
+  }
+
+  // Execute directly
+  let result;
+  if (action === 'create') {
+    result = await supabaseAdmin.from(targetTable).insert([payload]).select().single();
+  } else if (action === 'update' && targetId) {
+    result = await supabaseAdmin.from(targetTable).update(payload).eq('id', targetId).select().single();
+  } else if (action === 'delete' && targetId) {
+    result = await supabaseAdmin.from(targetTable).delete().eq('id', targetId);
+  } else {
+    return { success: false, message: 'Invalid mutation parameters' };
+  }
+
+  if (result.error) return { success: false, message: result.error.message };
+
+  await logAuditAction(action, targetTable, targetId || result.data?.id, null, action !== 'delete' ? payload : null, user);
+  revalidatePath('/admin');
+  
+  return { success: true, pending: false, data: result.data };
 }
 
 
@@ -60,6 +168,63 @@ export async function validateAdminPassword(password: string): Promise<{ valid: 
   return isValid ? { valid: true } : { valid: false, error: 'Incorrect password' };
 }
 
+// ─── PENDING CHANGES APPROVAL ──────────────────────────────────────────────
+export async function approvePendingChange(id: string) {
+  const user = await requireAdmin();
+  
+  // Verify core role
+  const { data: profile } = await supabaseAdmin.from('admins').select('role').eq('email', user.email).single();
+  if (profile?.role !== 'core') return { success: false, message: 'Only core admins can approve changes.' };
+
+  // Get the pending change
+  const { data: pending } = await supabaseAdmin.from('pending_changes').select('*').eq('id', id).single();
+  if (!pending || pending.status !== 'pending') return { success: false, message: 'Invalid or already processed request.' };
+
+  // Apply the actual mutation
+  let result;
+  if (pending.action === 'create') {
+    result = await supabaseAdmin.from(pending.target_table).insert([pending.new_data]);
+  } else if (pending.action === 'update' && pending.target_id) {
+    result = await supabaseAdmin.from(pending.target_table).update(pending.new_data).eq('id', pending.target_id);
+  } else if (pending.action === 'delete' && pending.target_id) {
+    result = await supabaseAdmin.from(pending.target_table).delete().eq('id', pending.target_id);
+  } else {
+    return { success: false, message: 'Invalid action data.' };
+  }
+
+  if (result?.error) return { success: false, message: result.error.message };
+
+  // Mark as approved
+  await supabaseAdmin.from('pending_changes').update({ 
+    status: 'approved', 
+    reviewed_by: profile?.id,
+    reviewed_at: new Date().toISOString()
+  }).eq('id', id);
+
+  await logAuditAction('approve_request', 'pending_changes', id, null, { applied_to: pending.target_table, action: pending.action }, user);
+  revalidatePath('/admin');
+  return { success: true };
+}
+
+export async function rejectPendingChange(id: string) {
+  const user = await requireAdmin();
+  
+  const { data: profile } = await supabaseAdmin.from('admins').select('role, id').eq('email', user.email).single();
+  if (profile?.role !== 'core') return { success: false, message: 'Only core admins can reject changes.' };
+
+  const { error } = await supabaseAdmin.from('pending_changes').update({ 
+    status: 'rejected',
+    reviewed_by: profile?.id,
+    reviewed_at: new Date().toISOString()
+  }).eq('id', id);
+
+  if (error) return { success: false, message: error.message };
+  
+  await logAuditAction('reject_request', 'pending_changes', id, null, null, user);
+  revalidatePath('/admin');
+  return { success: true };
+}
+
 // ─── INPUT VALIDATION ──────────────────────────────────────────────────────
 
 function validateCommitteeInput(data: Record<string, any>): { valid: boolean; error?: string } {
@@ -101,6 +266,7 @@ export async function approveMember(id: string) {
     .eq('id', id);
 
   if (error) throw new Error(error.message);
+  await logAuditAction('update_status', 'members', id, null, { status: 'approved' });
   revalidatePath('/admin');
   return { success: true };
 }
@@ -113,6 +279,7 @@ export async function rejectMember(id: string) {
     .eq('id', id);
 
   if (error) throw new Error(error.message);
+  await logAuditAction('update_status', 'members', id, null, { status: 'rejected' });
   revalidatePath('/admin');
   return { success: true };
 }
@@ -125,6 +292,7 @@ export async function deleteMember(id: string) {
     .eq('id', id);
 
   if (error) throw new Error(error.message);
+  await logAuditAction('delete', 'members', id);
   revalidatePath('/admin');
   return { success: true };
 }
@@ -163,6 +331,7 @@ export async function upsertCommitteeMember(data: Partial<CommitteeMember>) {
     .upsert(sanitized);
 
   if (error) return { success: false, message: error.message };
+  await logAuditAction(sanitized.id ? 'update' : 'create', 'committees', sanitized.id || 'new', null, sanitized);
   revalidatePath('/admin');
   return { success: true };
 }
@@ -187,6 +356,7 @@ export async function deleteCommitteeMemberSecure(id: string, password: string) 
     .eq('id', id);
 
   if (error) return { success: false, message: error.message };
+  await logAuditAction('delete_secure', 'committees', id);
   revalidatePath('/admin');
   return { success: true };
 }
@@ -212,6 +382,10 @@ export async function bulkDeleteCommitteeMembersSecure(ids: string[], password: 
   const deleted = results.filter(r => r.status === 'fulfilled' && !(r.value as any).error).length;
   const failed = results.length - deleted;
 
+  if (deleted > 0) {
+    await logAuditAction('bulk_delete_secure', 'committees', 'multiple', null, { deleted_count: deleted, total_attempted: ids.length });
+  }
+
   revalidatePath('/admin');
   return {
     success: failed === 0,
@@ -230,6 +404,7 @@ export async function deleteCommitteeMember(id: string) {
     .eq('id', id);
 
   if (error) throw new Error(error.message);
+  await logAuditAction('delete', 'committees', id);
   revalidatePath('/admin');
   return { success: true };
 }
@@ -244,6 +419,7 @@ export async function updateSubmissionStatus(id: string, status: 'selected' | 'r
     .eq('id', id);
 
   if (error) throw new Error(error.message);
+  await logAuditAction('update_status', 'exhibition_submissions', id, null, { status });
   revalidatePath('/admin');
   return { success: true };
 }

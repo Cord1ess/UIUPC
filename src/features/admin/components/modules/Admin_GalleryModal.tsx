@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { IconClose, IconSync, IconUpload, IconCamera, IconLink, IconFacebook } from "@/components/shared/Icons";
-import { Admin_DrivePicker } from "@/features/admin/components";
+import { Admin_DrivePicker, Admin_ModalPortal } from "@/features/admin/components";
 import { getImageUrl } from "@/utils/imageUrl";
 
 interface UploadForm {
@@ -19,32 +19,27 @@ interface Admin_GalleryModalProps {
   editingPhoto: any;
   uploading: boolean;
   imagePreview: string;
-  onClose: () => void;
+  eventOptions: { value: string; label: string }[];
+  onClose: (show: boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
   onInputChange: (field: string, value: string) => void;
+  onBulkImport: (folderId: string, folderName: string, eventId: string) => void;
 }
 
 const Admin_GalleryModal: React.FC<Admin_GalleryModalProps> = ({
-  uploadForm, editingPhoto, uploading, imagePreview, onClose, onSubmit, onInputChange
+  uploadForm, editingPhoto, uploading, imagePreview, eventOptions, onClose, onSubmit, onInputChange, onBulkImport
 }) => {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-
-  const EVENT_OPTIONS = [
-    { value: "1", label: "Friday Exposure" },
-    { value: "2", label: "Photo Adda" },
-    { value: "3", label: "Photo Walk" },
-    { value: "4", label: "Exhibitions Visit" },
-    { value: "5", label: "Workshops & Talks" },
-    { value: "6", label: "Shutter Stories" }
-  ];
+  const [isBulkPickerOpen, setIsBulkPickerOpen] = useState(false);
 
   return (
-    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 md:p-10">
-      <motion.div 
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/80 backdrop-blur-2xl"
-        onClick={onClose}
-      />
+    <Admin_ModalPortal>
+      <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 md:p-10">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          className="absolute inset-0 bg-black/80 backdrop-blur-2xl"
+          onClick={() => onClose(false)}
+        />
       <motion.div 
         initial={{ scale: 0.9, opacity: 0, y: 40 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 40 }}
         className="relative w-full max-w-4xl bg-white dark:bg-[#0d0d0d] rounded-[3rem] border border-zinc-200 dark:border-zinc-800 shadow-3xl flex flex-col md:flex-row overflow-hidden max-h-[90vh]"
@@ -77,11 +72,22 @@ const Admin_GalleryModal: React.FC<Admin_GalleryModalProps> = ({
 
         {/* Right Side: Form */}
         <div className="flex-1 p-8 md:p-14 overflow-y-auto custom-scrollbar bg-white dark:bg-[#0d0d0d]">
-          <div className="mb-12">
-            <span className="text-uiupc-orange text-[10px] font-black uppercase tracking-[0.4em] mb-4 block">Gallery Collection</span>
-            <h3 className="text-4xl font-black uppercase tracking-tighter dark:text-white leading-none">
-              {editingPhoto ? "Edit Image" : "New Image"}
-            </h3>
+          <div className="mb-12 flex items-center justify-between">
+            <div>
+              <span className="text-uiupc-orange text-[10px] font-black uppercase tracking-[0.4em] mb-4 block">Gallery Collection</span>
+              <h3 className="text-4xl font-black uppercase tracking-tighter dark:text-white leading-none">
+                {editingPhoto ? "Edit Image" : "New Image"}
+              </h3>
+            </div>
+            {!editingPhoto && (
+              <button 
+                type="button"
+                onClick={() => setIsBulkPickerOpen(true)}
+                className="px-6 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-200 transition-all border border-zinc-200 dark:border-zinc-800"
+              >
+                Bulk Import Folder
+              </button>
+            )}
           </div>
 
           <form onSubmit={onSubmit} className="space-y-8">
@@ -114,7 +120,7 @@ const Admin_GalleryModal: React.FC<Admin_GalleryModalProps> = ({
                     className="w-full bg-zinc-100 dark:bg-[#1a1a1a] border border-transparent p-4 rounded-xl outline-none focus:border-uiupc-orange dark:text-white font-bold transition-all text-sm"
                  >
                    <option value="">Select Category</option>
-                   {EVENT_OPTIONS.map(opt => (
+                   {eventOptions.map(opt => (
                      <option key={opt.value} value={opt.value}>{opt.label}</option>
                    ))}
                  </select>
@@ -179,10 +185,21 @@ const Admin_GalleryModal: React.FC<Admin_GalleryModalProps> = ({
               }}
               title="Select Gallery Image"
             />
+
+            <Admin_DrivePicker
+              isOpen={isBulkPickerOpen}
+              onClose={() => setIsBulkPickerOpen(false)}
+              onSelect={(folderId, _, folderName) => {
+                onBulkImport(folderId, folderName, uploadForm.eventId);
+              }}
+              title="Select Event Folder to Import"
+              allowFolderSelection={true}
+            />
           </form>
         </div>
       </motion.div>
     </div>
+    </Admin_ModalPortal>
   );
 };
 

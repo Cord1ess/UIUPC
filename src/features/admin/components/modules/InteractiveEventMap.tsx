@@ -46,21 +46,11 @@ export const InteractiveEventMap: React.FC<InteractiveEventMapProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const uiuMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const draggableMarkerRef = useRef<maplibregl.Marker | null>(null);
 
   const defaultCenter: [number, number] = [90.449860, 23.797445]; // [lng, lat] for MapLibre
 
-  // Mock Events around UIU for testing
-  const mockEvents: UIUPCEvent[] = useMemo(() => [
-    { id: 'm1', title: 'Street Photography Workshop', location: 'UIU Front Gate', latitude: 23.7985, longitude: 90.4495, map_icon_type: 'workshop', is_mapped: true, date: '2026-06-15', description: 'Mastering the art of street frames.', image: '', link: '' },
-    { id: 'm2', title: 'Lakeside Photowalk', location: 'UIU Lake Side', latitude: 23.7965, longitude: 90.4510, map_icon_type: 'photowalk', is_mapped: true, date: '2026-06-20', description: 'Golden hour walk around the lake.', image: '', link: '' },
-    { id: 'm3', title: 'Shutter Stories Exhibition', location: 'UIU Auditorium', latitude: 23.7970, longitude: 90.4485, map_icon_type: 'exhibition', is_mapped: true, date: '2026-07-05', description: 'Our flagship annual exhibition.', image: '', link: '' },
-    { id: 'm4', title: 'Visit to National Museum', location: 'Shahbagh', latitude: 23.7375, longitude: 90.3945, map_icon_type: 'visit', is_mapped: true, date: '2026-06-25', description: 'Exploring heritage through lenses.', image: '', link: '' },
-    { id: 'm5', title: 'Mobile Photography Session', location: 'UIU Field', latitude: 23.7978, longitude: 90.4505, map_icon_type: 'workshop', is_mapped: true, date: '2026-06-10', description: 'Phone to pro in 2 hours.', image: '', link: '' },
-    { id: 'm6', title: 'Macro World Hunt', location: 'UIU Garden', latitude: 23.7968, longitude: 90.4500, map_icon_type: 'photowalk', is_mapped: true, date: '2026-07-12', description: 'Finding beauty in small things.', image: '', link: '' },
-    { id: 'm7', title: 'Architecture Walk', location: 'UIU Main Building', latitude: 23.7976, longitude: 90.4490, map_icon_type: 'photowalk', is_mapped: true, date: '2026-07-20', description: 'Geometric perspectives.', image: '', link: '' }
-  ], []);
-
-  const allEvents = useMemo(() => [...events, ...mockEvents], [events, mockEvents]);
+  const allEvents = useMemo(() => events, [events]);
 
   // Filtered list
   const filteredEvents = useMemo(() => {
@@ -152,16 +142,7 @@ export const InteractiveEventMap: React.FC<InteractiveEventMapProps> = ({
         source: 'events-source',
         filter: ['!', ['has', 'point_count']],
         paint: {
-          'circle-color': [
-            'match',
-            ['get', 'map_icon_type'],
-            'workshop', iconColors.workshop,
-            'photowalk', iconColors.photowalk,
-            'exhibition', iconColors.exhibition,
-            'visit', iconColors.visit,
-            'uiu', iconColors.uiu,
-            iconColors.default
-          ],
+          'circle-color': ['coalesce', ['get', 'marker_color'], iconColors.default],
           'circle-radius': 8,
           'circle-stroke-width': 2,
           'circle-stroke-color': '#ffffff',
@@ -198,7 +179,7 @@ export const InteractiveEventMap: React.FC<InteractiveEventMapProps> = ({
               ${props.image ? `<div class="w-full h-24 mb-3 rounded-lg overflow-hidden bg-zinc-100"><img src="${getImageUrl(props.image, 400)}" class="w-full h-full object-cover" /></div>` : ''}
               <h3 class="font-black text-sm uppercase tracking-tight mb-1" style="color: #18181b;">${props.title}</h3>
               <div class="flex items-center gap-2 text-[9px] text-zinc-500 font-bold mb-3 uppercase tracking-widest">📅 ${props.date}</div>
-              <a href="/events/${props.id}" class="block w-full py-2.5 bg-[#f58920] text-white text-[9px] font-black uppercase tracking-widest text-center rounded-lg shadow-md">View Event Details</a>
+              <a href="${props.marker_link_url || `/events/${props.id}`}" class="block w-full py-2.5 bg-[#f58920] text-white text-[9px] font-black uppercase tracking-widest text-center rounded-lg shadow-md">View Event Details</a>
             </div>
           `)
           .addTo(map);
@@ -236,9 +217,40 @@ export const InteractiveEventMap: React.FC<InteractiveEventMapProps> = ({
       .addTo(map);
 
     return () => {
+      draggableMarkerRef.current?.remove();
+      draggableMarkerRef.current = null;
       map.remove();
     };
-  }, [theme]); // Re-init on theme change for style
+  }, [theme, isAdminMode]); // Re-init on theme change for style
+
+  // Update Draggable Marker Position
+  useEffect(() => {
+    if (!mapRef.current || !isAdminMode) return;
+    
+    if (tempCoords) {
+      if (!draggableMarkerRef.current) {
+        draggableMarkerRef.current = new maplibregl.Marker({ draggable: true, color: '#f58920' })
+          .setLngLat([tempCoords.lng, tempCoords.lat])
+          .addTo(mapRef.current);
+
+        draggableMarkerRef.current.on('dragend', () => {
+          const lngLat = draggableMarkerRef.current?.getLngLat();
+          if (lngLat && onMapClick) {
+            onMapClick({ lat: lngLat.lat, lng: lngLat.lng });
+          }
+        });
+      } else {
+        // Just update position if it moved externally (e.g. click)
+        const currentPos = draggableMarkerRef.current.getLngLat();
+        if (currentPos.lng !== tempCoords.lng || currentPos.lat !== tempCoords.lat) {
+          draggableMarkerRef.current.setLngLat([tempCoords.lng, tempCoords.lat]);
+        }
+      }
+    } else {
+      draggableMarkerRef.current?.remove();
+      draggableMarkerRef.current = null;
+    }
+  }, [tempCoords, isAdminMode, onMapClick]);
 
   // Update Data Source when filteredEvents changes
   useEffect(() => {
@@ -251,7 +263,10 @@ export const InteractiveEventMap: React.FC<InteractiveEventMapProps> = ({
         features: filteredEvents.map(e => ({
           type: 'Feature',
           geometry: { type: 'Point', coordinates: [e.longitude!, e.latitude!] },
-          properties: { ...e }
+          properties: { 
+            ...e, 
+            marker_color: e.marker_color || iconColors[e.map_icon_type || 'default'] || iconColors.default 
+          }
         }))
       });
     }

@@ -111,10 +111,11 @@ export const Admin_Archive: React.FC = () => {
   const totalPages = Math.ceil((count || 0) / pageSize);
 
   return (
+    <div className="pt-16 md:pt-24 pb-32 lg:pb-12 px-6 md:px-12 w-full max-w-[1600px] mx-auto">
     <div className="w-full space-y-8 min-w-0 relative z-10 isolate">
       <Admin_ModuleHeader 
         title="Archive Vault"
-        description="Preserved visual assets from past exhibitions and events."
+        subtitle="Preserved visual assets from past exhibitions and events."
       >
         <Admin_StatCard label="Total Assets" value={count} icon={<IconArchive size={20} />} />
         <Admin_StatCard label="Vault Status" value="Secure" icon={<IconCheck size={20} />} color="text-green-500" />
@@ -240,6 +241,7 @@ export const Admin_Archive: React.FC = () => {
           )}
         </AnimatePresence>
       </Admin_ErrorBoundary>
+    </div>
     </div>
   );
 };

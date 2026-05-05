@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useRef, memo } from 'react';
+import React, { useEffect, useRef, memo, useMemo } from 'react';
 import { 
   IconDashboard, IconUsers, IconCalendar, IconFileAlt, IconImages, 
   IconShield, IconWallet, IconHistory, IconUserCircle, IconNewspaper, 
   IconCamera, IconMap, IconLayerGroup, IconAward
 } from '@/components/shared/Icons';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useSupabaseAuth, canAccessPage } from '@/contexts/SupabaseAuthContext';
 import myLogo from '@/assets/UIUPC Logo.svg';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
@@ -29,15 +29,18 @@ const ADMIN_TABS = [
   { id: 'blog', label: 'Blog', icon: <IconNewspaper />, href: '/admin/blog' },
   { id: 'departments', label: 'Departments', icon: <IconLayerGroup />, href: '/admin/departments' },
   { id: 'achievements', label: 'Achievements', icon: <IconAward />, href: '/admin/achievements' },
-  // CORE only tabs
-  { id: 'finance', label: 'Finance', icon: <IconWallet />, href: '/admin/finances', coreOnly: true },
-  { id: 'admins', label: 'Admins', icon: <IconShield />, href: '/admin/admins', coreOnly: true },
-  { id: 'audit', label: 'Audit', icon: <IconHistory />, href: '/admin/audit', coreOnly: true },
+  { id: 'finance', label: 'Finance', icon: <IconWallet />, href: '/admin/finances' },
+  { id: 'admins', label: 'Admins', icon: <IconShield />, href: '/admin/admins' },
+  { id: 'audit', label: 'Audit', icon: <IconHistory />, href: '/admin/audit' },
 ];
 
 export const Admin_Sidebar = memo(({ activeTab }: Admin_SidebarProps) => {
-  const { isCore } = useSupabaseAuth();
-  const filteredTabs = ADMIN_TABS.filter(tab => !tab.coreOnly || isCore);
+  const { adminProfile } = useSupabaseAuth();
+  
+  const filteredTabs = useMemo(() => {
+    return ADMIN_TABS.filter(tab => canAccessPage(adminProfile?.role, tab.id));
+  }, [adminProfile?.role]);
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

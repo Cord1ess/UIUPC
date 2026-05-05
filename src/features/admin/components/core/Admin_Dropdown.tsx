@@ -59,7 +59,7 @@ export const Admin_Dropdown: React.FC<Admin_DropdownProps> = ({
                 {label || 'Select Option'}
               </span>
               <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest truncate max-w-[150px]">
-                {sublabel || selectedOption.label}
+                {sublabel || selectedOption?.label || 'None'}
               </span>
             </div>
             <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isOpen ? 'bg-zinc-100 dark:bg-zinc-800' : ''}`}>
@@ -68,7 +68,7 @@ export const Admin_Dropdown: React.FC<Admin_DropdownProps> = ({
           </>
         ) : (
           <>
-            <span className="truncate dark:text-white">{selectedOption.label}</span>
+            <span className="truncate dark:text-white">{selectedOption?.label || 'Select...'}</span>
             <IconChevronDown size={10} className={`text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
           </>
         )}

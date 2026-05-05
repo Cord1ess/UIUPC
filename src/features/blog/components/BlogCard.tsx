@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { IconShareAlt, IconFacebook, IconClock, IconTag, IconArrowRight } from '@/components/shared/Icons';
+import { IconShareAlt, IconFacebook, IconInstagram, IconLinkedin, IconClock, IconTag, IconArrowRight } from '@/components/shared/Icons';
 import BlogCarousel from './BlogCarousel';
 
 interface BlogCardProps {
@@ -13,7 +13,10 @@ interface BlogCardProps {
     media: any[];
     date: string;
     category?: string;
-    facebookLink?: string;
+    facebook_url?: string;
+    instagram_url?: string;
+    linkedin_url?: string;
+    author_email?: string;
   };
   index: number;
 }
@@ -32,9 +35,10 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
     }
   };
 
-  const formattedDate = post.date.split(' '); // Assuming "Dec 14, 2025" or similar
-  const dateDay = formattedDate[1]?.replace(',', '') || '';
-  const dateMonth = formattedDate[0] || '';
+  // Safe date parsing for different formats
+  const dateObj = new Date(post.date);
+  const dateDay = dateObj.getDate() || '';
+  const dateMonth = dateObj.toLocaleString('en-US', { month: 'short' }) || '';
 
   return (
     <motion.div
@@ -73,7 +77,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
       <div className="w-full md:w-[45%] flex flex-col justify-center space-y-8">
         <div className="flex items-center gap-6">
           <span className="px-4 py-1.5 rounded-full bg-uiupc-orange/10 border border-uiupc-orange/20 text-[9px] font-black uppercase tracking-[0.3em] text-uiupc-orange">
-            {post.category || "Update"}
+            {post.category || post.tags || "Update"}
           </span>
           <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
         </div>
@@ -107,27 +111,53 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
           )}
         </div>
 
-        {/* Footer Actions - Premium Typography */}
-        <div className="pt-10 flex items-center gap-10 border-t border-black/5 dark:border-white/5">
-          {post.facebookLink && (
+        {/* Footer Actions - Premium Typography with multi-social support */}
+        <div className="pt-10 flex flex-wrap items-center gap-8 border-t border-black/5 dark:border-white/5">
+          {post.facebook_url && (
             <motion.a 
-              whileHover={{ x: 5 }}
-              href={post.facebookLink}
+              whileHover={{ y: -2 }}
+              href={post.facebook_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] text-zinc-900 dark:text-white hover:text-uiupc-orange transition-all"
+              className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-white hover:text-uiupc-orange transition-all"
             >
-              <IconFacebook size={18} />
-              <span>Facebook</span>
+              <IconFacebook size={16} />
+              <span className="hidden sm:inline">Facebook</span>
+            </motion.a>
+          )}
+          {post.instagram_url && (
+            <motion.a 
+              whileHover={{ y: -2 }}
+              href={post.instagram_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-white hover:text-pink-500 transition-all"
+            >
+              <IconInstagram size={16} />
+              <span className="hidden sm:inline">Instagram</span>
+            </motion.a>
+          )}
+          {post.linkedin_url && (
+            <motion.a 
+              whileHover={{ y: -2 }}
+              href={post.linkedin_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-white hover:text-blue-500 transition-all"
+            >
+              <IconLinkedin size={16} />
+              <span className="hidden sm:inline">LinkedIn</span>
             </motion.a>
           )}
           
+          <div className="h-4 w-px bg-black/5 dark:bg-white/5 hidden sm:block" />
+
           <motion.button 
             whileHover={{ x: 5 }}
             onClick={handleShare}
-            className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
+            className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.25em] text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
           >
-            <IconShareAlt size={18} />
+            <IconShareAlt size={16} />
             <span>Share</span>
           </motion.button>
         </div>
